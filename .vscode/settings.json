@@ -1,0 +1,19 @@
+{
+    "C_Cpp.inlayHints.parameterNames.enabled": true,
+    "cmake.configureOnOpen": true,
+    "files.associations": {
+        ".fantomasignore": "ignore",
+        "*.embeddedhtml": "html",
+        "tools.h": "c",
+        "vlc.h": "c",
+        "libvlc_renderer_discoverer.h": "c",
+        "libvlc_media.h": "c",
+        "libvlc_media_library.h": "c",
+        "libvlc_dialog.h": "c",
+        "libvlc_vlm.h": "c",
+        "windows.h": "c",
+        "*.rh": "c",
+        "json.h": "c",
+        "connections.h": "c"
+    }
+}
