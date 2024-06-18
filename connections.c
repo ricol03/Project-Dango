@@ -13,7 +13,7 @@ char * winHttpGetResponse(HINTERNET hRequest, HINTERNET hConnect, HINTERNET hSes
     LPSTR pszOutBuffer = NULL;
     BOOL bResults = FALSE;
 
-    char* responseString = NULL;
+    char * responseString = NULL;
     size_t totalSize = 0;
 
     DWORD dwStatusCode = 0;
@@ -26,11 +26,11 @@ char * winHttpGetResponse(HINTERNET hRequest, HINTERNET hConnect, HINTERNET hSes
             wchar_t szLocation[256];
             DWORD dwSizeLocation = sizeof(szLocation) / sizeof(szLocation[0]);
 
-            // Get the 'Location' header from the response
+            //obtém o header 'Location'
             if (WinHttpQueryHeaders(hRequest, WINHTTP_QUERY_LOCATION, NULL, szLocation, &dwSizeLocation, NULL)) {
-                WinHttpCloseHandle(hRequest);  // Close the current request handle
+                WinHttpCloseHandle(hRequest); 
 
-                // Create a new request handle for the new location
+                //cria um novo handle através de URL_COMPONENTS para a nova 'Location'
                 URL_COMPONENTS urlComp;
                 memset(&urlComp, 0, sizeof(urlComp));
                 urlComp.dwStructSize = sizeof(urlComp);
@@ -42,7 +42,7 @@ char * winHttpGetResponse(HINTERNET hRequest, HINTERNET hConnect, HINTERNET hSes
                 urlComp.lpszUrlPath = szUrlPath;
                 urlComp.dwUrlPathLength = sizeof(szUrlPath) / sizeof(szUrlPath[0]);
 
-                // Crack the new URL into components
+                // acrescenta o URL aos componentes
                 WinHttpCrackUrl(szLocation, 0, 0, &urlComp);
 
                 hConnect = WinHttpConnect(hSession, urlComp.lpszHostName, urlComp.nPort, 0);
@@ -60,7 +60,7 @@ char * winHttpGetResponse(HINTERNET hRequest, HINTERNET hConnect, HINTERNET hSes
                 return NULL;
             }
         } else if (dwStatusCode == 200) {
-            // The request was successful, read the data
+            // se o pedido for bem-sucedido, lê os dados
             do {
                 dwSize = 0;
                 if (!WinHttpQueryDataAvailable(hRequest, &dwSize)) {
@@ -86,7 +86,7 @@ char * winHttpGetResponse(HINTERNET hRequest, HINTERNET hConnect, HINTERNET hSes
 
                     pszOutBuffer[dwDownloaded] = '\0';
 
-                    // Reallocate responseString to accommodate new data
+                    //faz realloc da variável para acrescentar novos dados
                     responseString = (char*)realloc(responseString, totalSize + dwDownloaded + 1);
                     if (!responseString) {
                         printf("Out of memory\n");
@@ -94,7 +94,7 @@ char * winHttpGetResponse(HINTERNET hRequest, HINTERNET hConnect, HINTERNET hSes
                         break;
                     }
 
-                    // Copy the new data to responseString
+                    //
                     memcpy(responseString + totalSize, pszOutBuffer, dwDownloaded + 1);
                     totalSize += dwDownloaded;
 
@@ -108,20 +108,12 @@ char * winHttpGetResponse(HINTERNET hRequest, HINTERNET hConnect, HINTERNET hSes
         printf("Error %u in WinHttpQueryHeaders.\n", GetLastError());
     }
 
-    /*if (bResults && responseString) {
-        //printf("Response: %s\n", responseString);
-    } else {
-        printf("Failed to retrieve response.\n");
-    }*/
-
-    //printf("\n\n\n\n\n - - - RETOURNOREU - - - \n\n\n\n\n");
-    //printf("Response: %s\n", responseString);
-
     return responseString;
 }
 
+
+//junta duas strings numa única
 void parseRequestText(char * uri, char * query) {
-    //printf("%s", query);
     char buffer[256]; 
     sprintf(buffer, "%s%s", uri, query);
     
@@ -131,34 +123,12 @@ void parseRequestText(char * uri, char * query) {
     }
     
     //alocamos memória para este long pointer constant wide string, fazendo o tamanho do buffer vezes o tamanho de um wide char
-    requestedquery = (LPCSTR)malloc((strlen(buffer) + 1) * sizeof(wchar_t));
+    requestedquery = (LPSTR)malloc((strlen(buffer) + 1) * sizeof(wchar_t));
     
     mbstowcs((wchar_t*) requestedquery, buffer, strlen(buffer) + 1);
 }
 
-LPCSTR TparseRequestText(char * uri, char * query) {
-
-    LPSTR Trequestedquery = NULL;
-
-    //printf("%s", query);
-    char buffer[256]; 
-    sprintf(buffer, "%s%s", uri, query);
-    
-    if (Trequestedquery != NULL) {
-        free(requestedquery);
-        Trequestedquery = NULL;
-    }
-    
-    //alocamos memória para este long pointer constant wide string, fazendo o tamanho do buffer vezes o tamanho de um wide char
-    Trequestedquery = (LPCSTR)malloc((strlen(buffer) + 1) * sizeof(wchar_t));
-    
-    mbstowcs((wchar_t*) Trequestedquery, buffer, strlen(buffer) + 1);
-
-    return Trequestedquery;
-}
-
 void parseRequestText2(char * uri, char * query) {
-    //printf("%s", query);
     char buffer[256]; 
     sprintf(buffer, "%s%s", uri, query);
     
@@ -171,8 +141,6 @@ void parseRequestText2(char * uri, char * query) {
     requestedquery2 = (LPCWSTR)malloc((strlen(buffer) + 1) * sizeof(wchar_t));
     
     mbstowcs((wchar_t*) requestedquery2, buffer, strlen(buffer) + 1);
-
-    printf("\n\n\nbuffer do dois: %s\n\n\n", buffer);
 }
 
 /**********************************************************/
@@ -209,59 +177,15 @@ int searchConnection(HWND hwnd, char * query, result results[]) {
         return 0;
     }
 
-    char* jsonstring;
-
-    if (WinHttpSendRequest(hrequest, WINHTTP_NO_ADDITIONAL_HEADERS, 0, WINHTTP_NO_REQUEST_DATA, 0, 0, 0)) {
-        if (WinHttpReceiveResponse(hrequest, NULL)) {
-            jsonstring = winHttpGetResponse(hrequest, hconnect, hsession);
-            //printf("olha ele deu print disto (sc): %s", jsonstring);
-            return parseresultsjson(jsonstring, results);
-        }
-    }
-}
-
-char * TsearchConnection(HWND hwnd, char * query, result results[]) {
-
-    parseRequestText("/anime/zoro/", query);
-
-    //Cria um handle de sessão de hinternet
-    HINTERNET hsession = WinHttpOpen(L"Miru-win32/1.0", WINHTTP_ACCESS_TYPE_DEFAULT_PROXY, WINHTTP_NO_PROXY_NAME, WINHTTP_NO_PROXY_BYPASS, 0);
-    if (hsession == NULL) {
-        MessageBox(hwnd, "WinHttpOpen failed!", "Error", MB_ICONERROR);
-        return -1;
-    }
-
-    //Atribuir protocolos à conexão
-    DWORD dwprotocols = WINHTTP_FLAG_SECURE_PROTOCOL_TLS1_2;
-    WinHttpSetOption(hsession, WINHTTP_OPTION_SECURE_PROTOCOLS, &dwprotocols, sizeof(dwprotocols));
-
-    //Estabelece contacto com o domínio especificado
-    HINTERNET hconnect = WinHttpConnect(hsession, L"consumet-one-sigma.vercel.app", INTERNET_DEFAULT_PORT, 0);
-    if (hconnect == NULL) {
-        MessageBox(hwnd, "WinHttpConnect failed!", "Error", MB_ICONERROR);
-        return 0;
-    }
-
-    //Cria um pedido HTTPS
-    HINTERNET hrequest = WinHttpOpenRequest(hconnect, L"GET", requestedquery, NULL, WINHTTP_NO_REFERER, WINHTTP_DEFAULT_ACCEPT_TYPES, 0);
-    if (hrequest == NULL) {
-        printf("%d", GetLastError());
-        MessageBox(hwnd, "error", "Error", MB_ICONERROR);
-        WinHttpCloseHandle(hsession);
-        GetLastError();
-        return 0;
-    }
-
     char * jsonstring;
 
     if (WinHttpSendRequest(hrequest, WINHTTP_NO_ADDITIONAL_HEADERS, 0, WINHTTP_NO_REQUEST_DATA, 0, 0, 0)) {
         if (WinHttpReceiveResponse(hrequest, NULL)) {
             jsonstring = winHttpGetResponse(hrequest, hconnect, hsession);
-            //printf("olha ele deu print disto (sc): %s", jsonstring);
-            return jsonstring;
-            //return parseresultsjson(jsonstring, results);
+            return parseresultsjson(jsonstring, results);
         }
-    }
+    } else
+        return -1;
 }
 
 int episodesConnection(HWND hwnd, char * resultid, episode episodes[]) {
@@ -294,49 +218,15 @@ int episodesConnection(HWND hwnd, char * resultid, episode episodes[]) {
         return 0;
     }
 
-    char* jsonstring;
-
-    if (WinHttpSendRequest(hrequest2, WINHTTP_NO_ADDITIONAL_HEADERS, 0, WINHTTP_NO_REQUEST_DATA, 0, 0, 0))
-    {
-        if (WinHttpReceiveResponse(hrequest2, NULL))
-        {
+    char * jsonstring;
+    
+    if (WinHttpSendRequest(hrequest2, WINHTTP_NO_ADDITIONAL_HEADERS, 0, WINHTTP_NO_REQUEST_DATA, 0, 0, 0)) {
+        if (WinHttpReceiveResponse(hrequest2, NULL)) {
             jsonstring = winHttpGetResponse(hrequest2, hconnect2, hsession2);
-            //printf("olha ele deu print disto (ep): %s", jsonstring);
             return parseepisodesjson(hwnd, resultid, jsonstring, episodes);
         }
-        
-    }
-
-
-    /*if (!WinHttpSendRequest(hrequest2, WINHTTP_NO_ADDITIONAL_HEADERS, 0, WINHTTP_NO_REQUEST_DATA, 0, 0, 0)) {
-        MessageBox(hwnd, "WinHttpSendRequest failed!", "Error", MB_ICONERROR);
-        wprintf(L"\n %s | %lu", requestedquery2, GetLastError());
+    } else
         return -1;
-    }
-
-    if (!WinHttpReceiveResponse(hrequest2, 0)) {
-        MessageBox(hwnd, "WinHttpReceiveResponse failed!", "Error", MB_ICONERROR);
-        return -1;
-    }
-
-    DWORD bytesRead;
-    char buffer[8192];
-    char* jsonstring;
-
-    //Preenche o buffer com a resposta
-    while (WinHttpReadData(hrequest2, buffer, sizeof(buffer), &bytesRead) && bytesRead > 0) {
-        buffer[bytesRead] = '\0';
-        printf(buffer);
-    }
-    
-    jsonstring = buffer;*/
-
-    /*int number = parseepisodesjson(hwnd, resultid, jsonstring, episodes);
-
-    free(requestedquery2);
-    requestedquery2 = NULL;
-
-    return number;*/
 }
 
 int epnumConnection(HWND hwnd, char * resultid) {
@@ -369,67 +259,16 @@ int epnumConnection(HWND hwnd, char * resultid) {
         return 0;
     }
     
-    char* jsonstring = NULL;
+    char * jsonstring = NULL;
     const char* epnumkey = "\"totalEpisodes\":";
 
     if (WinHttpSendRequest(hrequest, WINHTTP_NO_ADDITIONAL_HEADERS, 0, WINHTTP_NO_REQUEST_DATA, 0, 0, 0)) {
         if (WinHttpReceiveResponse(hrequest, NULL)) {
             jsonstring = winHttpGetResponse(hrequest, hconnect, hsession);
-            printf("olha ele deu print disto: %s", jsonstring);
             return getepisodesnum(jsonstring, epnumkey);
         }
-    }
-
-    //Envia o pedido HTTP
-    /*if (!WinHttpSendRequest(hrequest, WINHTTP_NO_ADDITIONAL_HEADERS, 0, WINHTTP_NO_REQUEST_DATA, 0, 0, 0)) {
-        MessageBox(hwnd, "WinHttpSendRequest failed!", "Error", MB_ICONERROR);
-        printf("%d", GetLastError());
-        WinHttpCloseHandle(hrequest);
-        WinHttpCloseHandle(hsession);
+    } else
         return -1;
-    }
-
-    if (!WinHttpReceiveResponse(hrequest, NULL)) {
-        MessageBox(hwnd, "WinHttpReceiveResponse failed!", "Error", MB_ICONERROR);
-        printf("%d", GetLastError());
-        WinHttpCloseHandle(hrequest);
-        WinHttpCloseHandle(hsession);
-        return -1;
-    }
-
-
-    
-
-
-    DWORD statusCode = 0;
-    DWORD statusCodeSize = sizeof(DWORD);
-
-    if (WinHttpQueryHeaders(hrequest, WINHTTP_QUERY_STATUS_CODE | WINHTTP_QUERY_FLAG_NUMBER, NULL, &statusCode, &statusCodeSize, NULL)) {
-        printf("%d", statusCode);
-    }
-
-    DWORD bytesRead;
-    char buffer[8192];
-    char* jsonstring;
-
-    //Preenche o buffer com a resposta
-    while (WinHttpReadData(hrequest, buffer, sizeof(buffer), &bytesRead) && bytesRead > 0) {
-        buffer[bytesRead] = '\0';
-        printf("\n%s\n", buffer);
-    }
-    jsonstring = buffer;*/
-    //const char* epnumkey = "\"totalEpisodes\":";
-
-    TCHAR* temp;
-
-    printf("\n\n\n\njson do bom: %s", jsonstring);
-
-    //test = getjsonid(jsonstring, epnumkey, temp, 2);
-    int num = getepisodesnum(jsonstring, epnumkey);
-
-    printf("\n\n\n\n\n\n NÚMERO: %d", num);
-
-    return num;
 }
 
 char * eplinkConnection(HWND hwnd, char * epid) {
@@ -461,122 +300,13 @@ char * eplinkConnection(HWND hwnd, char * epid) {
         return 0;
     }
 
-    char* jsonstring;
+    char * jsonstring;
 
-    if (WinHttpSendRequest(hrequest2, WINHTTP_NO_ADDITIONAL_HEADERS, 0, WINHTTP_NO_REQUEST_DATA, 0, 0, 0))
-    {
-        if (WinHttpReceiveResponse(hrequest2, NULL))
-        {
+    if (WinHttpSendRequest(hrequest2, WINHTTP_NO_ADDITIONAL_HEADERS, 0, WINHTTP_NO_REQUEST_DATA, 0, 0, 0)) {
+        if (WinHttpReceiveResponse(hrequest2, NULL)) {
             jsonstring = winHttpGetResponse(hrequest2, hconnect2, hsession2);
-            printf("olha ele deu print disto (ep): %s", jsonstring);
             return getlinkjson(hwnd, jsonstring);
-        }
-        
-    }
-
-
-    /*if (!WinHttpSendRequest(hrequest2, WINHTTP_NO_ADDITIONAL_HEADERS, 0, WINHTTP_NO_REQUEST_DATA, 0, 0, 0)) {
-        MessageBox(hwnd, "WinHttpSendRequest failed!", "Error", MB_ICONERROR);
-        wprintf(L"\n %s | %lu", requestedquery2, GetLastError());
-        return 0;
-    }
-
-    if (!WinHttpReceiveResponse(hrequest2, 0)) {
-        MessageBox(hwnd, "WinHttpReceiveResponse failed!", "Error", MB_ICONERROR);
-        return 0;
-    }
-
-    //pegar no link do watch, extrair o link do vídeo, e metê-lo no vlc
-
-    DWORD bytesRead;
-    char buffer[8192];
-    char* jsonstring;
-
-    //Preenche o buffer com a resposta
-    while (WinHttpReadData(hrequest2, buffer, sizeof(buffer), &bytesRead) && bytesRead > 0) {
-        buffer[bytesRead] = '\0';
-        printf(buffer);
-    }
-    
-    jsonstring = buffer;*/
-
-    /*char * link = 
-
-    free(requestedquery2);
-    requestedquery2 = NULL;
-
-    return link;*/
+        }   
+    } else
+        return -1;
 }
-
-/*int connectiontest(HWND hwnd) {
-    //Cria um handle de sessão de hinternet
-    HINTERNET hsession = WinHttpOpen(L"Nossa/1.0", WINHTTP_ACCESS_TYPE_DEFAULT_PROXY, WINHTTP_NO_PROXY_NAME, WINHTTP_NO_PROXY_BYPASS, 0);
-    if (hsession == NULL) {
-        MessageBox(hwnd, "WinHttpOpen failed!", "Error", MB_ICONERROR);
-        return -1;
-    }
-
-    //Estabelece contacto com o domínio especificado
-    HINTERNET hconnect = WinHttpConnect(hsession, L"https://consumet-one-sigma.vercel.app/", 3000, 0);
-
-    //Cria um pedido HTTP
-    HINTERNET hrequest = WinHttpOpenRequest(hconnect, L"GET", L"/meta/anilist/advance-search?genres=Action", NULL, WINHTTP_NO_REFERER, WINHTTP_DEFAULT_ACCEPT_TYPES, 0);
-    if (hrequest == NULL) {
-        printf("%d", GetLastError());
-        MessageBox(hwnd, "error", "Error", MB_ICONERROR);
-        WinHttpCloseHandle(hsession);
-        GetLastError();
-        return -1;
-    }
-
-    //Envia o pedido HTTP
-    if (!WinHttpSendRequest(hrequest, WINHTTP_NO_ADDITIONAL_HEADERS, 0, WINHTTP_NO_REQUEST_DATA, 0, 0, 0)) {
-        MessageBox(hwnd, "WinHttpSendRequest failed!", "Error", MB_ICONERROR);
-        printf("%d", GetLastError());
-        WinHttpCloseHandle(hrequest);
-        WinHttpCloseHandle(hsession);
-        return -1;
-    }
-
-    if (!WinHttpReceiveResponse(hrequest, NULL)) {
-        MessageBox(hwnd, "WinHttpReceiveResponse failed!", "Error", MB_ICONERROR);
-        printf("%d", GetLastError());
-        WinHttpCloseHandle(hrequest);
-        WinHttpCloseHandle(hsession);
-        return -1;
-    }
-
-    DWORD statusCode = 0;
-    DWORD statusCodeSize = sizeof(DWORD);
-
-    if (WinHttpQueryHeaders(hrequest, WINHTTP_QUERY_STATUS_CODE | WINHTTP_QUERY_FLAG_NUMBER, NULL, &statusCode, &statusCodeSize, NULL)) {
-
-        printf("%d", statusCode);
-
-    }
-
-    // Read and display the response content
-    DWORD bytesRead;
-    char buffer[8192];
-    char* jsonstringcopy;
-
-    struct jsonobject j;
-
-    //Preenche o buffer com a resposta
-    while (WinHttpReadData(hrequest, buffer, sizeof(buffer), &bytesRead) && bytesRead > 0) {
-        buffer[bytesRead] = '\0';
-        printf(buffer);
-    }
-    jsonstringcopy = buffer;
-
-    printf("\n\n\n\n%s", jsonstringcopy);
-
-    //parsejsonanddisplayimage(hwnd, jsonstringcopy, j);
-
-    // Cleanup
-
-    WinHttpCloseHandle(hconnect);
-    WinHttpCloseHandle(hsession);
-
-    return 0;
-}*/

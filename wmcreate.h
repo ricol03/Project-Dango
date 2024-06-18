@@ -23,8 +23,11 @@ BOOL CALLBACK enumVisibleChildWindowsProc(HWND hwnd, LPARAM lparam);
 void destroyVisibleChildWindows(HWND hwndparent);
 int homeWindow(HWND hwnd);
 int searchWindow(HWND hwnd);
+int settingsWindow(HWND hwnd);
 BOOL hideSearch();
 BOOL showSearch();
 int searchResults(HWND hwnd, char * query);
+BOOL showSettings();
+BOOL hideSettings();
 
 #endif

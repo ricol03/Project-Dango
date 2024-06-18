@@ -1,25 +1,10 @@
-#include "tools.h"
-
-//TODO: meter todos os episódios na listbox de baixo X
-//TODO: quando se clica no botão watch, meter o link do episódio no libvlc X
-//TODO:: meter as legendas da coisa
-//TODO:: fazer um menu toggable na janela do vídeo
-//TODO:: melhorar o ecrã inicial (com conteúdo em trending e etc)
-
-//FIXME: linha 223 do connections.c, segmentation fault depois de strstr com episodekey X
-
-//BUG: alguns dos links não funcionam, mesmo funcionando no browser X
-//BUG: quando reproduzimos um vídeo, e voltamos à janela para escolher outro episódio, a janela anterior não fecha 
-//BUG: alguns resultados (até agora os de conteúdo único) não têm link associado
-
-
-#pragma comment(linker,"\"/manifestdependency:type='win32' \
+﻿#pragma comment(linker,"\"/manifestdependency:type='win32' \
 name='Microsoft.Windows.Common-Controls' version='6.0.0.0' \
 processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 
 const wchar_t CLASS_NAME[]      = L"Window Class";
 const wchar_t SEARCH_CLASS[]    = L"SearchWndClass";
-const wchar_t SETTINGS_CLASS[]  = L"TEST";
+const wchar_t SETTINGS_CLASS[]  = L"SettingsWndClass";
 
 //janelas
 HWND hwndmain;
@@ -46,7 +31,7 @@ extern HWND hvidwindow;
 extern HMENU hmenu;
 extern HMENU hsubmenusearch;  
 
-//bool para a pesquisa estar vísivel ou não
+//boolean to check if specified windows are visible or not
 boolean searchtoggled = FALSE;
 boolean settingstoggled = FALSE;
 
@@ -54,21 +39,15 @@ extern const char* localfile;
 extern result results[];
 extern episode episodes[];
 
-HINSTANCE hinstance;
-
 int number;
 
 PAINTSTRUCT ps;
 
-DWORD threadId;
-
-const wchar_t provider;
-
 LRESULT CALLBACK WindowProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam);
 
-LRESULT SearchWindowProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam);
+LRESULT CALLBACK SearchWindowProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam);
 
-LRESULT SettingsWndProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam);
+LRESULT CALLBACK SettingsWindowProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam);
 
 int WINAPI WinMain(HINSTANCE hinstance, HINSTANCE hprevinstance, PSTR lpcmdline, int nshowcmd) {
 
@@ -113,8 +92,8 @@ int WINAPI WinMain(HINSTANCE hinstance, HINSTANCE hprevinstance, PSTR lpcmdline,
         0,
         SEARCH_CLASS,
         "Search",
-        WS_CAPTION | WS_SYSMENU,
-        CW_USEDEFAULT, CW_USEDEFAULT, SEARCHWINDOWWIDTH, SEARCHWINDOWHEIGHT,
+        WS_CAPTION | WS_SYSMENU | WS_ACTIVECAPTION,
+        SEARCHWINDOWWIDTH, SEARCHWINDOWHEIGHT, SEARCHWINDOWWIDTH, SEARCHWINDOWHEIGHT,
         NULL,
         NULL,
         hinstance,
@@ -126,39 +105,37 @@ int WINAPI WinMain(HINSTANCE hinstance, HINSTANCE hprevinstance, PSTR lpcmdline,
         return 0;
     }
 
-    WNDCLASS wc4 = { 0 };
+    WNDCLASS wc3 = { 0 };
 
-    wc4.lpfnWndProc     = SettingsWndProc; 
-    wc4.hInstance       = hinstance;
-    wc4.lpszClassName   = SETTINGS_CLASS;
+    wc3.lpfnWndProc      = SettingsWindowProc;
+    wc3.hInstance        = hinstance;
+    wc3.lpszClassName    = (LPCSTR)SETTINGS_CLASS;
 
-    RegisterClass(&wc4);
+    RegisterClass(&wc3);
 
     hwndsettings = CreateWindowEx(
         0,
         SETTINGS_CLASS,
         "Settings",
-        WS_CAPTION | WS_SYSMENU,
-        CW_USEDEFAULT, CW_USEDEFAULT, SETTINGSWINDOWWIDTH, SETTINGSWINDOWHEIGHT,
+        WS_CAPTION | WS_SYSMENU | WS_ACTIVECAPTION,
+        SETTINGSWINDOWWIDTH, SETTINGSWINDOWHEIGHT, SETTINGSWINDOWWIDTH, SETTINGSWINDOWHEIGHT,
         NULL,
         NULL,
         hinstance,
         NULL
     );
-
+    
     if (hwndsettings == NULL) {
-        MessageBoxW(NULL, "deu asneira", "error", MB_ICONERROR);
+        MessageBoxW(NULL, L"Unable to create settings window", L"Error", MB_ICONERROR | MB_OK);
         return 0;
     }
     
-
-
     MSG msg = { 0 };
 
     while (GetMessage(&msg, NULL, 0, 0)) {
         TranslateMessage(&msg);
         DispatchMessage(&msg);
-    } 
+    }  
 
     return 0;
 }
@@ -169,8 +146,7 @@ LRESULT CALLBACK WindowProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM lpar
         case WM_CREATE:
             createUtils();
             homeWindow(hwnd);
-            readSettings();
-
+            
             return 0;
 
         case WM_COMMAND:
@@ -202,7 +178,7 @@ LRESULT CALLBACK WindowProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM lpar
                     break;
                 }
                  
-                case IDW_SEARCH_BUTTON_WATCH: {
+                case 201: {
                     int item = (int)SendMessage(heplistbox, LB_GETCURSEL, 0, 0);
                     int i = (int)SendMessage(heplistbox, LB_GETITEMDATA, item, 0);
 
@@ -217,7 +193,7 @@ LRESULT CALLBACK WindowProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM lpar
                     
 
               
-                case IDW_SEARCH_LISTBOX_SHOW: {
+                case 303: {
                     switch (HIWORD(wparam)) {
                         case LBN_SELCHANGE: {
                             memset(&episodes, 0, sizeof(episode));
@@ -255,7 +231,7 @@ LRESULT CALLBACK WindowProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM lpar
                     break;
                 }
 
-                case IDW_SEARCH_LISTBOX_EPISODELIST: {
+                case 304: {
                     switch (HIWORD(wparam)) {
                         case LBN_SELCHANGE: {
                             
@@ -292,14 +268,15 @@ LRESULT CALLBACK WindowProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM lpar
                             return 0;
                         
                         default:
-                        break;
+                            break;
                     }
                     break;
                 }
 
-                default:
+
+                default:    
                     break;
-            }
+                }
             
             return 0;
 
@@ -323,7 +300,7 @@ void videoWindowWrapper(void* data) {
     videoWindowMain(hvidwindow, GetModuleHandle(NULL));
 }
 
-LRESULT SearchWindowProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam) {
+LRESULT CALLBACK SearchWindowProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam) {
     switch (message) {
         case WM_CREATE:
             searchWindow(hwnd);
@@ -331,11 +308,12 @@ LRESULT SearchWindowProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 
         case WM_COMMAND: {
             switch (LOWORD(wparam)) {
-                case IDW_SEARCH_BUTTON_SEARCH: {
+                case 202: {
                     char searchquery[256];
                     GetWindowText(hsearchbox, searchquery, sizeof(searchquery));
                     if (searchquery != NULL) {
-                        ShowWindow(hwnd, SW_HIDE);
+                        MessageBox(hwnd, searchquery, "Info", MB_ICONINFORMATION);
+                        //ShowWindow(hwnd, SW_HIDE);
                         searchtoggled = hideSearch();
                         if (searchResults(hwndmain, searchquery) == 0) {
                             homeWindow(hwndmain);
@@ -344,7 +322,7 @@ LRESULT SearchWindowProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
                     break;
 		        } 
 
-                case IDW_SEARCH_BUTTON_CANCEL: {
+                case 203: {
                     searchtoggled = hideSearch();
                     break;
 		        } 
@@ -368,7 +346,6 @@ LRESULT SearchWindowProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
         case WM_CLOSE:
         case WM_DESTROY:
             searchtoggled = hideSearch();
-            MessageBox(hwnd, "veio aqui", "warn", MB_ICONWARNING);
             return 0;
 
         default:
@@ -376,27 +353,21 @@ LRESULT SearchWindowProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
     }
 }
 
-LRESULT SettingsWndProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam) {
+LRESULT CALLBACK SettingsWindowProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam) {
     switch (message) {
         case WM_CREATE:
-            settingsWindow(hwnd);
-            readyingFile();
-            return 0; 
+            MessageBox(hwnd, "Working", "Info", MB_ICONINFORMATION);
+            return 0;
 
-        case WM_COMMAND:
+        case WM_COMMAND: {
             switch (LOWORD(wparam)) {
-                case IDW_SETTINGS_BUTTON_OK:
-                    MessageBox(NULL, "clicou ali", "info", MB_ICONINFORMATION);
-                    int index = SendMessage((HWND)lparam, (UINT)CB_GETCURSEL, (WPARAM)0, (LPARAM)0);
-                    SendMessage((HWND)lparam, (UINT)CB_GETLBTEXT, (WPARAM)index, (LPARAM)provider);
-                    saveSettings();
-                    break;
                 
-                
-
+            
                 default:
                     break;
             }
+            return 0;
+        } 
             
         case WM_PAINT: {
             HDC hdc = BeginPaint(hwnd, &ps);
@@ -417,4 +388,3 @@ LRESULT SettingsWndProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam) 
             return DefWindowProc(hwnd, message, wparam, lparam);
     }
 }
-

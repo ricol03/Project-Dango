@@ -15,6 +15,7 @@ HWND hsearchpanel;
 HWND hsearchlabel;         
 HWND hsearchbox; 
 HWND hsearchbutton, hcancelbutton;  
+HWND settingsbutton;
 
 //utilidades
 HFONT htitlefont;
@@ -25,6 +26,10 @@ HBRUSH hbrush;
 HWND hshowlistbox;
 HWND hwatchbutton;
 HWND heplistbox;
+
+//settings
+HWND hokbutton, hcancelbutton;
+HWND hproviderlist;
 
 //menu
 HMENU hmenu;             
@@ -107,7 +112,7 @@ int homeWindow(HWND hwnd) {
         WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,
         400, 60, 120, 30,
         hwnd,
-        (HMENU)201,
+        IDW_MAIN_BUTTON_SEARCH,
         GetModuleHandle(NULL),
         NULL
     );
@@ -144,7 +149,7 @@ int searchWindow(HWND hwnd) {
         10, 10, 100, 20,
         hwnd,
         (HMENU)1,
-        GetModuleHandle(NULL),
+        (HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE),
         NULL
     );
 
@@ -161,8 +166,8 @@ int searchWindow(HWND hwnd) {
         WS_TABSTOP | WS_CHILD | WS_BORDER | WS_EX_CLIENTEDGE | ES_WANTRETURN | WS_VISIBLE,
         130, 10, 250, 20,
         hwnd,
-        (HMENU)301,
-        GetModuleHandle(NULL),
+        IDW_SEARCH_EDIT_SEARCH,
+        (HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE),
         NULL
     );
 
@@ -172,8 +177,8 @@ int searchWindow(HWND hwnd) {
         WS_TABSTOP | WS_CHILD | BS_DEFPUSHBUTTON | WS_VISIBLE,
         200, 90, 70, 20,
         hwnd,
-        (HMENU)202,
-        GetModuleHandle(NULL),
+        IDW_SEARCH_BUTTON_SEARCH,
+        (HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE),
         NULL
     );
 
@@ -185,22 +190,57 @@ int searchWindow(HWND hwnd) {
         WS_TABSTOP | WS_CHILD | BS_DEFPUSHBUTTON | WS_VISIBLE,
         120, 90, 70, 20,
         hwnd,
-        (HMENU)203,
-        GetModuleHandle(NULL),
+        IDW_SEARCH_BUTTON_CANCEL,
+        (HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE),
         NULL
     );
 
+    return 1;
+
+}
+
+int settingsWindow(HWND hwnd) {
+    hokbutton = CreateWindow(
+        TEXT("BUTTON"),
+        TEXT("OK"),
+        WS_TABSTOP | WS_CHILD | BS_DEFPUSHBUTTON | WS_VISIBLE,
+        200, 90, 70, 20,
+        hwnd,
+        IDW_SETTINGS_BUTTON_OK,
+        (HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE),
+        NULL
+    );
+
+    hcancelbutton = CreateWindow(
+        TEXT("BUTTON"),
+        TEXT("Cancel"),
+        WS_TABSTOP | WS_CHILD | BS_DEFPUSHBUTTON | WS_VISIBLE,
+        140, 90, 70, 20,
+        hwnd,
+        IDW_SETTINGS_BUTTON_CANCEL,
+        (HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE),
+        NULL
+    );
+
+    hproviderlist = CreateWindow(
+        TEXT("COMBOBOX"),
+        NULL,
+        CBS_DROPDOWN | CBS_HASSTRINGS | WS_CHILD | WS_OVERLAPPED | WS_VISIBLE,
+        25, 25, 150, 40,
+        hwnd,
+        500,
+        (HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE),
+        NULL
+    );
+    
+    wchar_t test = "Zoro";
+
+    SendMessage(hproviderlist, (UINT)CB_ADDSTRING, (WPARAM)0, (LPARAM)test);
+    SendMessage(hproviderlist, CB_SETCURSEL, (WPARAM)0, (LPARAM)test);
+    
 }
 
 BOOL hideSearch() {
-    /*ShowWindow(hsearchpanel, SW_HIDE);
-    ShowWindow(hsearchlabel, SW_HIDE);
-    ShowWindow(hsearchbox, SW_HIDE);
-    ShowWindow(hsearchbutton, SW_HIDE);
-    UpdateWindow(hsearchpanel);
-    UpdateWindow(hsearchlabel);
-    UpdateWindow(hsearchbox);
-    UpdateWindow(hsearchbutton);*/
     ShowWindow(hwndsearch, SW_HIDE);
     UpdateWindow(hwndsearch);
     CheckMenuItem(hmenu, IDM_SEARCH_SEARCHBOX, MF_UNCHECKED);
@@ -208,15 +248,6 @@ BOOL hideSearch() {
 }
 
 BOOL showSearch() {
-    /*ShowWindow(hsearchpanel, SW_SHOW);
-    ShowWindow(hsearchlabel, SW_SHOW);
-    ShowWindow(hsearchbox, SW_SHOW);
-    ShowWindow(hsearchbutton, SW_SHOW);
-    SetWindowPos(hsearchpanel, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
-    UpdateWindow(hsearchpanel);
-    UpdateWindow(hsearchlabel);
-    UpdateWindow(hsearchbox);
-    UpdateWindow(hsearchbutton);*/
     ShowWindow(hwndsearch, SW_SHOW);
     UpdateWindow(hwndsearch);
     CheckMenuItem(hmenu, IDM_SEARCH_SEARCHBOX, MF_CHECKED);
@@ -246,7 +277,7 @@ int searchResults(HWND hwnd, char * query) {
         WS_CHILD | WS_BORDER | LBS_STANDARD,
         10, 50, 330, 140,
         hwnd,
-        (HMENU)303,
+        IDW_SEARCH_LISTBOX_SHOW,
         GetModuleHandle(NULL),
         NULL
     );
@@ -257,7 +288,7 @@ int searchResults(HWND hwnd, char * query) {
         WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,
         350, 50, 120, 30,
         hwnd,
-        (HMENU)201,
+        IDW_SEARCH_BUTTON_WATCH,
         GetModuleHandle(NULL),
         NULL
     );
@@ -268,7 +299,7 @@ int searchResults(HWND hwnd, char * query) {
         WS_CHILD | WS_BORDER | WS_VSCROLL | LBS_STANDARD,
         10, 250, 330, 140,
         hwnd,
-        (HMENU)304,
+        IDW_SEARCH_LISTBOX_EPISODELIST,
         GetModuleHandle(NULL),
         NULL
     );
@@ -297,4 +328,16 @@ int searchResults(HWND hwnd, char * query) {
     ShowWindow(heplistbox, SW_SHOWDEFAULT);
     UpdateWindow(heplistbox);
     
+}
+
+BOOL showSettings() {
+    ShowWindow(hwndsettings, SW_SHOW);
+    UpdateWindow(hwndsettings);
+    return TRUE;
+}
+
+BOOL hideSettings() {
+    ShowWindow(hwndsettings, SW_HIDE);
+    UpdateWindow(hwndsettings);
+    return FALSE;
 }

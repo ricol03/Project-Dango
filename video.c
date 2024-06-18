@@ -15,19 +15,19 @@ char * videolink = NULL;
 LRESULT videoWindowProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam);
 
 HWND videoWindowMain(HWND hwnd, HINSTANCE hinstance) {
-    const wchar_t CLASS_NAME[] = L"Video Window";
+    const wchar_t VIDEO_CLASS[] = L"Video Window";
 
     WNDCLASS wc = { 0 };
 
-    wc.hInstance = hinstance;
-    wc.lpfnWndProc = videoWindowProc;
-    wc.lpszClassName = CLASS_NAME;
+    wc.lpfnWndProc      = videoWindowProc;
+    wc.hInstance        = hinstance;
+    wc.lpszClassName    = (LPCSTR)VIDEO_CLASS;
 
     RegisterClass(&wc);
 
     hvidwindow = CreateWindowEx(
         0,
-        CLASS_NAME,
+        VIDEO_CLASS,
         "Video",
         WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_ICONIC | WS_ACTIVECAPTION | WS_VISIBLE,
         CW_USEDEFAULT, CW_USEDEFAULT, 1280, 720,
@@ -66,12 +66,12 @@ LRESULT videoWindowProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam) {
             printf("\n\n\n\n\n\n\nprint do videolink: %s", videolink);
             videoWindow(hwnd, videolink);
             AppendMenu(GetSystemMenu(hwnd, FALSE), MF_SEPARATOR, 0, NULL);
-            AppendMenu(GetSystemMenu(hwnd, FALSE), MF_STRING, IDV_SYS_TOGGLE, "Control menu");
+            AppendMenu(GetSystemMenu(hwnd, FALSE), MF_STRING, IDW_VIDEO_SYS_TOGGLE, "Control menu");
             break;
         
         case WM_SYSCOMMAND:
             switch (wparam) {
-                case IDV_SYS_TOGGLE:
+                case IDW_VIDEO_SYS_TOGGLE:
                     MessageBox(hwnd, "Test", "Test", MB_ICONEXCLAMATION);
                     break;
                 
