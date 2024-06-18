@@ -411,7 +411,7 @@ LRESULT SettingsWindowProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM lpara
 
         case WM_CLOSE:
         case WM_DESTROY:
-            //searchtoggled = hideSearch();
+            settingstoggled = hideSettings();
             return 0;
 
         default:
