@@ -5,8 +5,8 @@ FILE * fw;
 
 extern HWND hproviderlist;
 
-const char provider[32];
-const char lang[5];
+char provider[32];
+char lang[5];
 
 void readyingFile() {
     fr = fopen(SETTINGSFILENAME, "r");
@@ -23,8 +23,6 @@ int readSettings() {
 
         strcpy(provider, savedProvider);
 
-        printf("Original: %s\n", provider);
-        printf("Resultado: %s", savedProvider);
         MessageBox(NULL, savedProvider, "Info", MB_ICONINFORMATION);
     } else {
         MessageBox(NULL, "Settings not found", "Error", MB_ICONERROR);
@@ -35,7 +33,7 @@ int readSettings() {
 
 int saveSettings() {
     fw = fopen(SETTINGSFILENAME, "w+b");
-    
+
     fwrite(provider, sizeof(provider), 1, fw);
     fwrite(lang, sizeof(lang), 1, fw);
 

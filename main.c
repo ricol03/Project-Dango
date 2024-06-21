@@ -69,7 +69,7 @@ typedef struct stbInfo {
     int width, height, planes;
 } stbInfo;
 
-extern const char provider[32];
+extern char provider[32];
 
 LRESULT CALLBACK WindowProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam);
 
@@ -221,6 +221,11 @@ LRESULT CALLBACK WindowProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM lpar
 
                 case IDM_SETTINGS_SETTINGS: {
                     settingstoggled = showSettings();
+                    break;
+                }
+
+                case IDW_MAIN_BUTTON_SEARCH: {
+                    searchtoggled = showSearch();
                     break;
                 }
                  
@@ -408,19 +413,34 @@ LRESULT SettingsWndProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam) 
     switch (message) {
         case WM_CREATE:
             settingsWindow(hwnd);
-            //readyingFile();
             return 0; 
 
         case WM_COMMAND:
+            if (HIWORD(wparam) == CBN_SELCHANGE) {
+                int index = SendMessage((HWND)lparam, (UINT)CB_GETCURSEL, (WPARAM)0, (LPARAM)0);
+                SendMessage((HWND)lparam, (UINT)CB_GETLBTEXT, (WPARAM)index, (LPARAM)provider);
+                
+                break;
+            }
+
             switch (LOWORD(wparam)) {
-                case IDW_SETTINGS_BUTTON_OK:
-                    MessageBox(NULL, "clicou ali", "info", MB_ICONINFORMATION);
-                    int index = SendMessage((HWND)lparam, (UINT)CB_GETCURSEL, (WPARAM)0, (LPARAM)0);
-                    SendMessage((HWND)lparam, (UINT)CB_GETLBTEXT, (WPARAM)index, (LPARAM)provider);
+                /*case IDW_SETTINGS_COMBOBOX_PROVIDERLIST: {
+                    
+                    
+                }*/
+
+                case IDW_SETTINGS_BUTTON_OK: {
                     saveSettings();
+                    settingstoggled = hideSettings();
+                    homeWindow(hwndmain); //refreshing the window
                     break;
+                }
+
+                    
                 
-                
+                case IDW_SETTINGS_BUTTON_CANCEL:
+                    settingstoggled = hideSettings();
+                    break;
 
                 default:
                     break;

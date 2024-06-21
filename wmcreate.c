@@ -42,7 +42,7 @@ result results[100];
 episode episodes[100];
 trendinganimeinfo shows[12];
 
-extern const char provider[32];
+extern char provider[32];
 
 void createUtils() {
     htitlefont = CreateFont(
@@ -97,6 +97,17 @@ int homeWindow(HWND hwnd) {
     
 
     if (!strcmp(provider, PROVIDER1)) {
+        HWND htesttext = CreateWindow(
+            TEXT("STATIC"), 
+            TEXT("Under construction"),
+            WS_VISIBLE | WS_CHILD,
+            250, 150, 450, 200,
+            hwnd, 
+            998,
+            GetModuleHandle(NULL),
+            NULL
+        );
+
         htestbutton = CreateWindow(
             TEXT("BUTTON"),
             TEXT("TEST"),
@@ -108,16 +119,16 @@ int homeWindow(HWND hwnd) {
             NULL
         );
     } else if (!strcmp(provider, PROVIDER2)) {
-       hunavailabletext = CreateWindow(
-        TEXT("STATIC"), 
-        IDT_UNAVAILABLETRENDING,
-        WS_VISIBLE | WS_CHILD,
-        100, 100, 450, 200,
-        hwnd, 
-        IDW_MAIN_LABEL_UNAVAILABLETRENDING,
-        GetModuleHandle(NULL),
-        NULL
-       );
+        hunavailabletext = CreateWindow(
+            TEXT("STATIC"), 
+            IDT_UNAVAILABLETRENDING,
+            WS_VISIBLE | WS_CHILD,
+            100, 100, 450, 200,
+            hwnd, 
+            IDW_MAIN_LABEL_UNAVAILABLETRENDING,
+            GetModuleHandle(NULL),
+            NULL
+        );
     }
         
     htext = CreateWindow(
@@ -137,7 +148,7 @@ int homeWindow(HWND hwnd) {
         TEXT("BUTTON"),
         TEXT("Search anime"),
         WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,
-        400, 60, 120, 30,
+        400, 25, 120, 30,
         hwnd,
         IDW_MAIN_BUTTON_SEARCH,
         GetModuleHandle(NULL),
@@ -234,7 +245,7 @@ int settingsWindow(HWND hwnd) {
         TEXT("BUTTON"),
         TEXT("OK"),
         WS_TABSTOP | WS_CHILD | BS_DEFPUSHBUTTON | WS_VISIBLE,
-        200, 90, 70, 20,
+        200, 250, 70, 20,
         hwnd,
         IDW_SETTINGS_BUTTON_OK,
         (HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE),
@@ -245,7 +256,7 @@ int settingsWindow(HWND hwnd) {
         TEXT("BUTTON"),
         TEXT("Cancel"),
         WS_TABSTOP | WS_CHILD | BS_DEFPUSHBUTTON | WS_VISIBLE,
-        140, 90, 70, 20,
+        110, 250, 70, 20,
         hwnd,
         IDW_SETTINGS_BUTTON_CANCEL,
         (HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE),
@@ -255,16 +266,33 @@ int settingsWindow(HWND hwnd) {
     hproviderlist = CreateWindow(
         TEXT("COMBOBOX"),
         NULL,
-        CBS_DROPDOWN | CBS_HASSTRINGS | WS_CHILD | WS_OVERLAPPED | WS_VISIBLE,
-        25, 25, 150, 40,
+        CBS_DROPDOWNLIST | CBS_HASSTRINGS | WS_CHILD | WS_OVERLAPPED | WS_VISIBLE,
+        25, 25, 150, 200,
         hwnd,
-        500,
+        IDW_SETTINGS_COMBOBOX_PROVIDERLIST,
         (HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE),
         NULL
     );
 
-    SendMessage(hproviderlist, (UINT)CB_ADDSTRING, (WPARAM)0, (LPARAM)provider);
-    SendMessage(hproviderlist, CB_SETCURSEL, (WPARAM)0, (LPARAM)provider);
+    char providers[6][16] = {
+        PROVIDER1, PROVIDER2, "", "", "", ""
+    };
+
+    for (int i = 0; i < 6; i++) {
+        if (providers[i][0] != '\0') {
+            SendMessage(hproviderlist, (UINT)CB_ADDSTRING, (WPARAM)0, (LPARAM)providers[i]);
+            printf("%s\n", providers[i]);
+        }
+        
+        if (!strcmp(providers[i], provider)) {
+            SendMessage(hproviderlist, CB_SETCURSEL, (WPARAM)i, (LPARAM)0);
+        }
+        
+    }
+        
+    
+    
+    
     
 }
 
