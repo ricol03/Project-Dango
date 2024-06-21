@@ -17,13 +17,13 @@ LRESULT videoWindowProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam);
 HWND videoWindowMain(HWND hwnd, HINSTANCE hinstance) {
     const wchar_t VIDEO_CLASS[] = L"Video Window";
 
-    WNDCLASS wc = { 0 };
+    WNDCLASS videowindowclass = { 0 };
 
-    wc.lpfnWndProc      = videoWindowProc;
-    wc.hInstance        = hinstance;
-    wc.lpszClassName    = (LPCSTR)VIDEO_CLASS;
+    videowindowclass.lpfnWndProc      = videoWindowProc;
+    videowindowclass.hInstance        = hinstance;
+    videowindowclass.lpszClassName    = (LPCSTR)VIDEO_CLASS;
 
-    RegisterClass(&wc);
+    RegisterClass(&videowindowclass);
 
     hvidwindow = CreateWindowEx(
         0,

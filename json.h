@@ -8,11 +8,11 @@
 
 
 
-char * getjsonid(char* jsonstring, const char* key, TCHAR* value, int check);
-int getepisodesnum(char* jsonstring, const char* key);
-int parseresultsjson(char* jsonstring, result results[]);
-int parseepisodesjson(HWND hwnd, char * resultid, char* jsonstring, episode episodes[]);
-char * getlinkjson(HWND hwnd, char * jsonstring);
-int gettrendinginfo(char * jsonstring, trendinganimeinfo results[]);
+char * getJsonId(char* jsonstring, const char* key, TCHAR* value, int check);
+int getEpisodesNum(char* jsonstring, const char* key);
+int parseResultsJson(char* jsonstring, result results[]);
+int parseEpisodesJson(HWND hwnd, char * resultid, char* jsonstring, episode episodes[]);
+char * getLinkJson(HWND hwnd, char * jsonstring);
+int getTrendingInfo(char * jsonstring, trendinganimeinfo results[]);
 
 #endif

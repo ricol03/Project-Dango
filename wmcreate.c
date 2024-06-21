@@ -1,8 +1,5 @@
 #include "tools.h"
 
-extern const wchar_t LIST_CLASS[];
-WNDPROC DefListBoxProc;
-
 extern HWND hwndmain;
 extern HWND hwndsearch;
 extern HWND hwndsettings;
@@ -280,10 +277,10 @@ int searchResults(HWND hwnd, char * query) {
     destroyVisibleChildWindows(hwnd);
 
     //faz a conexão à api para fazer a pesquisa, e devolve o número de resultados
-    int size = searchConnection(hwnd, query, results);
-    printf("\n\n\n\n\nNúmero size: %d", size);
+    int resultsize = searchConnection(hwnd, query, results);
+    printf("\n\n\n\n\nNúmero size: %d", resultsize);
 
-    if (size != 0) {
+    if (resultsize != 0) {
         MessageBox(hwnd, "Working", "Info", MB_ICONEXCLAMATION);
     } else {
         MessageBox(hwnd, "No results found or error connecting", "Error", MB_ICONERROR);
@@ -331,7 +328,7 @@ int searchResults(HWND hwnd, char * query) {
         return 1;
     }
 
-    for (int i = 0; i < size; i++) {
+    for (int i = 0; i < resultsize; i++) {
         int position = (int)SendMessage(hshowlistbox, LB_INSERTSTRING, 0, (LPARAM)results[i].title);
         SendMessage(hshowlistbox, LB_SETITEMDATA, position, (LPARAM)i);
         printf("\n%s", results[i].id);

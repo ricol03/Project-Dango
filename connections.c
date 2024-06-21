@@ -154,7 +154,7 @@ int searchConnection(HWND hwnd, char * query, result results[]) {
     HINTERNET hsession = WinHttpOpen(L"Dango/1.0", WINHTTP_ACCESS_TYPE_DEFAULT_PROXY, WINHTTP_NO_PROXY_NAME, WINHTTP_NO_PROXY_BYPASS, 0);
     if (hsession == NULL) {
         MessageBox(hwnd, "WinHttpOpen failed!", "Error", MB_ICONERROR);
-        return -1;
+        return 0;
     }
 
     //Atribuir protocolos à conexão
@@ -183,10 +183,10 @@ int searchConnection(HWND hwnd, char * query, result results[]) {
     if (WinHttpSendRequest(hrequest, WINHTTP_NO_ADDITIONAL_HEADERS, 0, WINHTTP_NO_REQUEST_DATA, 0, 0, 0)) {
         if (WinHttpReceiveResponse(hrequest, NULL)) {
             jsonstring = winHttpGetResponse(hrequest, hconnect, hsession);
-            return parseresultsjson(jsonstring, results);
+            return parseResultsJson(jsonstring, results);
         }
     } else
-        return -1;
+        return 0;
 }
 
 int episodesConnection(HWND hwnd, char * resultid, episode episodes[]) {
@@ -224,10 +224,10 @@ int episodesConnection(HWND hwnd, char * resultid, episode episodes[]) {
     if (WinHttpSendRequest(hrequest2, WINHTTP_NO_ADDITIONAL_HEADERS, 0, WINHTTP_NO_REQUEST_DATA, 0, 0, 0)) {
         if (WinHttpReceiveResponse(hrequest2, NULL)) {
             jsonstring = winHttpGetResponse(hrequest2, hconnect2, hsession2);
-            return parseepisodesjson(hwnd, resultid, jsonstring, episodes);
+            return parseEpisodesJson(hwnd, resultid, jsonstring, episodes);
         }
     } else
-        return -1;
+        return 0;
 }
 
 int epnumConnection(HWND hwnd, char * resultid) {
@@ -266,10 +266,10 @@ int epnumConnection(HWND hwnd, char * resultid) {
     if (WinHttpSendRequest(hrequest, WINHTTP_NO_ADDITIONAL_HEADERS, 0, WINHTTP_NO_REQUEST_DATA, 0, 0, 0)) {
         if (WinHttpReceiveResponse(hrequest, NULL)) {
             jsonstring = winHttpGetResponse(hrequest, hconnect, hsession);
-            return getepisodesnum(jsonstring, epnumkey);
+            return getEpisodesNum(jsonstring, epnumkey);
         }
     } else
-        return -1;
+        return 0;
 }
 
 char * eplinkConnection(HWND hwnd, char * epid) {
@@ -279,7 +279,7 @@ char * eplinkConnection(HWND hwnd, char * epid) {
     if (hsession2 == NULL) {
         MessageBox(hwnd, "WinHttpOpen failed!", "Error", MB_ICONERROR);
         printf("\n %lu", GetLastError());
-        return -1;
+        return 0;
     }
 
     DWORD dwprotocols = WINHTTP_FLAG_SECURE_PROTOCOL_TLS1_2;
@@ -306,10 +306,10 @@ char * eplinkConnection(HWND hwnd, char * epid) {
     if (WinHttpSendRequest(hrequest2, WINHTTP_NO_ADDITIONAL_HEADERS, 0, WINHTTP_NO_REQUEST_DATA, 0, 0, 0)) {
         if (WinHttpReceiveResponse(hrequest2, NULL)) {
             jsonstring = winHttpGetResponse(hrequest2, hconnect2, hsession2);
-            return getlinkjson(hwnd, jsonstring);
+            return getLinkJson(hwnd, jsonstring);
         }   
     } else
-        return -1;
+        return 0;
 }
 
 int getinfoConnection(HWND hwnd, trendinganimeinfo shows[]) {
@@ -317,7 +317,7 @@ int getinfoConnection(HWND hwnd, trendinganimeinfo shows[]) {
     if (hsession2 == NULL) {
         MessageBox(hwnd, "WinHttpOpen failed!", "Error", MB_ICONERROR);
         printf("\n %lu", GetLastError());
-        return -1;
+        return 0;
     }
 
     DWORD dwprotocols = WINHTTP_FLAG_SECURE_PROTOCOL_TLS1_2;
@@ -344,8 +344,8 @@ int getinfoConnection(HWND hwnd, trendinganimeinfo shows[]) {
     if (WinHttpSendRequest(hrequest2, WINHTTP_NO_ADDITIONAL_HEADERS, 0, WINHTTP_NO_REQUEST_DATA, 0, 0, 0)) {
         if (WinHttpReceiveResponse(hrequest2, NULL)) {
             jsonstring = winHttpGetResponse(hrequest2, hconnect2, hsession2);
-            return gettrendinginfo(jsonstring, shows);
+            return getTrendingInfo(jsonstring, shows);
         }   
     } else
-        return -1;
+        return 0;
 }

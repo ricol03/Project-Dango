@@ -79,14 +79,14 @@ LRESULT SettingsWndProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam);
 
 int WINAPI WinMain(HINSTANCE hinstance, HINSTANCE hprevinstance, PSTR lpcmdline, int nshowcmd) {
 
-    WNDCLASS wc = { 0 };
+    WNDCLASS mainwindowclass = { 0 };
 
-    wc.style            = CS_OWNDC;
-    wc.lpfnWndProc      = WindowProc;
-    wc.hInstance        = hinstance;
-    wc.lpszClassName    = (LPCSTR)CLASS_NAME;
+    mainwindowclass.style            = CS_OWNDC;
+    mainwindowclass.lpfnWndProc      = WindowProc;
+    mainwindowclass.hInstance        = hinstance;
+    mainwindowclass.lpszClassName    = (LPCSTR)CLASS_NAME;
 
-    RegisterClass(&wc);
+    RegisterClass(&mainwindowclass);
 
     hwndmain = CreateWindowEx(
         0,
@@ -99,9 +99,6 @@ int WINAPI WinMain(HINSTANCE hinstance, HINSTANCE hprevinstance, PSTR lpcmdline,
         hinstance,
         NULL
     );
-
-    /*ShowWindow(hwndmain, SW_SHOW);
-    UpdateWindow(hwndmain);*/
     
     if (hwndmain == NULL) {
         MessageBoxW(NULL, L"Unable to create Windows", 
@@ -110,13 +107,13 @@ int WINAPI WinMain(HINSTANCE hinstance, HINSTANCE hprevinstance, PSTR lpcmdline,
     } else
         ShowWindow(hwndmain, SW_SHOW);
 
-    WNDCLASS wc2 = { 0 };
+    WNDCLASS searchwindowclass = { 0 };
 
-    wc2.lpfnWndProc      = SearchWindowProc;
-    wc2.hInstance        = hinstance;
-    wc2.lpszClassName    = (LPCSTR)SEARCH_CLASS;
+    searchwindowclass.lpfnWndProc      = SearchWindowProc;
+    searchwindowclass.hInstance        = hinstance;
+    searchwindowclass.lpszClassName    = (LPCSTR)SEARCH_CLASS;
 
-    RegisterClass(&wc2);
+    RegisterClass(&searchwindowclass);
 
     hwndsearch = CreateWindowEx(
         0,
@@ -135,13 +132,13 @@ int WINAPI WinMain(HINSTANCE hinstance, HINSTANCE hprevinstance, PSTR lpcmdline,
         return 0;
     }
 
-    WNDCLASS wc4 = { 0 };
+    WNDCLASS settingswindowclass = { 0 };
 
-    wc4.lpfnWndProc     = SettingsWndProc; 
-    wc4.hInstance       = hinstance;
-    wc4.lpszClassName   = SETTINGS_CLASS;
+    settingswindowclass.lpfnWndProc     = SettingsWndProc; 
+    settingswindowclass.hInstance       = hinstance;
+    settingswindowclass.lpszClassName   = SETTINGS_CLASS;
 
-    RegisterClass(&wc4);
+    RegisterClass(&settingswindowclass);
 
     hwndsettings = CreateWindowEx(
         0,

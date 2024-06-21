@@ -3,9 +3,9 @@
 //criação da união para albergar um de dois tipos de dados
 connections test;
 
-char * getjsonid(char* jsonstring, const char* key, TCHAR* value, int check) {
-    const char* endquote = "\"";
-    const char* resseparator = "},{";
+char * getJsonId(char * jsonstring, const char * key, TCHAR * value, int check) {
+    const char * endquote = "\"";
+    const char * resseparator = "},{";
 
     if (jsonstring == NULL) {
         MessageBox(NULL, "Error with JSON string", "Error", MB_ICONERROR | MB_OK);
@@ -33,7 +33,7 @@ char * getjsonid(char* jsonstring, const char* key, TCHAR* value, int check) {
 
     //ele queima-se todo aqui man, vê lá isso
     //printf("%s", jsonstring);
-    char* start = strstr(jsonstring, key);
+    char * start = strstr(jsonstring, key);
     //printf("\n\n cheque %d", check);
     printf("\n\n\nEle dá print disto amigo (start): %s", start);
 
@@ -75,7 +75,7 @@ char * getjsonid(char* jsonstring, const char* key, TCHAR* value, int check) {
     }
 }
 
-int getepisodesnum(char* jsonstring, const char* key) {
+int getEpisodesNum(char * jsonstring, const char * key) {
 
     //printf("\n\n\nele chegou ao getepisodesnum");
     //printf("\ncom isto: %s", jsonstring);
@@ -107,31 +107,31 @@ int getepisodesnum(char* jsonstring, const char* key) {
     }
 }
 
-int parseresultsjson(char* jsonstring, result results[]) {
+int parseResultsJson(char * jsonstring, result results[]) {
 
     //cria uma string do início da chave de cada atributo json
-    const char* idkey = "\"id\":\"";
-    const char* titlekey = "\"title\":\"";
-    const char* ratingkey = "\"rating\":\"";
-    const char* reldatekey = "\"releaseDate\":\"";
-    const char* typekey = "\"type\":\"";
+    const char * idkey = "\"id\":\"";
+    const char * titlekey = "\"title\":\"";
+    const char * ratingkey = "\"rating\":\"";
+    const char * reldatekey = "\"releaseDate\":\"";
+    const char * typekey = "\"type\":\"";
 
     //printf("\n\n\nchegou ao parseresults");
 
     //printf("\n\n\n\nprint aí man: %s", jsonstring);
 
     for (int i = 0; i < 8; i++) {
-        getjsonid(jsonstring, idkey, results[i].id, 0);
+        getJsonId(jsonstring, idkey, results[i].id, 0);
         //printf("\n\nid do resultado: %s", results[i].id);
-        getjsonid(jsonstring, titlekey, results[i].title, 0);
+        getJsonId(jsonstring, titlekey, results[i].title, 0);
         //printf("\n\ntítulo do resultado: %s", results[i].title);
-        getjsonid(jsonstring, ratingkey, results[i].rating, 0);
+        getJsonId(jsonstring, ratingkey, results[i].rating, 0);
         //printf("\n\nrating do resultado: %s", results[i].rating);
-        getjsonid(jsonstring, reldatekey, results[i].releasedate, 0);
+        getJsonId(jsonstring, reldatekey, results[i].releasedate, 0);
         //printf("\n\ndata de lançamento do resultado: %s", results[i].releasedate);
         
         //anteriormente test (union)
-        jsonstring = getjsonid(jsonstring, typekey, results[i].type, 1);
+        jsonstring = getJsonId(jsonstring, typekey, results[i].type, 1);
         //printf("\n\ntipo do resultado: %s", results[i].type);
         //jsonstring = test.value;
 
@@ -142,13 +142,13 @@ int parseresultsjson(char* jsonstring, result results[]) {
     return 8;        
 }
 
-int parseepisodesjson(HWND hwnd, char * resultid, char* jsonstring, episode episodes[]) {
+int parseEpisodesJson(HWND hwnd, char * resultid, char * jsonstring, episode episodes[]) {
 
     int number = epnumConnection(hwnd, resultid);
 
     printf("que número é este meu senhor? %d", number);
-    const char* totalepisodeskey = "\"totalEpisodes\":";
-    const char* episodekey = "\"episodes\":";
+    const char * totalepisodeskey = "\"totalEpisodes\":";
+    const char * episodekey = "\"episodes\":";
 
     printf("\n\n\n vê lá a string no peej: %s", jsonstring);
 
@@ -156,16 +156,16 @@ int parseepisodesjson(HWND hwnd, char * resultid, char* jsonstring, episode epis
     char * newstring2 = strstr(newstring, episodekey);
 
     //cria uma string do início da chave de cada atributo json
-    const char* idkey = "\"id\":\"";
-    const char* numberkey = "\"number\":\"";
-    const char* titlekey = "\"title\":\"";
+    const char * idkey = "\"id\":\"";
+    const char * numberkey = "\"number\":\"";
+    const char * titlekey = "\"title\":\"";
 
     for (int i = 0; i < number; i++) {
-        getjsonid(newstring2, idkey, episodes[i].id, 0);
-        getjsonid(newstring2, numberkey, episodes[i].number, 0);
+        getJsonId(newstring2, idkey, episodes[i].id, 0);
+        getJsonId(newstring2, numberkey, episodes[i].number, 0);
         
         //anteriormente test (union)
-        newstring2 = getjsonid(newstring2, titlekey, episodes[i].title, 0);
+        newstring2 = getJsonId(newstring2, titlekey, episodes[i].title, 0);
         //newstring2 = test.value;
 
         if (newstring2 == NULL)
@@ -175,7 +175,7 @@ int parseepisodesjson(HWND hwnd, char * resultid, char* jsonstring, episode epis
     return number;
 }
 
-char * getlinkjson(HWND hwnd, char * jsonstring) {
+char * getLinkJson(HWND hwnd, char * jsonstring) {
     
     const char * linkkey = "\"url\":";
     const char * endquote = "\"";
@@ -218,7 +218,7 @@ char * getlinkjson(HWND hwnd, char * jsonstring) {
     }
 }
 
-int gettrendinginfo(char * jsonstring, trendinganimeinfo results[]) {
+int getTrendingInfo(char * jsonstring, trendinganimeinfo results[]) {
     const char * idkey = "{\"id\":\"";
     const char * titlekey = "\"title\":\"";
     const char * imagekey = "\"image\":\"";
@@ -228,13 +228,13 @@ int gettrendinginfo(char * jsonstring, trendinganimeinfo results[]) {
     printf("%s", jsonstring);
 
     for (int i = 0; i < 12; i++) {
-        getjsonid(jsonstring, idkey, results[i].id, 3);
+        getJsonId(jsonstring, idkey, results[i].id, 3);
         printf("\n\nid do resultado: %s", results[i].id);
-        getjsonid(jsonstring, titlekey, results[i].title, 3);
+        getJsonId(jsonstring, titlekey, results[i].title, 3);
         printf("\n\ntítulo do resultado: %s", results[i].title);
-        getjsonid(jsonstring, imagekey, results[i].imageurl, 3);
+        getJsonId(jsonstring, imagekey, results[i].imageurl, 3);
         printf("\n\nimagem do resultado: %s", results[i].imageurl);
-        jsonstring = getjsonid(jsonstring, NULL, NULL, 1);
+        jsonstring = getJsonId(jsonstring, NULL, NULL, 1);
 
         printf("\n\n\n\n\n %d", i);
 
