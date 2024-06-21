@@ -3,7 +3,8 @@
 #ifndef CONST_H_
 #define CONST_H_
 
-#define SETTINGSFILENAME "settings.dat"
+#define SETTINGSFILENAME "settings.bin"
+#define TESTIMAGE "test.jpg"
 
 #define MAINWINDOWHEIGHT 500
 #define MAINWINDOWWIDTH 600
@@ -46,6 +47,9 @@
 #define IDW_SEARCH_EDIT_SEARCH          402
 
 #define IDW_VIDEO_SYS_TOGGLE 400
+
+
+#define ID_TEST 9999
 
 
 

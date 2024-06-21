@@ -17,6 +17,13 @@ typedef struct {
     TCHAR title[256];
 } episode;
 
+//test struct
+typedef struct trendinganimeinfo {
+    char id[128];
+    char title[128];
+    char imageurl[256];
+} trendinganimeinfo;
+
 boolean testsMinutils();
 void createUtils();
 BOOL CALLBACK enumVisibleChildWindowsProc(HWND hwnd, LPARAM lparam);

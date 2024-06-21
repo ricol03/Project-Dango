@@ -5,6 +5,7 @@ LPSTR requestedquery = NULL;
 LPSTR requestedquery2 = NULL;
 
 extern connections test;
+extern trendinganimeinfo shows[12];
 
 //função para gerir redirects
 char * winHttpGetResponse(HINTERNET hRequest, HINTERNET hConnect, HINTERNET hSession) {
@@ -306,6 +307,44 @@ char * eplinkConnection(HWND hwnd, char * epid) {
         if (WinHttpReceiveResponse(hrequest2, NULL)) {
             jsonstring = winHttpGetResponse(hrequest2, hconnect2, hsession2);
             return getlinkjson(hwnd, jsonstring);
+        }   
+    } else
+        return -1;
+}
+
+int getinfoConnection(HWND hwnd, trendinganimeinfo shows[]) {
+    HINTERNET hsession2 = WinHttpOpen(L"Miru-win32/1.0", WINHTTP_ACCESS_TYPE_DEFAULT_PROXY, WINHTTP_NO_PROXY_NAME, WINHTTP_NO_PROXY_BYPASS, 0);
+    if (hsession2 == NULL) {
+        MessageBox(hwnd, "WinHttpOpen failed!", "Error", MB_ICONERROR);
+        printf("\n %lu", GetLastError());
+        return -1;
+    }
+
+    DWORD dwprotocols = WINHTTP_FLAG_SECURE_PROTOCOL_TLS1_2;
+    WinHttpSetOption(hsession2, WINHTTP_OPTION_SECURE_PROTOCOLS, &dwprotocols, sizeof(dwprotocols));
+    
+    HINTERNET hconnect2 = WinHttpConnect(hsession2, L"consumet-one-sigma.vercel.app", INTERNET_DEFAULT_PORT, 0);
+    if (hconnect2 == NULL) {
+        MessageBox(hwnd, "WinHttpConnect failed!", "Error", MB_ICONERROR);
+        printf("\n %lu", GetLastError());
+        return 0;
+    }
+
+    HINTERNET hrequest2 = WinHttpOpenRequest(hconnect2, L"GET", L"/anime/gogoanime/popular", NULL, WINHTTP_NO_REFERER, WINHTTP_DEFAULT_ACCEPT_TYPES, 0);
+    if (hrequest2 == NULL) {
+        MessageBox(hwnd, "WinHttpOpenRequest failed!", "Error", MB_ICONERROR);
+        wprintf(L"\n %s | %lu", requestedquery2, GetLastError());
+        WinHttpCloseHandle(hconnect2);
+        WinHttpCloseHandle(hsession2);
+        return 0;
+    }
+
+    char * jsonstring;
+
+    if (WinHttpSendRequest(hrequest2, WINHTTP_NO_ADDITIONAL_HEADERS, 0, WINHTTP_NO_REQUEST_DATA, 0, 0, 0)) {
+        if (WinHttpReceiveResponse(hrequest2, NULL)) {
+            jsonstring = winHttpGetResponse(hrequest2, hconnect2, hsession2);
+            return gettrendinginfo(jsonstring, shows);
         }   
     } else
         return -1;

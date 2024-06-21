@@ -3,13 +3,14 @@
 //criação da união para albergar um de dois tipos de dados
 connections test;
 
-connections getjsonid(char* jsonstring, const char* key, TCHAR* value, int check) {
+char * getjsonid(char* jsonstring, const char* key, TCHAR* value, int check) {
     const char* endquote = "\"";
     const char* resseparator = "},{";
 
-    if (jsonstring == NULL || key == NULL) {
-        MessageBox(NULL, jsonstring, "Erro", MB_ICONERROR | MB_OK);
-        return test;
+    if (jsonstring == NULL) {
+        MessageBox(NULL, "Error with JSON string", "Error", MB_ICONERROR | MB_OK);
+        //return test;
+        return NULL;
     }
     
     //printf("%s", jsonstring);
@@ -19,10 +20,11 @@ connections getjsonid(char* jsonstring, const char* key, TCHAR* value, int check
     if (check == 1) {
         char * check = strstr(jsonstring, resseparator);
         if (check == NULL) {
-            jsonstring = NULL;
-            test.value = jsonstring;
-            return test;
-        } 
+            return jsonstring;
+        } else {
+            check += strlen(resseparator);
+            return check;
+        }
     }
 
     //printf("\n\nantes do cheque: \n%s", jsonstring);
@@ -33,7 +35,7 @@ connections getjsonid(char* jsonstring, const char* key, TCHAR* value, int check
     //printf("%s", jsonstring);
     char* start = strstr(jsonstring, key);
     //printf("\n\n cheque %d", check);
-    //printf("\n\n\nEle dá print disto amigo (start): %s", start);
+    printf("\n\n\nEle dá print disto amigo (start): %s", start);
 
     if (check == 2) {
         //printf("valor do start: %s", start);
@@ -47,8 +49,8 @@ connections getjsonid(char* jsonstring, const char* key, TCHAR* value, int check
 
         //printf("\n\npasso 2");
 
-        char* end = strstr(start, endquote);
-       // printf("\n\n\nEle dá print disto amigo (end): %s", end);
+        char * end = strstr(start, endquote);
+        printf("\n\n\nEle dá print disto amigo (end): %s", end);
 
         if (end != NULL) {
             //printf("\n\npasso 3");
@@ -59,9 +61,16 @@ connections getjsonid(char* jsonstring, const char* key, TCHAR* value, int check
             strncpy(value, start, length);
             //termina a string com um \0
             
-            value[length] = '\0';
-            test.value = start;
-            return test;    
+            if (check == 3) {
+                return NULL;
+            } else {
+                value[length] = '\0';
+                /*test.value = start;
+                return test;    */
+                return value;
+            }
+            
+            
         }
     }
 }
@@ -120,9 +129,11 @@ int parseresultsjson(char* jsonstring, result results[]) {
         //printf("\n\nrating do resultado: %s", results[i].rating);
         getjsonid(jsonstring, reldatekey, results[i].releasedate, 0);
         //printf("\n\ndata de lançamento do resultado: %s", results[i].releasedate);
-        test = getjsonid(jsonstring, typekey, results[i].type, 1);
+        
+        //anteriormente test (union)
+        jsonstring = getjsonid(jsonstring, typekey, results[i].type, 1);
         //printf("\n\ntipo do resultado: %s", results[i].type);
-        jsonstring = test.value;
+        //jsonstring = test.value;
 
         if (jsonstring == NULL)
             return i;
@@ -152,8 +163,10 @@ int parseepisodesjson(HWND hwnd, char * resultid, char* jsonstring, episode epis
     for (int i = 0; i < number; i++) {
         getjsonid(newstring2, idkey, episodes[i].id, 0);
         getjsonid(newstring2, numberkey, episodes[i].number, 0);
-        test = getjsonid(newstring2, titlekey, episodes[i].title, 0);
-        newstring2 = test.value;
+        
+        //anteriormente test (union)
+        newstring2 = getjsonid(newstring2, titlekey, episodes[i].title, 0);
+        //newstring2 = test.value;
 
         if (newstring2 == NULL)
             return i;
@@ -165,7 +178,7 @@ int parseepisodesjson(HWND hwnd, char * resultid, char* jsonstring, episode epis
 char * getlinkjson(HWND hwnd, char * jsonstring) {
     
     const char * linkkey = "\"url\":";
-    const char* endquote = "\"";
+    const char * endquote = "\"";
 
     char * value = malloc(512);
     //malloc(value);
@@ -203,4 +216,32 @@ char * getlinkjson(HWND hwnd, char * jsonstring) {
         free(value);
         return NULL;
     }
+}
+
+int gettrendinginfo(char * jsonstring, trendinganimeinfo results[]) {
+    const char * idkey = "{\"id\":\"";
+    const char * titlekey = "\"title\":\"";
+    const char * imagekey = "\"image\":\"";
+    const char * endquote = "\"";
+
+    printf(" - - - - trendinginfo\n\n\n");
+    printf("%s", jsonstring);
+
+    for (int i = 0; i < 12; i++) {
+        getjsonid(jsonstring, idkey, results[i].id, 3);
+        printf("\n\nid do resultado: %s", results[i].id);
+        getjsonid(jsonstring, titlekey, results[i].title, 3);
+        printf("\n\ntítulo do resultado: %s", results[i].title);
+        getjsonid(jsonstring, imagekey, results[i].imageurl, 3);
+        printf("\n\nimagem do resultado: %s", results[i].imageurl);
+        jsonstring = getjsonid(jsonstring, NULL, NULL, 1);
+
+        printf("\n\n\n\n\n %d", i);
+
+        if (jsonstring == NULL)
+            return i;
+    }
+
+
+
 }

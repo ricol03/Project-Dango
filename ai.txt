@@ -388,3 +388,29 @@ LRESULT CALLBACK SettingsWindowProc (HWND hwnd, UINT message, WPARAM wparam, LPA
             return DefWindowProc(hwnd, message, wparam, lparam);
     }
 }
+
+int readSettings() {
+    fr = fopen(SETTINGSFILENAME, "rb");
+
+    fseek(fr, 0, SEEK_END);
+    if (ftell(fr) > 0) {
+        MessageBox(NULL, "Settings found", "Info", MB_ICONINFORMATION);
+        char a[32];
+        rewind(fr);
+        fread(&a, 32 * sizeof(char), 1, fw);
+        printf("%s", a);
+        MessageBox(NULL, a, "Info", MB_ICONINFORMATION);
+    } else {
+        MessageBox(NULL, "Settings not found", "Error", MB_ICONERROR);
+    } 
+
+    fclose(fr);
+}
+
+int saveSettings() {
+    fw = fopen(SETTINGSFILENAME, "wb");
+    fwrite(&provider, sizeof(provider) * sizeof(char), 1, fw);
+
+    fclose(fw);
+}
+

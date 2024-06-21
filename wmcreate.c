@@ -42,6 +42,9 @@ const char* localfile;
 
 result results[100];
 episode episodes[100];
+trendinganimeinfo shows[12];
+
+extern const char provider[32];
 
 void createUtils() {
     htitlefont = CreateFont(
@@ -93,6 +96,23 @@ int homeWindow(HWND hwnd) {
 
     destroyVisibleChildWindows(hwnd);
     
+    if (provider == "Windows 95 ") {
+        HWND htestbutton = CreateWindow(
+            TEXT("BUTTON"),
+            TEXT("TEST"),
+            WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,
+            250, 200, 120, 30,
+            hwnd,
+            ID_TEST,
+            GetModuleHandle(NULL),
+            NULL
+        );
+    } else {
+        //MessageBox(NULL, provider, "Error", MB_ICONERROR);
+    }
+    
+    
+
     htext = CreateWindow(
         TEXT("STATIC"),
         TEXT("Trending Content"),
@@ -139,6 +159,9 @@ int homeWindow(HWND hwnd) {
     AppendMenu(hmenu, MF_STRING | MF_POPUP, (UINT_PTR)hsubmenuabout, "About");
 
     SetMenu(hwnd, hmenu);
+
+    
+
 }
 
 int searchWindow(HWND hwnd) {
@@ -232,11 +255,9 @@ int settingsWindow(HWND hwnd) {
         (HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE),
         NULL
     );
-    
-    wchar_t test = "Zoro";
 
-    SendMessage(hproviderlist, (UINT)CB_ADDSTRING, (WPARAM)0, (LPARAM)test);
-    SendMessage(hproviderlist, CB_SETCURSEL, (WPARAM)0, (LPARAM)test);
+    SendMessage(hproviderlist, (UINT)CB_ADDSTRING, (WPARAM)0, (LPARAM)provider);
+    SendMessage(hproviderlist, CB_SETCURSEL, (WPARAM)0, (LPARAM)provider);
     
 }
 

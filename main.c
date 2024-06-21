@@ -1,5 +1,8 @@
 #include "tools.h"
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
 //TODO: meter todos os episódios na listbox de baixo X
 //TODO: quando se clica no botão watch, meter o link do episódio no libvlc X
 //TODO:: meter as legendas da coisa
@@ -53,6 +56,7 @@ boolean settingstoggled = FALSE;
 extern const char* localfile;
 extern result results[];
 extern episode episodes[];
+extern trendinganimeinfo shows[];
 
 HINSTANCE hinstance;
 
@@ -60,9 +64,12 @@ int number;
 
 PAINTSTRUCT ps;
 
-DWORD threadId;
+typedef struct stbInfo {
+    unsigned char * imgdata;
+    int width, height, planes;
+} stbInfo;
 
-const wchar_t provider;
+const char provider[32];
 
 LRESULT CALLBACK WindowProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam);
 
@@ -74,6 +81,7 @@ int WINAPI WinMain(HINSTANCE hinstance, HINSTANCE hprevinstance, PSTR lpcmdline,
 
     WNDCLASS wc = { 0 };
 
+    wc.style            = CS_OWNDC;
     wc.lpfnWndProc      = WindowProc;
     wc.hInstance        = hinstance;
     wc.lpszClassName    = (LPCSTR)CLASS_NAME;
@@ -92,11 +100,12 @@ int WINAPI WinMain(HINSTANCE hinstance, HINSTANCE hprevinstance, PSTR lpcmdline,
         NULL
     );
 
-    ShowWindow(hwndmain, SW_SHOW);
-    UpdateWindow(hwndmain);
+    /*ShowWindow(hwndmain, SW_SHOW);
+    UpdateWindow(hwndmain);*/
     
     if (hwndmain == NULL) {
-        MessageBoxW(NULL, L"Unable to create Windows", L"Error", MB_ICONERROR | MB_OK);
+        MessageBoxW(NULL, L"Unable to create Windows", 
+                L"Error", MB_ICONERROR | MB_OK);
         return 0;
     } else
         ShowWindow(hwndmain, SW_SHOW);
@@ -151,8 +160,6 @@ int WINAPI WinMain(HINSTANCE hinstance, HINSTANCE hprevinstance, PSTR lpcmdline,
         return 0;
     }
     
-
-
     MSG msg = { 0 };
 
     while (GetMessage(&msg, NULL, 0, 0)) {
@@ -168,13 +175,31 @@ LRESULT CALLBACK WindowProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM lpar
     switch (message) {
         case WM_CREATE:
             createUtils();
-            homeWindow(hwnd);
             readSettings();
+            homeWindow(hwnd);
+            /*stbInfo teste;
+
+            teste.imgdata = stbi_load(TESTIMAGE, teste.width, teste.height, teste.planes, 0);
+
+            if (teste.imgdata) {
+                MessageBox(NULL, "Funcionou", "Info", MB_ICONINFORMATION);
+            } else {
+                MessageBox(NULL, "Não funcionou", "Error", MB_ICONERROR);
+            }*/
+            
+            
 
             return 0;
 
         case WM_COMMAND:
             switch (LOWORD(wparam)) {
+
+                case ID_TEST: {
+                    MessageBox(hwnd, "CLicou", "Info", MB_ICONINFORMATION);
+                    getinfoConnection(hwnd, shows);
+                }
+
+
                 case IDM_FILE_HOME:
                     homeWindow(hwnd);
                     break;
@@ -308,12 +333,18 @@ LRESULT CALLBACK WindowProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM lpar
 
             FillRect(hdc, &ps.rcPaint, (HBRUSH) (COLOR_3DFACE+1));
 
+            
+            
+            
+
+
             EndPaint(hwnd, &ps);
         }
             return 0;
 
+        case WM_CLOSE:
         case WM_DESTROY:
-            
+            PostQuitMessage(0);
             return 0;
     }
     return DefWindowProc(hwnd, message, wparam, lparam);
@@ -380,7 +411,7 @@ LRESULT SettingsWndProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam) 
     switch (message) {
         case WM_CREATE:
             settingsWindow(hwnd);
-            readyingFile();
+            //readyingFile();
             return 0; 
 
         case WM_COMMAND:

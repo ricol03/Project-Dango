@@ -5,29 +5,42 @@ FILE * fw;
 
 extern HWND hproviderlist;
 
-extern const wchar_t provider;
+const char provider[32];
+const char lang[5];
 
 void readyingFile() {
-    fr = fopen(SETTINGSFILENAME, "rb");
-    fw = fopen(SETTINGSFILENAME, "wb");
+    fr = fopen(SETTINGSFILENAME, "r");
+    fw = fopen(SETTINGSFILENAME, "w");
 }
 
 int readSettings() {
-    fr = fopen(SETTINGSFILENAME, "rb");
+    fr = fopen(SETTINGSFILENAME, "r+b");
 
-    fseek(fr, 0, SEEK_END);
-    if (ftell(fr) > 0) {
-        MessageBox(NULL, "Settings found", "Info", MB_ICONINFORMATION);
-        //provider = fread()
+    if (fr != NULL) {
+        //MessageBox(NULL, "Settings found", "Info", MB_ICONINFORMATION);
+        char savedProvider[32];
+        fread(savedProvider, sizeof(savedProvider), 1, fr);
+
+        strcpy(provider, savedProvider);
+
+        printf("Original: %s\n", provider);
+        printf("Resultado: %s", savedProvider);
+        MessageBox(NULL, savedProvider, "Info", MB_ICONINFORMATION);
     } else {
         MessageBox(NULL, "Settings not found", "Error", MB_ICONERROR);
     } 
-    
+
+    fclose(fr);
 }
 
 int saveSettings() {
-    fw = fopen(SETTINGSFILENAME, "wb");
-    fwrite(provider, sizeof(provider) * sizeof(wchar_t), NULL, fw);
+    fw = fopen(SETTINGSFILENAME, "w+b");
+    
+    fwrite(provider, sizeof(provider), 1, fw);
+    fwrite(lang, sizeof(lang), 1, fw);
 
+    //fprintf(fw, provider);
 
+    fclose(fw);
 }
+
