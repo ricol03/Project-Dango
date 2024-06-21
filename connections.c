@@ -151,7 +151,7 @@ int searchConnection(HWND hwnd, char * query, result results[]) {
     parseRequestText("/anime/zoro/", query);
 
     //Cria um handle de sessão de hinternet
-    HINTERNET hsession = WinHttpOpen(L"Miru-win32/1.0", WINHTTP_ACCESS_TYPE_DEFAULT_PROXY, WINHTTP_NO_PROXY_NAME, WINHTTP_NO_PROXY_BYPASS, 0);
+    HINTERNET hsession = WinHttpOpen(L"Dango/1.0", WINHTTP_ACCESS_TYPE_DEFAULT_PROXY, WINHTTP_NO_PROXY_NAME, WINHTTP_NO_PROXY_BYPASS, 0);
     if (hsession == NULL) {
         MessageBox(hwnd, "WinHttpOpen failed!", "Error", MB_ICONERROR);
         return -1;
@@ -193,7 +193,7 @@ int episodesConnection(HWND hwnd, char * resultid, episode episodes[]) {
 
     parseRequestText2("/anime/zoro/info?id=", resultid);
 
-    HINTERNET hsession2 = WinHttpOpen(L"Miru-win32/1.0", WINHTTP_ACCESS_TYPE_DEFAULT_PROXY, WINHTTP_NO_PROXY_NAME, WINHTTP_NO_PROXY_BYPASS, 0);
+    HINTERNET hsession2 = WinHttpOpen(L"Dango/1.0", WINHTTP_ACCESS_TYPE_DEFAULT_PROXY, WINHTTP_NO_PROXY_NAME, WINHTTP_NO_PROXY_BYPASS, 0);
     if (hsession2 == NULL) {
         MessageBox(hwnd, "WinHttpOpen failed!", "Error", MB_ICONERROR);
         printf("\n %lu", GetLastError());
@@ -234,7 +234,7 @@ int epnumConnection(HWND hwnd, char * resultid) {
 
     parseRequestText("/anime/zoro/info?id=", resultid);
 
-    HINTERNET hsession = WinHttpOpen(L"Miru-win32/1.0", WINHTTP_ACCESS_TYPE_DEFAULT_PROXY, WINHTTP_NO_PROXY_NAME, WINHTTP_NO_PROXY_BYPASS, 0);
+    HINTERNET hsession = WinHttpOpen(L"Dango/1.0", WINHTTP_ACCESS_TYPE_DEFAULT_PROXY, WINHTTP_NO_PROXY_NAME, WINHTTP_NO_PROXY_BYPASS, 0);
     if (hsession == NULL) {
         MessageBox(hwnd, "WinHttpOpen failed!", "Error", MB_ICONERROR);
         return 0;
@@ -275,7 +275,7 @@ int epnumConnection(HWND hwnd, char * resultid) {
 char * eplinkConnection(HWND hwnd, char * epid) {
     parseRequestText2("/anime/zoro/watch?episodeId=", epid);
 
-    HINTERNET hsession2 = WinHttpOpen(L"Miru-win32/1.0", WINHTTP_ACCESS_TYPE_DEFAULT_PROXY, WINHTTP_NO_PROXY_NAME, WINHTTP_NO_PROXY_BYPASS, 0);
+    HINTERNET hsession2 = WinHttpOpen(L"Dango/1.0", WINHTTP_ACCESS_TYPE_DEFAULT_PROXY, WINHTTP_NO_PROXY_NAME, WINHTTP_NO_PROXY_BYPASS, 0);
     if (hsession2 == NULL) {
         MessageBox(hwnd, "WinHttpOpen failed!", "Error", MB_ICONERROR);
         printf("\n %lu", GetLastError());
@@ -313,7 +313,7 @@ char * eplinkConnection(HWND hwnd, char * epid) {
 }
 
 int getinfoConnection(HWND hwnd, trendinganimeinfo shows[]) {
-    HINTERNET hsession2 = WinHttpOpen(L"Miru-win32/1.0", WINHTTP_ACCESS_TYPE_DEFAULT_PROXY, WINHTTP_NO_PROXY_NAME, WINHTTP_NO_PROXY_BYPASS, 0);
+    HINTERNET hsession2 = WinHttpOpen(L"Dango/1.0", WINHTTP_ACCESS_TYPE_DEFAULT_PROXY, WINHTTP_NO_PROXY_NAME, WINHTTP_NO_PROXY_BYPASS, 0);
     if (hsession2 == NULL) {
         MessageBox(hwnd, "WinHttpOpen failed!", "Error", MB_ICONERROR);
         printf("\n %lu", GetLastError());
