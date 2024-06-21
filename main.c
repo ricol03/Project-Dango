@@ -69,7 +69,7 @@ typedef struct stbInfo {
     int width, height, planes;
 } stbInfo;
 
-const char provider[32];
+extern const char provider[32];
 
 LRESULT CALLBACK WindowProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam);
 

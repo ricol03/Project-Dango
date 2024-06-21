@@ -26,3 +26,4 @@
 #include "video.h"
 #include "json.h"
 #include "file.h"
+#include "lang_en.h"

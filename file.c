@@ -18,7 +18,7 @@ int readSettings() {
 
     if (fr != NULL) {
         //MessageBox(NULL, "Settings found", "Info", MB_ICONINFORMATION);
-        char savedProvider[32];
+        char savedProvider[32] = {0};
         fread(savedProvider, sizeof(savedProvider), 1, fr);
 
         strcpy(provider, savedProvider);

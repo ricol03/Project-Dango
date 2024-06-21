@@ -13,6 +13,7 @@ HWND hsearchlabel;
 HWND hsearchbox; 
 HWND hsearchbutton, hcancelbutton;  
 HWND settingsbutton;
+HWND htestbutton, hunavailabletext;
 
 //utilidades
 HFONT htitlefont;
@@ -92,29 +93,38 @@ void destroyVisibleChildWindows(HWND hwndparent) {
 int homeWindow(HWND hwnd) {
 
     destroyVisibleChildWindows(hwnd);
+
     
-    if (provider == "Windows 95 ") {
-        HWND htestbutton = CreateWindow(
+
+    if (!strcmp(provider, PROVIDER1)) {
+        htestbutton = CreateWindow(
             TEXT("BUTTON"),
             TEXT("TEST"),
-            WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,
+            WS_TABSTOP | WS_CHILD | BS_DEFPUSHBUTTON | WS_VISIBLE,
             250, 200, 120, 30,
             hwnd,
             ID_TEST,
             GetModuleHandle(NULL),
             NULL
         );
-    } else {
-        //MessageBox(NULL, provider, "Error", MB_ICONERROR);
+    } else if (!strcmp(provider, PROVIDER2)) {
+       hunavailabletext = CreateWindow(
+        TEXT("STATIC"), 
+        IDT_UNAVAILABLETRENDING,
+        WS_VISIBLE | WS_CHILD,
+        100, 100, 450, 200,
+        hwnd, 
+        IDW_MAIN_LABEL_UNAVAILABLETRENDING,
+        GetModuleHandle(NULL),
+        NULL
+       );
     }
-    
-    
-
+        
     htext = CreateWindow(
         TEXT("STATIC"),
         TEXT("Trending Content"),
         WS_VISIBLE | WS_CHILD,
-        25, 25, 450, 200,
+        25, 25, 450, 50,
         hwnd,
         (HMENU)1,
         GetModuleHandle(NULL),

@@ -6,6 +6,9 @@
 #define SETTINGSFILENAME "settings.bin"
 #define TESTIMAGE "test.jpg"
 
+#define PROVIDER1 "Gogoanime"
+#define PROVIDER2 "Zoro"
+
 #define MAINWINDOWHEIGHT 500
 #define MAINWINDOWWIDTH 600
 
@@ -32,6 +35,9 @@
 #define IDM_ABOUT_ABOUT                 15
 
 /*-------------------------------*/
+
+#define IDW_MAIN_LABEL_TITLE 100
+#define IDW_MAIN_LABEL_UNAVAILABLETRENDING  101
 
 #define IDW_MAIN_BUTTON_SEARCH          200
 #define IDW_SEARCH_BUTTON_WATCH         201
