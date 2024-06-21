@@ -165,7 +165,7 @@ int parseEpisodesJson(HWND hwnd, char * resultid, char * jsonstring, episode epi
         getJsonId(newstring2, numberkey, episodes[i].number, 0);
         
         //anteriormente test (union)
-        newstring2 = getJsonId(newstring2, titlekey, episodes[i].title, 0);
+        newstring2 = getJsonId(newstring2, titlekey, episodes[i].title, 1);
         //newstring2 = test.value;
 
         if (newstring2 == NULL)

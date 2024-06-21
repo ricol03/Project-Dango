@@ -26,7 +26,7 @@ HWND hwatchbutton;
 HWND heplistbox;
 
 //settings
-HWND hokbutton, hcancelbutton;
+HWND hokbutton, hcancelbutton, happlybutton;
 HWND hproviderlist;
 
 //menu
@@ -245,7 +245,7 @@ int settingsWindow(HWND hwnd) {
         TEXT("BUTTON"),
         TEXT("OK"),
         WS_TABSTOP | WS_CHILD | BS_DEFPUSHBUTTON | WS_VISIBLE,
-        200, 250, 70, 20,
+        110, 250, 70, 20,
         hwnd,
         IDW_SETTINGS_BUTTON_OK,
         (HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE),
@@ -256,9 +256,20 @@ int settingsWindow(HWND hwnd) {
         TEXT("BUTTON"),
         TEXT("Cancel"),
         WS_TABSTOP | WS_CHILD | BS_DEFPUSHBUTTON | WS_VISIBLE,
-        110, 250, 70, 20,
+        190, 250, 70, 20,
         hwnd,
         IDW_SETTINGS_BUTTON_CANCEL,
+        (HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE),
+        NULL
+    );
+
+    happlybutton = CreateWindow(
+        TEXT("BUTTON"),
+        TEXT("Apply"),
+        WS_TABSTOP | WS_CHILD | BS_DEFPUSHBUTTON | WS_VISIBLE,
+        270, 250, 70, 20,
+        hwnd,
+        IDW_SETTINGS_BUTTON_APPLY,
         (HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE),
         NULL
     );

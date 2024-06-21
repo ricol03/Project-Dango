@@ -91,7 +91,7 @@ int WINAPI WinMain(HINSTANCE hinstance, HINSTANCE hprevinstance, PSTR lpcmdline,
     hwndmain = CreateWindowEx(
         0,
         CLASS_NAME,
-        "Windows",
+        "Project Dango",
         WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_ICONIC | WS_ACTIVECAPTION | WS_VISIBLE,
         MAINWINDOWWIDTH, MAINWINDOWHEIGHT, MAINWINDOWWIDTH, MAINWINDOWHEIGHT,
         NULL,
@@ -128,7 +128,8 @@ int WINAPI WinMain(HINSTANCE hinstance, HINSTANCE hprevinstance, PSTR lpcmdline,
     );
     
     if (hwndsearch == NULL) {
-        MessageBoxW(NULL, L"Unable to create search window", L"Error", MB_ICONERROR | MB_OK);
+        MessageBoxW(NULL, L"Unable to create search window", 
+                    L"Error", MB_ICONERROR | MB_OK);
         return 0;
     }
 
@@ -153,7 +154,8 @@ int WINAPI WinMain(HINSTANCE hinstance, HINSTANCE hprevinstance, PSTR lpcmdline,
     );
 
     if (hwndsettings == NULL) {
-        MessageBoxW(NULL, "deu asneira", "error", MB_ICONERROR);
+        MessageBoxW(NULL, L"Unable to create settings window",
+                     L"Error", MB_ICONERROR | MB_OK);
         return 0;
     }
     
@@ -440,6 +442,10 @@ LRESULT SettingsWndProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam) 
                 
                 case IDW_SETTINGS_BUTTON_CANCEL:
                     settingstoggled = hideSettings();
+                    break;
+
+                case IDW_SETTINGS_BUTTON_APPLY:
+                    saveSettings();
                     break;
 
                 default:
