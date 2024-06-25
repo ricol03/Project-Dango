@@ -3,9 +3,12 @@
 #ifndef MAIN_H_
 #define MAIN_H_
 
-LRESULT CALLBACK WindowProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam);
-LRESULT  SearchWindowProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam);
+LRESULT CALLBACK MainWindowProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam);
+LRESULT SearchWindowProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam);
 LRESULT SettingsWndProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam);
+LRESULT NetworkTabProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam);
+LRESULT ProviderTabProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam);
+LRESULT LangTabProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam);
 void videoWindowWrapper(void* data);
 DWORD WINAPI settingsWindowWrapper(void* arg);
 int WINAPI WinMain(HINSTANCE hinstance, HINSTANCE hprevinstance, PSTR lpcmdline, int nshowcmd);

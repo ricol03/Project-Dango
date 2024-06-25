@@ -24,7 +24,6 @@ typedef struct trendinganimeinfo {
     char imageurl[256];
 } trendinganimeinfo;
 
-boolean testsMinutils();
 void createUtils();
 BOOL CALLBACK enumVisibleChildWindowsProc(HWND hwnd, LPARAM lparam);
 void destroyVisibleChildWindows(HWND hwndparent);
@@ -36,5 +35,6 @@ BOOL showSearch();
 int searchResults(HWND hwnd, char * query);
 BOOL showSettings();
 BOOL hideSettings();
+int networkTab(HWND hwnd);
 
 #endif
