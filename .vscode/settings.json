@@ -14,6 +14,14 @@
         "windows.h": "c",
         "*.rh": "c",
         "json.h": "c",
-        "connections.h": "c"
+        "connections.h": "c",
+        "string.h": "c",
+        "mfapi.h": "c",
+        "commctrl.h": "c",
+        "tchar.h": "c",
+        "process.h": "c",
+        "mferror.h": "c",
+        "dshow.h": "c",
+        "windowsx.h": "c"
     }
 }

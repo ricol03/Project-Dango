@@ -28,6 +28,7 @@ HWND heplistbox;
 //settings
 HWND hokbutton, hcancelbutton, happlybutton;
 HWND hproviderlist;
+HWND htabtest;
 
 //menu
 HMENU hmenu;             
@@ -241,6 +242,47 @@ int searchWindow(HWND hwnd) {
 }
 
 int settingsWindow(HWND hwnd) {
+
+    INITCOMMONCONTROLSEX icex;
+    TCITEM tcnetwork, tcprovider, tclang;
+
+    tcnetwork.mask = TCIF_TEXT;
+    tcnetwork.pszText = "Network";
+
+    tcprovider.mask = TCIF_TEXT;
+    tcprovider.pszText = "Provider";
+
+    tclang.mask = TCIF_TEXT;
+    tclang.pszText = "Language";
+
+    icex.dwICC = ICC_TAB_CLASSES;
+    icex.dwSize = sizeof(INITCOMMONCONTROLSEX);
+
+    InitCommonControlsEx(&icex);
+
+    htabtest = CreateWindow(
+        WC_TABCONTROL,
+        TEXT(""),
+        TCS_BUTTONS | WS_CHILD | WS_CLIPSIBLINGS | WS_VISIBLE,
+        0, 0, 300, 100,
+        hwnd,
+        NULL,
+        (HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE),
+        NULL
+    );
+
+    if (htabtest == NULL) {
+        MessageBox(NULL, "Não funcionou", "Error", MB_ICONERROR);
+        printf("Erro: %lu", GetLastError());
+    }
+
+    tcprovider.mask = TCIF_TEXT;
+    tcprovider.pszText = "Provider";
+
+    TabCtrl_InsertItem(htabtest, 0, &tcnetwork);
+    TabCtrl_InsertItem(htabtest, 1, &tcprovider);
+    TabCtrl_InsertItem(htabtest, 2, &tclang);
+    
     hokbutton = CreateWindow(
         TEXT("BUTTON"),
         TEXT("OK"),

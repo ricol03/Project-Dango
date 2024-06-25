@@ -14,14 +14,16 @@
                 "-lwsock32",
                 "-lwinhttp",
                 "-lgdi32",
-                "-lole32",
-                "-lmf",
-                "-lmfplat",
-                "-lmfuuid",
+                //"-lole32",
+                //"-lmf",
+                //"-lmfplat",
+                //"-lmfuuid",
+                "-lcomctl32",
                 "-I\"${fileDirname}\\libvlc\\include\"",
                 "-L\"${fileDirname}\\libvlc\"",
                 "-lvlc",
                 //"-mwindows"
+                "--static"
             ],
             "options": {
                 "cwd": "${fileDirname}"

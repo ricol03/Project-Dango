@@ -7,12 +7,12 @@
 #include <Windows.h>
 #include <wingdi.h>
 #include <string.h>
-#include <dshow.h>
-#include <mfapi.h>
-#include <mfidl.h>
-#include <mferror.h>
+//#include <dshow.h>
+//#include <mfapi.h>
+//#include <mfidl.h>
+//#include <mferror.h>
 #include <tchar.h>
-
+#include <commctrl.h>
 #include <process.h>
 
 //external headers
