@@ -1,4 +1,5 @@
 #include "tools.h"
+#include "connections.h"
 
 //para este tipo de dados precisamos sempre de alocar memória
 LPSTR requestedquery = NULL;

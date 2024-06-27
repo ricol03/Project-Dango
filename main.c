@@ -23,9 +23,11 @@ const wchar_t MAIN_CLASS[]          = L"MainWndClass";
 const wchar_t SEARCH_CLASS[]        = L"SearchWndClass";
 const wchar_t SETTINGS_CLASS[]      = L"TEST";
 
-const wchar_t NETWORKTAB_CLASS[]    = L"NetTabWndClass";
+const wchar_t NETWORKTAB_CLASS[]    = L"Cancro";
 const wchar_t PROVIDERTAB_CLASS[]   = L"ProviderTabWndClass";
 const wchar_t LANGTAB_CLASS[]       = L"LangTabWndClass";
+
+const wchar_t TEST_CLASS[]    = L"TCLASS";
 
 //janelas
 HWND hwndmain;
@@ -42,8 +44,10 @@ extern HWND hsearchbutton;
 extern HBRUSH hbrush;
 
 //controlos das definições
-extern HWND htabtest;
-HWND hwndnetworktab;
+HWND hokbutton, hcancelbutton, happlybutton;
+HWND hproviderlist;
+HWND htabtest;
+HWND hwndnetworktab, hwndprovidertab, hwndlangtab;
 
 //controlos dos resultados de pesquisa
 extern HWND hshowlistbox, heplistbox;
@@ -67,6 +71,8 @@ extern trendinganimeinfo shows[];
 
 HINSTANCE hinstance;
 
+HWND hproviderlist;
+
 int number;
 
 PAINTSTRUCT ps;
@@ -80,8 +86,8 @@ extern char provider[32];
 
 LRESULT CALLBACK MainWindowProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam);
 LRESULT SearchWindowProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam);
-LRESULT SettingsWndProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam);
-LRESULT NetworkTabProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam);
+LRESULT CALLBACK SettingsWndProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam);
+LRESULT CALLBACK NetworkTabProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam);
 LRESULT ProviderTabProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam);
 LRESULT LangTabProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam);
 
@@ -174,6 +180,8 @@ int WINAPI WinMain(HINSTANCE hinstance, HINSTANCE hprevinstance, PSTR lpcmdline,
         return 0;
     }
 
+
+    
     
 
     #pragma endregion
@@ -192,48 +200,50 @@ int WINAPI WinMain(HINSTANCE hinstance, HINSTANCE hprevinstance, PSTR lpcmdline,
         printf("Erro: %lu", GetLastError());
     }
 
-    /*RECT rect;
+    
+    RECT rect;
     GetClientRect(htabtest, &rect);
 
     hwndnetworktab = CreateWindowEx(
         0,
-        NETWORKTAB_CLASS,
-        "",
-        WS_CHILD | WS_VISIBLE,
-        rect.left, rect.top+20, rect.right - rect.left, rect.bottom - rect.top,
+        (LPCSTR)NETWORKTAB_CLASS,
+        NULL,
+        WS_CHILDWINDOW | WS_VISIBLE,
+        rect.left, rect.top+23, rect.right - rect.left, rect.bottom - rect.top,
+        //0, 0, 100, 100,
         htabtest,
-        995,
-        //GetModuleHandle(NULL),
-        hinstance,
+        (HMENU)989,
+        (HINSTANCE)GetWindowLong(htabtest, GWL_HINSTANCE),
+        //hinstance,
         NULL
     );
     
     if (hwndnetworktab == NULL) {
         MessageBox(NULL, "Não funcionou (network tab)", "Error", MB_ICONERROR);
         printf("Erro: %lu", GetLastError());
-        printf("%s", NETWORKTAB_CLASS);
-    }*/
+        //printf("%s", NETWORKTAB_CLASS);
+    }
 
 
     //provider tab
-    WNDCLASS providertabclass = { 0 };
+    /*WNDCLASS providertabclass = { 0 };
 
     providertabclass.style            = CS_OWNDC;
     providertabclass.lpfnWndProc      = ProviderTabProc;
     providertabclass.hInstance        = hinstance;
     providertabclass.lpszClassName    = (LPCSTR)PROVIDERTAB_CLASS;
 
-    RegisterClass(&providertabclass);
+    RegisterClass(&providertabclass);*/
 
     //language tab
-    WNDCLASS languagetabclass = { 0 };
+    /*WNDCLASS languagetabclass = { 0 };
 
     languagetabclass.style            = CS_OWNDC;
     languagetabclass.lpfnWndProc      = LangTabProc;
     languagetabclass.hInstance        = hinstance;
     languagetabclass.lpszClassName    = (LPCSTR)LANGTAB_CLASS;
 
-    RegisterClass(&languagetabclass);
+    RegisterClass(&languagetabclass);*/
 
     #pragma endregion
 
@@ -486,26 +496,14 @@ LRESULT SearchWindowProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
     }
 }
 
-LRESULT SettingsWndProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam) {
+LRESULT CALLBACK SettingsWndProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam) {
     switch (message) {
         case WM_CREATE:
             settingsWindow(hwnd);
             return 0; 
 
-        case WM_COMMAND:
-            if (HIWORD(wparam) == CBN_SELCHANGE) {
-                int index = SendMessage((HWND)lparam, (UINT)CB_GETCURSEL, (WPARAM)0, (LPARAM)0);
-                SendMessage((HWND)lparam, (UINT)CB_GETLBTEXT, (WPARAM)index, (LPARAM)provider);
-                
-                break;
-            }
-
+        case WM_COMMAND: {
             switch (LOWORD(wparam)) {
-                /*case IDW_SETTINGS_COMBOBOX_PROVIDERLIST: {
-                    
-                    
-                }*/
-
                 case IDW_SETTINGS_BUTTON_OK: {
                     saveSettings();
                     settingstoggled = hideSettings();
@@ -524,6 +522,10 @@ LRESULT SettingsWndProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam) 
                 default:
                     break;
             }
+        }
+        return 0;
+
+        
 
         case WM_NOTIFY: {
             switch (((LPNMHDR)lparam)->code) {
@@ -535,7 +537,7 @@ LRESULT SettingsWndProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam) 
                     break;
             }
         }
-            return 0;
+        return 0;
             
         case WM_PAINT: {
             HDC hdc = BeginPaint(hwnd, &ps);
@@ -557,12 +559,31 @@ LRESULT SettingsWndProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam) 
     }
 }
 
-LRESULT NetworkTabProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam) {
+LRESULT CALLBACK NetworkTabProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam) {
     switch (message) {
         case WM_CREATE: {
             networkTab(hwnd);
             break;
         }
+        return 0;
+
+        case WM_COMMAND: {
+            if (HIWORD(wparam) == CBN_SELCHANGE) {
+                int index = SendMessage((HWND)lparam, (UINT)CB_GETCURSEL, (WPARAM)0, (LPARAM)0);
+                SendMessage((HWND)lparam, (UINT)CB_GETLBTEXT, (WPARAM)index, (LPARAM)provider);
+                
+                break;
+            }
+        }
+        
+        case WM_PAINT: {
+            HDC hdc = BeginPaint(hwnd, &ps);
+
+            FillRect(hdc, &ps.rcPaint, (HBRUSH) (RGB(255, 255, 255)));
+
+            EndPaint(hwnd, &ps);
+        }
+        return 0;
 
         default:
             return DefWindowProc(hwnd, message, wparam, lparam);
@@ -576,3 +597,6 @@ LRESULT ProviderTabProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam) 
 LRESULT LangTabProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam) {
     return DefWindowProc(hwnd, message, wparam, lparam);
 }
+
+
+

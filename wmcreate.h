@@ -35,6 +35,8 @@ BOOL showSearch();
 int searchResults(HWND hwnd, char * query);
 BOOL showSettings();
 BOOL hideSettings();
+
+int settingsWindow(HWND hwnd);
 int networkTab(HWND hwnd);
 
 #endif

@@ -1,9 +1,16 @@
 #define NO_DSHOW_STRSAFE
 
+#ifdef _WIN32_WINNT_WIN2K
+#include "connections_prexp.h"
+#include <wininet.h>
+#else
+#include "connections.h"
+#include <winhttp.h>
+#endif
+
 //system headers
 #include <stdio.h>
-#include <winsock2.h>
-#include <winhttp.h>
+//#include <winsock2.h>
 #include <Windows.h>
 #include <wingdi.h>
 #include <string.h>
@@ -22,8 +29,9 @@
 #include "const.h"
 #include "main.h"
 #include "wmcreate.h"
-#include "connections.h"
+
 #include "video.h"
 #include "json.h"
 #include "file.h"
 #include "lang_en.h"
+

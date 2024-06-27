@@ -13,6 +13,7 @@
                 "${fileDirname}\\${fileBasenameNoExtension}.exe",
                 "-lwsock32",
                 "-lwinhttp",
+                "-lwininet",
                 "-lgdi32",
                 //"-lole32",
                 //"-lmf",

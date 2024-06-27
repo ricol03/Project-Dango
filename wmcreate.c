@@ -1,8 +1,14 @@
 #include "tools.h"
 
+extern const wchar_t NETWORKTAB_CLASS[];// = L"Classe";
+
 extern HWND hwndmain;
 extern HWND hwndsearch;
 extern HWND hwndsettings;
+
+char providers[6][16] = {
+    PROVIDER1, PROVIDER2, "", "", "", ""
+};
 
 //janela principal
 HWND hbutton;            
@@ -78,6 +84,19 @@ void createUtils() {
     );
 
     hbrush = CreateSolidBrush(RGB(255, 255, 0));
+
+    /*OSVERSIONINFO winvista;
+
+    winvista.dwMajorVersion = 6;
+    winvista.dwMinorVersion = 0;
+
+    int test = VerifyVersionInfo(&winvista, VER_MAJORVERSION | VER_MINORVERSION, VER_EQUAL);
+
+    if (test)
+        MessageBox(NULL, "Windows 7", "Info", MB_ICONINFORMATION);
+    else
+        MessageBox(NULL, "Other Windows version", "Info", MB_ICONINFORMATION);*/
+    
 
 }
 
@@ -192,7 +211,7 @@ int searchWindow(HWND hwnd) {
         10, 10, 100, 20,
         hwnd,
         (HMENU)1,
-        (HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE),
+        (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE),
         NULL
     );
 
@@ -210,7 +229,7 @@ int searchWindow(HWND hwnd) {
         130, 10, 250, 20,
         hwnd,
         IDW_SEARCH_EDIT_SEARCH,
-        (HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE),
+        (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE),
         NULL
     );
 
@@ -221,7 +240,7 @@ int searchWindow(HWND hwnd) {
         200, 90, 70, 20,
         hwnd,
         IDW_SEARCH_BUTTON_SEARCH,
-        (HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE),
+        (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE),
         NULL
     );
 
@@ -234,7 +253,7 @@ int searchWindow(HWND hwnd) {
         120, 90, 70, 20,
         hwnd,
         IDW_SEARCH_BUTTON_CANCEL,
-        (HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE),
+        (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE),
         NULL
     );
 
@@ -242,91 +261,6 @@ int searchWindow(HWND hwnd) {
 
 }
 
-int settingsWindow(HWND hwnd) {
-
-    INITCOMMONCONTROLSEX icex;
-    TCITEM tcnetwork, tcprovider, tclang;
-
-    tcnetwork.mask = TCIF_TEXT;
-    tcnetwork.pszText = "Network";
-
-    tcprovider.mask = TCIF_TEXT;
-    tcprovider.pszText = "Provider";
-
-    tclang.mask = TCIF_TEXT;
-    tclang.pszText = "Language";
-
-    icex.dwICC = ICC_TAB_CLASSES;
-    icex.dwSize = sizeof(INITCOMMONCONTROLSEX);
-
-    InitCommonControlsEx(&icex);
-
-    htabtest = CreateWindowEx(
-        0,
-        WC_TABCONTROL,
-        TEXT(""),
-        WS_CHILD | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_VISIBLE,
-        7, 0, 380, 190,
-        hwnd,
-        NULL,
-        (HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE),
-        NULL
-    );
-
-    if (htabtest == NULL) {
-        MessageBox(NULL, "Não funcionou", "Error", MB_ICONERROR);
-        printf("Erro: %lu", GetLastError());
-    }
-
-    /*if (htabtest == NULL) {
-        MessageBox(NULL, "Não funcionou", "Error", MB_ICONERROR);
-        printf("Erro: %lu", GetLastError());
-    }*/
-
-    TabCtrl_InsertItem(htabtest, 0, &tcnetwork);
-    TabCtrl_InsertItem(htabtest, 1, &tcprovider);
-    TabCtrl_InsertItem(htabtest, 2, &tclang);
-    
-    hokbutton = CreateWindow(
-        TEXT("BUTTON"),
-        TEXT("OK"),
-        WS_TABSTOP | WS_CHILD | BS_DEFPUSHBUTTON | WS_VISIBLE,
-        155, 195, 70, 20,
-        hwnd,
-        IDW_SETTINGS_BUTTON_OK,
-        (HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE),
-        NULL
-    );
-
-    hcancelbutton = CreateWindow(
-        TEXT("BUTTON"),
-        TEXT("Cancel"),
-        WS_TABSTOP | WS_CHILD | BS_DEFPUSHBUTTON | WS_VISIBLE,
-        235, 195, 70, 20,
-        hwnd,
-        IDW_SETTINGS_BUTTON_CANCEL,
-        (HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE),
-        NULL
-    );
-
-    happlybutton = CreateWindow(
-        TEXT("BUTTON"),
-        TEXT("Apply"),
-        WS_TABSTOP | WS_CHILD | BS_DEFPUSHBUTTON | WS_VISIBLE,
-        315, 195, 70, 20,
-        hwnd,
-        IDW_SETTINGS_BUTTON_APPLY,
-        (HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE),
-        NULL
-    );
-
-    
-    
-    
-    
-    
-    
-}
 
 BOOL hideSearch() {
     ShowWindow(hwndsearch, SW_HIDE);
@@ -430,30 +364,110 @@ BOOL hideSettings() {
     return FALSE;
 }
 
-int networkTab(HWND hwnd) {
+
+int settingsWindow(HWND hwnd) {
+
+    htabtest = CreateWindowEx(
+        0,
+        WC_TABCONTROL,
+        "",
+        WS_CHILDWINDOW | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_VISIBLE,
+        7, 0, 380, 190,
+        hwnd,
+        (HMENU)990,
+        GetModuleHandle(NULL),
+        //hinstance,
+        NULL
+    );
+
+    if (htabtest == NULL) {
+        MessageBox(NULL, "Não funcionou", "Error", MB_ICONERROR);
+        printf("Erro: %lu", GetLastError());
+    }
+
+
+    INITCOMMONCONTROLSEX icex;
+    TCITEM tcnetwork, tcprovider, tclang;
+
+    tcnetwork.mask = TCIF_TEXT;
+    tcnetwork.pszText = "Network";
+
+    tcprovider.mask = TCIF_TEXT;
+    tcprovider.pszText = "Provider";
+
+    tclang.mask = TCIF_TEXT;
+    tclang.pszText = "Language";
+
+    icex.dwICC = ICC_TAB_CLASSES;
+    icex.dwSize = sizeof(INITCOMMONCONTROLSEX);
+
+    InitCommonControlsEx(&icex);
+
+    TabCtrl_InsertItem(htabtest, 0, &tcnetwork);
+    TabCtrl_InsertItem(htabtest, 1, &tcprovider);
+    TabCtrl_InsertItem(htabtest, 2, &tclang);
+    
+    hokbutton = CreateWindow(
+        TEXT("BUTTON"),
+        TEXT("OK"),
+        WS_TABSTOP | WS_CHILD | BS_DEFPUSHBUTTON | WS_VISIBLE,
+        155, 195, 70, 20,
+        hwnd,
+        IDW_SETTINGS_BUTTON_OK,
+        (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE),
+        NULL
+    );
+
+    hcancelbutton = CreateWindow(
+        TEXT("BUTTON"),
+        TEXT("Cancel"),
+        WS_TABSTOP | WS_CHILD | WS_VISIBLE,
+        235, 195, 70, 20,
+        hwnd,
+        IDW_SETTINGS_BUTTON_CANCEL,
+        (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE),
+        NULL
+    );
+
+    happlybutton = CreateWindow(
+        TEXT("BUTTON"),
+        TEXT("Apply"),
+        WS_TABSTOP | WS_CHILD | WS_VISIBLE,
+        315, 195, 70, 20,
+        hwnd,
+        IDW_SETTINGS_BUTTON_APPLY,
+        (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE),
+        NULL
+    );
 
     
+    
+    
+    
+    
+}
 
-    hproviderlist = CreateWindow(
-        TEXT("COMBOBOX"),
+int networkTab(HWND hwnd) {
+    hproviderlist = CreateWindowEx(
+        0,
+        WC_COMBOBOX,
         NULL,
         CBS_DROPDOWNLIST | CBS_HASSTRINGS | WS_CHILD | WS_OVERLAPPED | WS_VISIBLE,
         25, 25, 150, 200,
         hwnd,
         IDW_SETTINGS_COMBOBOX_PROVIDERLIST,
-        (HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE),
+        (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE),
         NULL
     );
 
-    char providers[6][16] = {
-        PROVIDER1, PROVIDER2, "", "", "", ""
-    };
+    SendMessage(hproviderlist, (UINT)CB_ADDSTRING, (WPARAM)0, (LPARAM)providers[0]);
+    SendMessage(hproviderlist, (UINT)CB_ADDSTRING, (WPARAM)0, (LPARAM)providers[1]);
 
-    for (int i = 0; i < 6; i++) {
+    /*for (int i = 0; i < 6; i++) {
         SendMessage(hproviderlist, (UINT)CB_ADDSTRING, (WPARAM)0, (LPARAM)providers[i]);
         printf("%s\n", providers[i]);
         
         if (!strcmp(providers[i], provider)) 
             SendMessage(hproviderlist, CB_SETCURSEL, (WPARAM)i, (LPARAM)0);
-    }
+    }*/
 }

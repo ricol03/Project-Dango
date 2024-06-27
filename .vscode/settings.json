@@ -22,6 +22,17 @@
         "process.h": "c",
         "mferror.h": "c",
         "dshow.h": "c",
-        "windowsx.h": "c"
+        "windowsx.h": "c",
+        "stdio.h": "c",
+        "wmcreate.h": "c",
+        "wininet.h": "c",
+        "connections_prexp.h": "c",
+        "lang_en.h": "c",
+        "file.h": "c",
+        "specstrings.h": "c",
+        "_mingw_unicode.h": "c",
+        "pshpack4.h": "c",
+        "const.h": "c",
+        "main.h": "c"
     }
 }
