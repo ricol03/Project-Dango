@@ -645,15 +645,64 @@ LRESULT CALLBACK NetworkTabProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM 
 
         case WM_COMMAND: {
             switch (LOWORD(wparam)) {
-                case IDW_NETWORK_CHECKBOX_PORT:
-                    if (IsDlgButtonChecked(hwnd, IDW_NETWORK_CHECKBOX_PORT)) {
-                        MessageBox(NULL, "a", "b", MB_ICONASTERISK);
-                        SendMessage(hprotocolcheck, BM_SETCHECK, BST_CHECKED, 0);
-                    } else {
-                        SendMessage(hprotocolcheck, BM_SETCHECK, BST_UNCHECKED, 0);
+                case IDW_NETWORK_CHECKBOX_PORT: {
+                    switch (HIWORD(wparam)) {
+                        case BN_CLICKED: {
+                            if (SendDlgItemMessage(hwnd, IDW_NETWORK_CHECKBOX_PORT, BM_GETCHECK, 0, 0) == 0) {
+                                SendDlgItemMessage(hwnd, IDW_NETWORK_CHECKBOX_PORT, BM_SETCHECK, 1, 0);
+                                EnableWindow(GetDlgItem(hwnd, IDW_NETWORK_EDIT_PORT), FALSE);
+                            } else {
+                                SendDlgItemMessage(hwnd, IDW_NETWORK_CHECKBOX_PORT, BM_SETCHECK, 0, 0);
+                                EnableWindow(GetDlgItem(hwnd, IDW_NETWORK_EDIT_PORT), TRUE);
+                            }
+                            break;
+                        }
+                        default:
+                            break;
+                        
                     }
-                    
                     break;
+                }
+                
+                case IDW_NETWORK_RADIO_HTTP: {
+                    switch(HIWORD(lparam)) {
+                        case BN_CLICKED: {
+                            if (SendDlgItemMessage(hwnd, IDW_NETWORK_RADIO_HTTP, BM_GETCHECK, 0, 0) == 0) {
+                                SendDlgItemMessage(hwnd, IDW_NETWORK_RADIO_HTTP, BM_SETCHECK, 1, 0);
+                                SendDlgItemMessage(hwnd, IDW_NETWORK_RADIO_HTTPS, BM_SETCHECK, 0, 0);
+                            }
+                        }  
+                    }
+                    break;
+                }
+
+                case IDW_NETWORK_RADIO_HTTPS: {
+                    switch(HIWORD(lparam)) {
+                        case BN_CLICKED: {
+                            if (SendDlgItemMessage(hwnd, IDW_NETWORK_RADIO_HTTPS, BM_GETCHECK, 0, 0) == 0) {
+                                SendDlgItemMessage(hwnd, IDW_NETWORK_RADIO_HTTPS, BM_SETCHECK, 1, 0);
+                                SendDlgItemMessage(hwnd, IDW_NETWORK_RADIO_HTTP, BM_SETCHECK, 0, 0);
+                            }
+                        }  
+                    }
+                    break;
+                }
+
+                /*case IDW_NETWORK_CHECKBOX_PORT: {
+                    switch (HIWORD(lparam))
+                    {
+                    case BN_CLICKED:
+                        if (SendDlgItemMessage(hwnd, IDW_NETWORK_CHECKBOX_PORT, BM_GETCHECK, 0, 0) == 0) {
+
+                        } else {
+
+                        }
+                        break;
+                    
+                    default:
+                        break;
+                    }
+                }*/
                 
                 default:
                     break;

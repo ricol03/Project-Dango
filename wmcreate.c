@@ -63,6 +63,8 @@ trendinganimeinfo shows[12];
 
 extern char provider[32];
 extern char server[32];
+extern char protocol[6];
+extern char port[6];
 
 void createUtils() {
     htitlefont = CreateFont(
@@ -483,7 +485,7 @@ int networkTab(HWND hwnd) {
         BS_AUTORADIOBUTTON | WS_GROUP | WS_CHILD | WS_VISIBLE,
         125, 60, 70, 20,
         hwnd,
-        (HMENU)940,
+        (HMENU)IDW_NETWORK_RADIO_HTTP,
         (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE),
         NULL
     );
@@ -494,7 +496,7 @@ int networkTab(HWND hwnd) {
         BS_AUTORADIOBUTTON | WS_CHILD | WS_VISIBLE,
         205, 60, 70, 20,
         hwnd,
-        (HMENU)939,
+        (HMENU)IDW_NETWORK_RADIO_HTTPS,
         (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE),
         NULL
     );
@@ -517,7 +519,7 @@ int networkTab(HWND hwnd) {
         WS_TABSTOP | WS_CHILD | ES_WANTRETURN | WS_VISIBLE,
         125, 100, 55, 20,
         hwnd,
-        (HMENU)947,
+        (HMENU)IDW_NETWORK_EDIT_PORT,
         (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE),
         NULL
     );
@@ -528,10 +530,33 @@ int networkTab(HWND hwnd) {
         BS_CHECKBOX | WS_CHILD | WS_VISIBLE,
         195, 100, 135, 20,
         hwnd,
-        (HMENU)939,
+        (HMENU)IDW_NETWORK_CHECKBOX_PORT,
         (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE),
         NULL
     );
+
+    printf("chegou aqui");
+
+    //sets the enabled radio button
+    if (!strcmp(protocol, "HTTP")) {
+        SendDlgItemMessage(hwnd, IDW_NETWORK_RADIO_HTTP, BM_SETCHECK, 1, 0);
+        SendDlgItemMessage(hwnd, IDW_NETWORK_RADIO_HTTPS, BM_SETCHECK, 0, 0);
+        printf("e aqui");
+    } else if (!strcmp(protocol, "HTTPS")) {
+        SendDlgItemMessage(hwnd, IDW_NETWORK_RADIO_HTTPS, BM_SETCHECK, 1, 0);
+        SendDlgItemMessage(hwnd, IDW_NETWORK_RADIO_HTTP, BM_SETCHECK, 0, 0);
+        printf("e aqui2");
+    }
+
+    if ((!strcmp(port, "443") && !strcmp(protocol, "HTTPS")) || (!strcmp(port, "80") && !strcmp(protocol, "HTTP"))) {
+        SendDlgItemMessage(hwnd, IDW_NETWORK_CHECKBOX_PORT, BM_SETCHECK, 1, 0);
+        SetWindowText(hportbox, port);
+        EnableWindow(GetDlgItem(hwnd, IDW_NETWORK_EDIT_PORT), FALSE);
+    } else
+        SetWindowText(hportbox, port);
+    
+
+    printf("saiu daqui");
 }
 
 int providerTab(HWND hwnd) {

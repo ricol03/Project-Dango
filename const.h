@@ -70,6 +70,7 @@
 #define IDW_SEARCH_LISTBOX_EPISODELIST      304
 
 #define IDW_SEARCH_EDIT_SEARCH              402
+#define IDW_NETWORK_EDIT_PORT               444
 
 #define IDW_NETWORK_CHECKBOX_PORT           500
 
