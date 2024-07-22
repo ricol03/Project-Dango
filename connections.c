@@ -1,6 +1,10 @@
 #include "tools.h"
 #include "connections.h"
 
+extern char server[32];
+
+#define SERVERADDRESS server
+
 //para este tipo de dados precisamos sempre de alocar memória
 LPSTR requestedquery = NULL;
 LPSTR requestedquery2 = NULL;
@@ -145,6 +149,16 @@ void parseRequestText2(char * uri, char * query) {
     mbstowcs((wchar_t*) requestedquery2, buffer, strlen(buffer) + 1);
 }
 
+LPSTR serverAddressInitializer() {
+    LPSTR servernew = NULL;
+
+    servernew = (LPSTR)malloc((strlen(server) + 1) * sizeof(wchar_t));
+
+    MultiByteToWideChar(CP_ACP, 0, server, -1, servernew, strlen(server)+1);
+
+    return servernew;
+}
+
 /**********************************************************/
 
 int searchConnection(HWND hwnd, char * query, result results[]) {
@@ -162,10 +176,15 @@ int searchConnection(HWND hwnd, char * query, result results[]) {
     DWORD dwprotocols = WINHTTP_FLAG_SECURE_PROTOCOL_TLS1_2;
     WinHttpSetOption(hsession, WINHTTP_OPTION_SECURE_PROTOCOLS, &dwprotocols, sizeof(dwprotocols));
 
+    LPSTR servernew = serverAddressInitializer();
+
     //Estabelece contacto com o domínio especificado
-    HINTERNET hconnect = WinHttpConnect(hsession, L"consumet-one-sigma.vercel.app", INTERNET_DEFAULT_PORT, 0);
+    HINTERNET hconnect = WinHttpConnect(hsession, servernew, INTERNET_DEFAULT_PORT, 0);
     if (hconnect == NULL) {
         MessageBox(hwnd, "WinHttpConnect failed!", "Error", MB_ICONERROR);
+        MessageBox(hwnd, SERVERADDRESS, "Error", MB_ICONERROR);
+        MessageBox(hwnd, servernew, "Error", MB_ICONERROR);
+        MessageBox(hwnd, requestedquery, "INFO", MB_ICONINFORMATION);
         return 0;
     }
 
@@ -203,8 +222,10 @@ int episodesConnection(HWND hwnd, char * resultid, episode episodes[]) {
 
     DWORD dwprotocols = WINHTTP_FLAG_SECURE_PROTOCOL_TLS1_2;
     WinHttpSetOption(hsession2, WINHTTP_OPTION_SECURE_PROTOCOLS, &dwprotocols, sizeof(dwprotocols));
+
+    LPSTR servernew = serverAddressInitializer();
     
-    HINTERNET hconnect2 = WinHttpConnect(hsession2, L"consumet-one-sigma.vercel.app", INTERNET_DEFAULT_PORT, 0);
+    HINTERNET hconnect2 = WinHttpConnect(hsession2, servernew, INTERNET_DEFAULT_PORT, 0);
     if (hconnect2 == NULL) {
         MessageBox(hwnd, "WinHttpConnect failed!", "Error", MB_ICONERROR);
         printf("\n %lu", GetLastError());
@@ -244,8 +265,10 @@ int epnumConnection(HWND hwnd, char * resultid) {
     DWORD dwprotocols = WINHTTP_FLAG_SECURE_PROTOCOL_TLS1_2;
     WinHttpSetOption(hsession, WINHTTP_OPTION_SECURE_PROTOCOLS, &dwprotocols, sizeof(dwprotocols));
 
+    LPSTR servernew = serverAddressInitializer();
+
     //Estabelece contacto com o domínio especificado
-    HINTERNET hconnect = WinHttpConnect(hsession, L"consumet-one-sigma.vercel.app", INTERNET_DEFAULT_PORT, 0);
+    HINTERNET hconnect = WinHttpConnect(hsession, servernew, INTERNET_DEFAULT_PORT, 0);
     if (hconnect == NULL) {
         MessageBox(hwnd, "WinHttpConnect failed!", "Error", MB_ICONERROR);
         return 0;
@@ -286,7 +309,9 @@ char * eplinkConnection(HWND hwnd, char * epid) {
     DWORD dwprotocols = WINHTTP_FLAG_SECURE_PROTOCOL_TLS1_2;
     WinHttpSetOption(hsession2, WINHTTP_OPTION_SECURE_PROTOCOLS, &dwprotocols, sizeof(dwprotocols));
     
-    HINTERNET hconnect2 = WinHttpConnect(hsession2, L"consumet-one-sigma.vercel.app", INTERNET_DEFAULT_PORT, 0);
+    LPSTR servernew = serverAddressInitializer();
+
+    HINTERNET hconnect2 = WinHttpConnect(hsession2, servernew, INTERNET_DEFAULT_PORT, 0);
     if (hconnect2 == NULL) {
         MessageBox(hwnd, "WinHttpConnect failed!", "Error", MB_ICONERROR);
         printf("\n %lu", GetLastError());
@@ -323,8 +348,10 @@ int getinfoConnection(HWND hwnd, trendinganimeinfo shows[]) {
 
     DWORD dwprotocols = WINHTTP_FLAG_SECURE_PROTOCOL_TLS1_2;
     WinHttpSetOption(hsession2, WINHTTP_OPTION_SECURE_PROTOCOLS, &dwprotocols, sizeof(dwprotocols));
+
+    LPSTR servernew = serverAddressInitializer();
     
-    HINTERNET hconnect2 = WinHttpConnect(hsession2, L"consumet-one-sigma.vercel.app", INTERNET_DEFAULT_PORT, 0);
+    HINTERNET hconnect2 = WinHttpConnect(hsession2, servernew, INTERNET_DEFAULT_PORT, 0);
     if (hconnect2 == NULL) {
         MessageBox(hwnd, "WinHttpConnect failed!", "Error", MB_ICONERROR);
         printf("\n %lu", GetLastError());

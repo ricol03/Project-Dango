@@ -1,8 +1,8 @@
 #define NO_DSHOW_STRSAFE
 
 #ifdef _WIN32_WINNT_WIN2K
-#include "connections_prexp.h"
-#include <wininet.h>
+//#include "connections_prexp.h"
+//#include <wininet.h>
 #else
 #include "connections.h"
 #include <winhttp.h>

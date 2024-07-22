@@ -11,6 +11,7 @@
                 "${fileDirname}\\**.h",
                 "-o",
                 "${fileDirname}\\${fileBasenameNoExtension}.exe",
+                "resources.o",
                 "-lwsock32",
                 "-lwinhttp",
                 "-lwininet",

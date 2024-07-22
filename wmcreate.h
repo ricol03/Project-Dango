@@ -38,5 +38,8 @@ BOOL hideSettings();
 
 int settingsWindow(HWND hwnd);
 int networkTab(HWND hwnd);
+int providerTab(HWND hwnd);
+int updateNotice();
+int languageTab(HWND hwnd);
 
 #endif

@@ -17,9 +17,9 @@
 
 const wchar_t MAIN_CLASS[]          = L"MainWndClass";
 const wchar_t SEARCH_CLASS[]        = L"SearchWndClass";
-const wchar_t SETTINGS_CLASS[]      = L"TEST";
+const wchar_t SETTINGS_CLASS[]      = L"idkwhyicantputanormalname";
 
-const wchar_t NETWORKTAB_CLASS[]    = L"Cancro";
+const wchar_t NETWORKTAB_CLASS[]    = L"NetTabWndClass";
 const wchar_t PROVIDERTAB_CLASS[]   = L"ProviderTabWndClass";
 const wchar_t LANGTAB_CLASS[]       = L"LangTabWndClass";
 
@@ -40,10 +40,11 @@ extern HWND hsearchbutton;
 extern HBRUSH hbrush;
 
 //controlos das definições
-HWND hokbutton, hcancelbutton, happlybutton;
-HWND hproviderlist;
-HWND htabtest;
-HWND hwndnetworktab, hwndprovidertab, hwndlangtab;
+extern HWND hokbutton, hcancelbutton, happlybutton;
+extern HWND hproviderlist;
+extern HWND htabtest;
+extern HWND hwndnetworktab, hwndprovidertab, hwndlangtab;
+extern HWND hprotocolcheck;
 
 //controlos dos resultados de pesquisa
 extern HWND hshowlistbox, heplistbox;
@@ -65,9 +66,7 @@ extern result results[];
 extern episode episodes[];
 extern trendinganimeinfo shows[];
 
-HINSTANCE hinstance;
-
-HWND hproviderlist;
+extern HWND hproviderlist;
 
 int number;
 
@@ -79,21 +78,9 @@ typedef struct stbInfo {
 } stbInfo;
 
 extern char provider[32];
-
-LRESULT CALLBACK MainWindowProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam);
-LRESULT SearchWindowProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam);
-LRESULT CALLBACK SettingsWndProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam);
-LRESULT CALLBACK NetworkTabProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam);
-LRESULT ProviderTabProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam);
-LRESULT LangTabProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam);
-
-void showNetworkTab();
-void showProviderTab();
+extern char lang[5];
 
 int WINAPI WinMain(HINSTANCE hinstance, HINSTANCE hprevinstance, PSTR lpcmdline, int nshowcmd) {
-
-    //Make sure this is here so you can use XP Styles
-    InitCommonControls();
 
     #pragma region MainWindow
     WNDCLASS mainwindowclass = { 0 };
@@ -132,6 +119,7 @@ int WINAPI WinMain(HINSTANCE hinstance, HINSTANCE hprevinstance, PSTR lpcmdline,
     searchwindowclass.lpfnWndProc      = SearchWindowProc;
     searchwindowclass.hInstance        = hinstance;
     searchwindowclass.lpszClassName    = (LPCSTR)SEARCH_CLASS;
+    searchwindowclass.hIcon            = NULL;
 
     RegisterClass(&searchwindowclass);
 
@@ -161,30 +149,9 @@ int WINAPI WinMain(HINSTANCE hinstance, HINSTANCE hprevinstance, PSTR lpcmdline,
     settingswindowclass.lpfnWndProc     = SettingsWndProc; 
     settingswindowclass.hInstance       = hinstance;
     settingswindowclass.lpszClassName   = SETTINGS_CLASS;
+    settingswindowclass.hIcon           = NULL;
 
     RegisterClass(&settingswindowclass);
-
-    hwndsettings = CreateWindowEx(
-        0,
-        SETTINGS_CLASS,
-        "Settings",
-        WS_CAPTION | WS_SYSMENU,
-        CW_USEDEFAULT, CW_USEDEFAULT, SETTINGSWINDOWWIDTH, SETTINGSWINDOWHEIGHT,
-        NULL,
-        NULL,
-        hinstance,
-        NULL
-    );
-
-    if (hwndsettings == NULL) {
-        MessageBoxW(NULL, L"Unable to create settings window",
-                     L"Error", MB_ICONERROR | MB_OK);
-        return 0;
-    }
-
-
-    
-    
 
     #pragma endregion
     
@@ -203,7 +170,74 @@ int WINAPI WinMain(HINSTANCE hinstance, HINSTANCE hprevinstance, PSTR lpcmdline,
         printf("Erro: %lu", GetLastError());
     }
 
-    
+    //provider tab
+    WNDCLASS providertabclass = { 0 };
+
+    providertabclass.style            = CS_OWNDC;
+    providertabclass.lpfnWndProc      = ProviderTabProc;
+    providertabclass.hInstance        = hinstance;
+    providertabclass.lpszClassName    = (LPCSTR)PROVIDERTAB_CLASS;
+
+    RegisterClass(&providertabclass);
+
+    //language tab
+    WNDCLASS languagetabclass = { 0 };
+
+    languagetabclass.style            = CS_OWNDC;
+    languagetabclass.lpfnWndProc      = LangTabProc;
+    languagetabclass.hInstance        = hinstance;
+    languagetabclass.lpszClassName    = (LPCSTR)LANGTAB_CLASS;
+
+    RegisterClass(&languagetabclass);
+
+    #pragma endregion
+
+    settingstoggled = createSettingsWindow(hinstance);
+
+    //initializeTheming();
+
+    MSG msg = { 0 };
+
+    while (GetMessage(&msg, NULL, 0, 0)) {
+        TranslateMessage(&msg);
+        DispatchMessage(&msg);
+    } 
+
+    return 0;
+}
+
+int createSettingsWindow(HINSTANCE hinstance) {
+    if (settingstoggled) {
+        return 1;
+    } else {
+        hwndsettings = CreateWindowEx(
+            0,
+            SETTINGS_CLASS,
+            "Settings",
+            WS_CAPTION,
+            CW_USEDEFAULT, CW_USEDEFAULT, SETTINGSWINDOWWIDTH, SETTINGSWINDOWHEIGHT,
+            NULL,
+            NULL,
+            hinstance,
+            NULL
+        );
+
+        if (hwndsettings == NULL) {
+            MessageBoxW(NULL, L"Unable to create settings window",
+                        L"Error", MB_ICONERROR | MB_OK);
+            return 0;
+        } else {
+            createNetworkTab();
+            createProviderTab();
+            createLanguageTab();
+
+            return 1;
+        }
+            
+    }
+}
+
+int createNetworkTab() {
     RECT rect;
     GetClientRect(htabtest, &rect);
 
@@ -216,7 +250,8 @@ int WINAPI WinMain(HINSTANCE hinstance, HINSTANCE hprevinstance, PSTR lpcmdline,
         //0, 0, 100, 100,
         htabtest,
         (HMENU)989,
-        (HINSTANCE)GetWindowLong(htabtest, GWL_HINSTANCE),
+        //(HINSTANCE)GetWindowLong(htabtest, GWL_HINSTANCE),
+        GetModuleHandle(NULL),
         //hinstance,
         NULL
     );
@@ -226,24 +261,18 @@ int WINAPI WinMain(HINSTANCE hinstance, HINSTANCE hprevinstance, PSTR lpcmdline,
         printf("Erro: %lu", GetLastError());
         //printf("%s", NETWORKTAB_CLASS);
     }
+}
 
-
-    //provider tab
-    WNDCLASS providertabclass = { 0 };
-
-    providertabclass.style            = CS_OWNDC;
-    providertabclass.lpfnWndProc      = ProviderTabProc;
-    providertabclass.hInstance        = hinstance;
-    providertabclass.lpszClassName    = (LPCSTR)PROVIDERTAB_CLASS;
-
-    RegisterClass(&providertabclass);
+int createProviderTab() {
+    RECT rect;
+    GetClientRect(htabtest, &rect);
 
     hwndprovidertab = CreateWindowEx(
         0,
         (LPCSTR)PROVIDERTAB_CLASS,
         NULL,
         WS_CHILDWINDOW,
-        rect.left, rect.top+23, rect.right - rect.left, rect.bottom - rect.top,
+        rect.left + 5, rect.top+33, rect.right - rect.left - 15, rect.bottom - rect.top - 60,
         //0, 0, 100, 100,
         htabtest,
         (HMENU)988,
@@ -253,27 +282,22 @@ int WINAPI WinMain(HINSTANCE hinstance, HINSTANCE hprevinstance, PSTR lpcmdline,
     );
     
     if (hwndprovidertab == NULL) {
-        MessageBox(NULL, "Não funcionou (network tab)", "Error", MB_ICONERROR);
+        MessageBox(NULL, "Não funcionou (provider tab)", "Error", MB_ICONERROR);
         printf("Erro: %lu", GetLastError());
         //printf("%s", NETWORKTAB_CLASS);
     }
+}
 
-    //language tab
-    WNDCLASS languagetabclass = { 0 };
+int createLanguageTab() {
+    RECT rect;
+    GetClientRect(htabtest, &rect);
 
-    languagetabclass.style            = CS_OWNDC;
-    languagetabclass.lpfnWndProc      = LangTabProc;
-    languagetabclass.hInstance        = hinstance;
-    languagetabclass.lpszClassName    = (LPCSTR)LANGTAB_CLASS;
-
-    RegisterClass(&languagetabclass);
-
-    /*hwndprovidertab = CreateWindowEx(
+    hwndlangtab = CreateWindowEx(
         0,
         (LPCSTR)LANGTAB_CLASS,
         NULL,
         WS_CHILDWINDOW,
-        rect.left, rect.top+23, rect.right - rect.left, rect.bottom - rect.top,
+        rect.left + 5, rect.top+33, rect.right - rect.left - 15, rect.bottom - rect.top - 60,
         //0, 0, 100, 100,
         htabtest,
         (HMENU)987,
@@ -282,22 +306,11 @@ int WINAPI WinMain(HINSTANCE hinstance, HINSTANCE hprevinstance, PSTR lpcmdline,
         NULL
     );
     
-    if (hwndprovidertab == NULL) {
-        MessageBox(NULL, "Não funcionou (network tab)", "Error", MB_ICONERROR);
+    if (hwndlangtab == NULL) {
+        MessageBox(NULL, "Não funcionou (language tab)", "Error", MB_ICONERROR);
         printf("Erro: %lu", GetLastError());
         //printf("%s", NETWORKTAB_CLASS);
-    }*/
-
-    #pragma endregion
-
-    MSG msg = { 0 };
-
-    while (GetMessage(&msg, NULL, 0, 0)) {
-        TranslateMessage(&msg);
-        DispatchMessage(&msg);
-    } 
-
-    return 0;
+    }
 }
 
 LRESULT CALLBACK MainWindowProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam) {
@@ -486,7 +499,7 @@ void videoWindowWrapper(void* data) {
     videoWindowMain(hvidwindow, GetModuleHandle(NULL));
 }
 
-LRESULT SearchWindowProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam) {
+LRESULT CALLBACK SearchWindowProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam) {
     switch (message) {
         case WM_CREATE:
             searchWindow(hwnd);
@@ -580,6 +593,10 @@ LRESULT CALLBACK SettingsWndProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM
                         case 1:
                             showProviderTab();
                             break;
+
+                        case 2:
+                            showLanguageTab();
+                            break;
                         
                         default:
                             break;
@@ -616,6 +633,9 @@ LRESULT CALLBACK SettingsWndProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM
 }
 
 LRESULT CALLBACK NetworkTabProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam) {
+
+    HDC hdc;
+
     switch (message) {
         case WM_CREATE: {
             networkTab(hwnd);
@@ -624,16 +644,35 @@ LRESULT CALLBACK NetworkTabProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM 
         return 0;
 
         case WM_COMMAND: {
-            
+            switch (LOWORD(wparam)) {
+                case IDW_NETWORK_CHECKBOX_PORT:
+                    if (IsDlgButtonChecked(hwnd, IDW_NETWORK_CHECKBOX_PORT)) {
+                        MessageBox(NULL, "a", "b", MB_ICONASTERISK);
+                        SendMessage(hprotocolcheck, BM_SETCHECK, BST_CHECKED, 0);
+                    } else {
+                        SendMessage(hprotocolcheck, BM_SETCHECK, BST_UNCHECKED, 0);
+                    }
+                    
+                    break;
+                
+                default:
+                    break;
+            }
         }
         
         case WM_PAINT: {
             HDC hdc = BeginPaint(hwnd, &ps);
 
-            FillRect(hdc, &ps.rcPaint, (HBRUSH) ((COLOR_3DFACE+1)));
+            FillRect(hdc, &ps.rcPaint, (HBRUSH) ((GetSysColor(COLOR_WINDOW)+1)));
 
             EndPaint(hwnd, &ps);
         }
+        return 0;
+
+        case WM_CTLCOLORSTATIC:
+        case WM_CTLCOLORDLG:
+            EnumChildWindows(hwnd, SetBackgroundColorProc, (LPARAM)hdc);
+
         return 0;
 
         default:
@@ -641,7 +680,10 @@ LRESULT CALLBACK NetworkTabProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM 
     }
 }
 
-LRESULT ProviderTabProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam) {
+LRESULT CALLBACK ProviderTabProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam) {
+    
+    HDC hdc;
+    
     switch (message) {
         case WM_CREATE: {
             providerTab(hwnd);
@@ -653,18 +695,28 @@ LRESULT ProviderTabProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam) 
             if (HIWORD(wparam) == CBN_SELCHANGE) {
                 int index = SendMessage((HWND)lparam, (UINT)CB_GETCURSEL, (WPARAM)0, (LPARAM)0);
                 SendMessage((HWND)lparam, (UINT)CB_GETLBTEXT, (WPARAM)index, (LPARAM)provider);
+
+                printf("deu isto zeca: %s", provider);
+
+                updateNotice();
                 
                 break;
             }
         }
         
         case WM_PAINT: {
-            HDC hdc = BeginPaint(hwnd, &ps);
+            hdc = BeginPaint(hwnd, &ps);
 
-            FillRect(hdc, &ps.rcPaint, (HBRUSH) ((COLOR_3DFACE+1)));
+            FillRect(hdc, &ps.rcPaint, (HBRUSH) ((GetSysColor(COLOR_WINDOW)+1)));
 
             EndPaint(hwnd, &ps);
         }
+        return 0;
+
+        case WM_CTLCOLORSTATIC:
+        case WM_CTLCOLORDLG:
+            EnumChildWindows(hwnd, SetBackgroundColorProc, (LPARAM)hdc);
+
         return 0;
 
         default:
@@ -672,22 +724,96 @@ LRESULT ProviderTabProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam) 
     }
 }
 
-LRESULT LangTabProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam) {
-    return DefWindowProc(hwnd, message, wparam, lparam);
+LRESULT CALLBACK LangTabProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam) {
+
+    HDC hdc;
+
+    switch (message) {
+        case WM_CREATE: {
+            languageTab(hwnd);
+            EnumChildWindows(hwnd, SetBackgroundColorProc, (LPARAM)hdc);
+            break;
+        }
+        return 0;
+
+        /*case WM_COMMAND: {
+            if (HIWORD(wparam) == CBN_SELCHANGE) {
+                int index = SendMessage((HWND)lparam, (UINT)CB_GETCURSEL, (WPARAM)0, (LPARAM)0);
+                SendMessage((HWND)lparam, (UINT)CB_GETLBTEXT, (WPARAM)index, (LPARAM)lang);
+
+                printf("deu isto zeca: %s", provider);
+
+                updateNotice();
+                
+                break;
+            }
+        }*/
+        
+        case WM_PAINT: {
+            hdc = BeginPaint(hwnd, &ps);
+
+            FillRect(hdc, &ps.rcPaint, (HBRUSH) ((GetSysColor(COLOR_WINDOW)+1)));
+
+            EndPaint(hwnd, &ps);
+        }
+        return 0;
+
+        case WM_CTLCOLORSTATIC:
+        case WM_CTLCOLORDLG:
+            EnumChildWindows(hwnd, SetBackgroundColorProc, (LPARAM)hdc);
+
+        return 0;
+
+        default:
+            return DefWindowProc(hwnd, message, wparam, lparam);
+    }
+}
+
+BOOL CALLBACK SetFontProc(HWND hwnd, LPARAM lparam) {
+    SendMessage(hwnd, WM_SETFONT, 0, lparam);
+    return TRUE;
+}
+
+BOOL CALLBACK SetBackgroundColorProc(HWND hwnd, LPARAM lparam) {
+    SetBkColor((HDC)lparam, GetSysColor(COLOR_WINDOW));
+    return TRUE;
+}
+
+void initializeTheming() { 
+    InitCommonControls();
+    EnumChildWindows(hwndmain, (WNDENUMPROC)SetFontProc, (LPARAM)GetStockObject(DEFAULT_GUI_FONT));
+    EnumChildWindows(hwndsettings, (WNDENUMPROC)SetFontProc, (LPARAM)GetStockObject(DEFAULT_GUI_FONT));
+    EnumChildWindows(hwndsearch, (WNDENUMPROC)SetFontProc, (LPARAM)GetStockObject(DEFAULT_GUI_FONT));
 }
 
 void showNetworkTab() {
     ShowWindow(hwndnetworktab, SW_SHOW);
     ShowWindow(hwndprovidertab, SW_HIDE);
-    //ShowWindow(hwndprovidertab, SW_HIDE);
+    ShowWindow(hwndlangtab, SW_HIDE);
     UpdateWindow(hwndnetworktab);
     UpdateWindow(hwndprovidertab);
+    UpdateWindow(hwndlangtab);
 }
 
 void showProviderTab() {
     ShowWindow(hwndnetworktab, SW_HIDE);
     ShowWindow(hwndprovidertab, SW_SHOW);
-    //ShowWindow(hwndprovidertab, SW_HIDE);
+    ShowWindow(hwndlangtab, SW_HIDE);
     UpdateWindow(hwndnetworktab);
     UpdateWindow(hwndprovidertab);
+    UpdateWindow(hwndlangtab);
 }
+
+void showLanguageTab() {
+    ShowWindow(hwndnetworktab, SW_HIDE);
+    ShowWindow(hwndprovidertab, SW_HIDE);
+    ShowWindow(hwndlangtab, SW_SHOW);
+    UpdateWindow(hwndnetworktab);
+    UpdateWindow(hwndprovidertab);
+    UpdateWindow(hwndlangtab);
+}
+
+
+
+
+

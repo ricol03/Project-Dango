@@ -15,6 +15,7 @@ char* winHttpGetResponse(HINTERNET hRequest, HINTERNET hConnect, HINTERNET hSess
 void parseRequestText(char * uri, char * query);
 LPCSTR TparseRequestText(char * uri, char * query);
 void parseRequestText2(char * uri, char * query);
+LPSTR serverAddressInitializer();
 
 int searchConnection(HWND hwnd, char * query, result results[]);
 char * TsearchConnection(HWND hwnd, char * query, result results[]);

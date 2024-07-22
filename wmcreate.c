@@ -1,7 +1,5 @@
 #include "tools.h"
 
-extern const wchar_t NETWORKTAB_CLASS[];// = L"Classe";
-
 extern HWND hwndmain;
 extern HWND hwndsearch;
 extern HWND hwndsettings;
@@ -33,9 +31,22 @@ HWND heplistbox;
 
 //settings
 HWND hokbutton, hcancelbutton, happlybutton;
-HWND hproviderlist;
 HWND htabtest;
 HWND hwndnetworktab, hwndprovidertab, hwndlangtab;
+
+//network tab child windows
+HWND hserverlabel, hprotocollabel, hportlabel;
+HWND hserverbox, hportbox;
+HWND hhttpsradio, hhttpradio;
+HWND hprotocolcheck;
+
+//provider tab child windows
+HWND hproviderlabel;
+HWND hproviderlist;
+HWND hwarningnotice;
+
+//language tab child windows
+HWND hlanglabel, hlanglist;
 
 //menu
 HMENU hmenu;             
@@ -51,6 +62,7 @@ episode episodes[100];
 trendinganimeinfo shows[12];
 
 extern char provider[32];
+extern char server[32];
 
 void createUtils() {
     htitlefont = CreateFont(
@@ -112,10 +124,7 @@ void destroyVisibleChildWindows(HWND hwndparent) {
 }
 
 int homeWindow(HWND hwnd) {
-
     destroyVisibleChildWindows(hwnd);
-
-    
 
     if (!strcmp(provider, PROVIDER1)) {
         HWND htesttext = CreateWindow(
@@ -124,7 +133,7 @@ int homeWindow(HWND hwnd) {
             WS_VISIBLE | WS_CHILD,
             250, 150, 450, 200,
             hwnd, 
-            998,
+            (HMENU)998,
             GetModuleHandle(NULL),
             NULL
         );
@@ -135,7 +144,7 @@ int homeWindow(HWND hwnd) {
             WS_TABSTOP | WS_CHILD | BS_DEFPUSHBUTTON | WS_VISIBLE,
             250, 200, 120, 30,
             hwnd,
-            ID_TEST,
+            (HMENU)ID_TEST,
             GetModuleHandle(NULL),
             NULL
         );
@@ -146,7 +155,7 @@ int homeWindow(HWND hwnd) {
             WS_VISIBLE | WS_CHILD,
             100, 100, 450, 200,
             hwnd, 
-            IDW_MAIN_LABEL_UNAVAILABLETRENDING,
+            (HMENU)IDW_MAIN_LABEL_UNAVAILABLETRENDING,
             GetModuleHandle(NULL),
             NULL
         );
@@ -163,7 +172,7 @@ int homeWindow(HWND hwnd) {
         NULL
     );
 
-    SendMessage(htext, WM_SETFONT, htitlefont, NULL);
+    SendMessage(htext, WM_SETFONT, (WPARAM)htitlefont, (LPARAM)NULL);
 
     hbutton = CreateWindow(
         TEXT("BUTTON"),
@@ -171,12 +180,12 @@ int homeWindow(HWND hwnd) {
         WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,
         400, 25, 120, 30,
         hwnd,
-        IDW_MAIN_BUTTON_SEARCH,
+        (HMENU)IDW_MAIN_BUTTON_SEARCH,
         GetModuleHandle(NULL),
         NULL
     );
 
-    SendMessage(hbutton, WM_SETFONT, hfont, NULL);
+    SendMessage(hbutton, WM_SETFONT, (WPARAM)hfont, (LPARAM)NULL);
 
     hmenu = CreateMenu();
     hsubmenufile        = CreatePopupMenu();
@@ -185,12 +194,12 @@ int homeWindow(HWND hwnd) {
     hsubmenuabout       = CreatePopupMenu();
 
     AppendMenu(hsubmenufile, MF_STRING, IDM_FILE_HOME, "Home");
-    AppendMenu(hsubmenufile, MF_SEPARATOR, NULL, NULL);
+    AppendMenu(hsubmenufile, MF_SEPARATOR, 0, NULL);
     AppendMenu(hsubmenufile, MF_STRING, IDM_FILE_CLOSE, "Exit");
     AppendMenu(hsubmenusearch, MF_STRING, IDM_SEARCH_SEARCHBOX, "Search box...");
     AppendMenu(hsubmenusettings, MF_STRING, IDM_SETTINGS_SETTINGS, "Settings");
     AppendMenu(hsubmenuabout, MF_STRING, IDM_ABOUT_HELP, "Ajuda");
-    AppendMenu(hsubmenuabout, MF_SEPARATOR, NULL, NULL);
+    AppendMenu(hsubmenuabout, MF_SEPARATOR, 0, NULL);
     AppendMenu(hsubmenuabout, MF_STRING, IDM_ABOUT_ABOUT, "Acerca de");
     AppendMenu(hmenu, MF_STRING | MF_POPUP, (UINT_PTR)hsubmenufile, "File");
     AppendMenu(hmenu, MF_STRING | MF_POPUP, (UINT_PTR)hsubmenusearch, "Search");
@@ -198,9 +207,6 @@ int homeWindow(HWND hwnd) {
     AppendMenu(hmenu, MF_STRING | MF_POPUP, (UINT_PTR)hsubmenuabout, "About");
 
     SetMenu(hwnd, hmenu);
-
-    
-
 }
 
 int searchWindow(HWND hwnd) {
@@ -220,7 +226,7 @@ int searchWindow(HWND hwnd) {
         printf("Erro do label: %lu", GetLastError());
     }
     
-    SendMessage(hsearchlabel, WM_SETFONT, hfont, NULL);
+    SendMessage(hsearchlabel, WM_SETFONT, (WPARAM)hfont, (LPARAM)NULL);
 
     hsearchbox = CreateWindow(
         TEXT("EDIT"),
@@ -228,7 +234,7 @@ int searchWindow(HWND hwnd) {
         WS_TABSTOP | WS_CHILD | WS_BORDER | WS_EX_CLIENTEDGE | ES_WANTRETURN | WS_VISIBLE,
         130, 10, 250, 20,
         hwnd,
-        IDW_SEARCH_EDIT_SEARCH,
+        (HMENU)IDW_SEARCH_EDIT_SEARCH,
         (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE),
         NULL
     );
@@ -239,12 +245,12 @@ int searchWindow(HWND hwnd) {
         WS_TABSTOP | WS_CHILD | BS_DEFPUSHBUTTON | WS_VISIBLE,
         200, 90, 70, 20,
         hwnd,
-        IDW_SEARCH_BUTTON_SEARCH,
+        (HMENU)IDW_SEARCH_BUTTON_SEARCH,
         (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE),
         NULL
     );
 
-    SendMessage(hsearchbutton, WM_SETFONT, hfont, NULL);
+    SendMessage(hsearchbutton, WM_SETFONT, (WPARAM)hfont, (LPARAM)NULL);
 
     hcancelbutton = CreateWindow(
         TEXT("BUTTON"),
@@ -252,15 +258,13 @@ int searchWindow(HWND hwnd) {
         WS_TABSTOP | WS_CHILD | BS_DEFPUSHBUTTON | WS_VISIBLE,
         120, 90, 70, 20,
         hwnd,
-        IDW_SEARCH_BUTTON_CANCEL,
+        (HMENU)IDW_SEARCH_BUTTON_CANCEL,
         (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE),
         NULL
     );
 
     return 1;
-
 }
-
 
 BOOL hideSearch() {
     ShowWindow(hwndsearch, SW_HIDE);
@@ -277,7 +281,6 @@ BOOL showSearch() {
 }
 
 int searchResults(HWND hwnd, char * query) {
-
     destroyVisibleChildWindows(hwnd);
 
     //faz a conexão à api para fazer a pesquisa, e devolve o número de resultados
@@ -290,8 +293,6 @@ int searchResults(HWND hwnd, char * query) {
         MessageBox(hwnd, "No results found or error connecting", "Error", MB_ICONERROR);
         return 0;
     }
-
-    //showSearch();
         
     hshowlistbox = CreateWindow(
         TEXT("LISTBOX"),
@@ -299,7 +300,7 @@ int searchResults(HWND hwnd, char * query) {
         WS_CHILD | WS_BORDER | LBS_STANDARD,
         10, 50, 330, 140,
         hwnd,
-        IDW_SEARCH_LISTBOX_SHOW,
+        (HMENU)IDW_SEARCH_LISTBOX_SHOW,
         GetModuleHandle(NULL),
         NULL
     );
@@ -310,7 +311,7 @@ int searchResults(HWND hwnd, char * query) {
         WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,
         350, 50, 120, 30,
         hwnd,
-        IDW_SEARCH_BUTTON_WATCH,
+        (HMENU)IDW_SEARCH_BUTTON_WATCH,
         GetModuleHandle(NULL),
         NULL
     );
@@ -321,7 +322,7 @@ int searchResults(HWND hwnd, char * query) {
         WS_CHILD | WS_BORDER | WS_VSCROLL | LBS_STANDARD,
         10, 250, 330, 140,
         hwnd,
-        IDW_SEARCH_LISTBOX_EPISODELIST,
+        (HMENU)IDW_SEARCH_LISTBOX_EPISODELIST,
         GetModuleHandle(NULL),
         NULL
     );
@@ -348,35 +349,33 @@ int searchResults(HWND hwnd, char * query) {
     }
 
     ShowWindow(heplistbox, SW_SHOWDEFAULT);
-    UpdateWindow(heplistbox);
-    
+    UpdateWindow(heplistbox);  
 }
 
 BOOL showSettings() {
+    createSettingsWindow(GetModuleHandle(NULL));
     ShowWindow(hwndsettings, SW_SHOW);
     UpdateWindow(hwndsettings);
     return TRUE;
 }
 
 BOOL hideSettings() {
-    ShowWindow(hwndsettings, SW_HIDE);
-    UpdateWindow(hwndsettings);
+    DestroyWindow(hwndsettings);
+    //ShowWindow(hwndsettings, SW_HIDE);
+    //UpdateWindow(hwndsettings);
     return FALSE;
 }
 
-
 int settingsWindow(HWND hwnd) {
-
     htabtest = CreateWindowEx(
-        0,
+        WS_EX_TRANSPARENT,
         WC_TABCONTROL,
         "",
         WS_CHILDWINDOW | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_VISIBLE,
-        7, 0, 380, 190,
+        5, 5, 380, 180,
         hwnd,
         (HMENU)990,
         GetModuleHandle(NULL),
-        //hinstance,
         NULL
     );
 
@@ -384,7 +383,6 @@ int settingsWindow(HWND hwnd) {
         MessageBox(NULL, "Não funcionou", "Error", MB_ICONERROR);
         printf("Erro: %lu", GetLastError());
     }
-
 
     INITCOMMONCONTROLSEX icex;
     TCITEM tcnetwork, tcprovider, tclang;
@@ -408,66 +406,217 @@ int settingsWindow(HWND hwnd) {
     TabCtrl_InsertItem(htabtest, 2, &tclang);
     
     hokbutton = CreateWindow(
-        TEXT("BUTTON"),
+        WC_BUTTON,
         TEXT("OK"),
         WS_TABSTOP | WS_CHILD | BS_DEFPUSHBUTTON | WS_VISIBLE,
-        155, 195, 70, 20,
+        155, 192, 70, 25,
         hwnd,
-        IDW_SETTINGS_BUTTON_OK,
+        (HMENU)IDW_SETTINGS_BUTTON_OK,
         (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE),
         NULL
     );
 
     hcancelbutton = CreateWindow(
-        TEXT("BUTTON"),
+        WC_BUTTON,
         TEXT("Cancel"),
         WS_TABSTOP | WS_CHILD | WS_VISIBLE,
-        235, 195, 70, 20,
+        235, 192, 70, 25,
         hwnd,
-        IDW_SETTINGS_BUTTON_CANCEL,
+        (HMENU)IDW_SETTINGS_BUTTON_CANCEL,
         (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE),
         NULL
     );
 
     happlybutton = CreateWindow(
-        TEXT("BUTTON"),
+        WC_BUTTON,
         TEXT("Apply"),
         WS_TABSTOP | WS_CHILD | WS_VISIBLE,
-        315, 195, 70, 20,
+        315, 192, 70, 25,
         hwnd,
-        IDW_SETTINGS_BUTTON_APPLY,
+        (HMENU)IDW_SETTINGS_BUTTON_APPLY,
+        (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE),
+        NULL
+    );
+}
+
+int networkTab(HWND hwnd) {
+    hserverlabel = CreateWindow(
+        WC_STATIC,
+        TEXT("Server address (IP/URL): "),
+        WS_CHILD | WS_VISIBLE,
+        10, 10, 100, 40,
+        hwnd,
+        (HMENU)949,
         (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE),
         NULL
     );
 
+    hserverbox = CreateWindowEx(
+        WS_EX_CLIENTEDGE,
+        WC_EDIT,
+        NULL,
+        WS_TABSTOP | WS_CHILD | ES_WANTRETURN | WS_VISIBLE,
+        125, 20, 225, 20,
+        hwnd,
+        (HMENU)950,
+        (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE),
+        NULL
+    );
+
+    if (server != NULL)
+        SetWindowText(hserverbox, server);
     
-    
-    
-    
-    
+    hportlabel = CreateWindow(
+        WC_STATIC,
+        TEXT("Protocol: "),
+        WS_CHILD | WS_VISIBLE,
+        10, 60, 100, 20,
+        hwnd,
+        (HMENU)946,
+        (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE),
+        NULL
+    );
+
+    hhttpradio = CreateWindow(
+        WC_BUTTON,
+        TEXT("HTTP"),
+        BS_AUTORADIOBUTTON | WS_GROUP | WS_CHILD | WS_VISIBLE,
+        125, 60, 70, 20,
+        hwnd,
+        (HMENU)940,
+        (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE),
+        NULL
+    );
+
+    hhttpsradio = CreateWindow(
+        WC_BUTTON,
+        TEXT("HTTPS"),
+        BS_AUTORADIOBUTTON | WS_CHILD | WS_VISIBLE,
+        205, 60, 70, 20,
+        hwnd,
+        (HMENU)939,
+        (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE),
+        NULL
+    );
+
+    hportlabel = CreateWindow(
+        WC_STATIC,
+        TEXT("Port: "),
+        WS_CHILD | WS_VISIBLE,
+        10, 100, 100, 20,
+        hwnd,
+        (HMENU)948,
+        (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE),
+        NULL
+    );
+
+    hportbox = CreateWindowEx(
+        WS_EX_CLIENTEDGE,
+        WC_EDIT,
+        NULL,
+        WS_TABSTOP | WS_CHILD | ES_WANTRETURN | WS_VISIBLE,
+        125, 100, 55, 20,
+        hwnd,
+        (HMENU)947,
+        (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE),
+        NULL
+    );
+
+    hprotocolcheck = CreateWindow(
+        TEXT("BUTTON"),
+        TEXT("Protocol's default"),
+        BS_CHECKBOX | WS_CHILD | WS_VISIBLE,
+        195, 100, 135, 20,
+        hwnd,
+        (HMENU)939,
+        (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE),
+        NULL
+    );
 }
 
-int networkTab(HWND hwnd) {
+int providerTab(HWND hwnd) {
+    destroyVisibleChildWindows(hwnd);
+
+    hproviderlabel = CreateWindow(
+        WC_STATIC,
+        TEXT("Provider: "),
+        WS_CHILD | WS_VISIBLE,
+        10, 25, 100, 20,
+        hwnd,
+        (HMENU)948,
+        (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE),
+        NULL
+    );
+
     hproviderlist = CreateWindowEx(
         0,
         WC_COMBOBOX,
         NULL,
         CBS_DROPDOWNLIST | CBS_HASSTRINGS | WS_CHILD | WS_OVERLAPPED | WS_VISIBLE,
-        25, 25, 150, 200,
+        125, 20, 150, 200,
         hwnd,
-        IDW_SETTINGS_COMBOBOX_PROVIDERLIST,
+        (HMENU)IDW_SETTINGS_COMBOBOX_PROVIDERLIST,
         (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE),
         NULL
     );
 
-    SendMessage(hproviderlist, (UINT)CB_ADDSTRING, (WPARAM)0, (LPARAM)providers[0]);
-    SendMessage(hproviderlist, (UINT)CB_ADDSTRING, (WPARAM)0, (LPARAM)providers[1]);
+    hwarningnotice = CreateWindow(
+        WC_STATIC,
+        IDT_WARNINGNOTRENDING,
+        WS_CHILD,
+        10, 80, 400, 125,
+        hwnd,
+        (HMENU)IDW_PROVIDER_LABEL_WARNING,
+        (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE),
+        NULL
+    );
 
-    /*for (int i = 0; i < 6; i++) {
+    /*SendMessage(hproviderlist, (UINT)CB_ADDSTRING, (WPARAM)0, (LPARAM)providers[0]);
+    SendMessage(hproviderlist, (UINT)CB_ADDSTRING, (WPARAM)0, (LPARAM)providers[1]);*/
+
+    for (int i = 0; i < 2; i++) {
         SendMessage(hproviderlist, (UINT)CB_ADDSTRING, (WPARAM)0, (LPARAM)providers[i]);
         printf("%s\n", providers[i]);
         
         if (!strcmp(providers[i], provider)) 
             SendMessage(hproviderlist, CB_SETCURSEL, (WPARAM)i, (LPARAM)0);
-    }*/
+    }
+
+    updateNotice();
 }
+
+int updateNotice() {   
+    if (!strcmp(PROVIDER2, provider)) {
+        ShowWindow(hwarningnotice, SW_SHOW);
+        //UpdateWindow(htabtest);
+    } else {
+        ShowWindow(hwarningnotice, SW_HIDE);
+        //UpdateWindow(htabtest);
+    }
+}
+
+int languageTab(HWND hwnd) {
+    hlanglabel = CreateWindow(
+        WC_STATIC,
+        TEXT("Language: "),
+        WS_CHILD | WS_VISIBLE,
+        10, 25, 100, 20,
+        hwnd,
+        (HMENU)948,
+        (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE),
+        NULL
+    );
+
+    hlanglist = CreateWindowEx(
+        0,
+        WC_COMBOBOX,
+        NULL,
+        CBS_DROPDOWNLIST | CBS_HASSTRINGS | WS_CHILD | WS_OVERLAPPED | WS_VISIBLE,
+        125, 20, 150, 200,
+        hwnd,
+        (HMENU)IDW_SETTINGS_COMBOBOX_LANGLIST,
+        (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE),
+        NULL
+    );
+}
+
