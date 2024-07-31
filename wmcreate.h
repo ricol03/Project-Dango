@@ -17,6 +17,11 @@ typedef struct {
     TCHAR title[256];
 } episode;
 
+typedef struct {
+    TCHAR link[512];
+    TCHAR quality[8];
+} stream;
+
 //test struct
 typedef struct trendinganimeinfo {
     char id[128];

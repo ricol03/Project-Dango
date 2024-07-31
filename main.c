@@ -9,8 +9,6 @@
 //TODO:: fazer um menu toggable na janela do vídeo
 //TODO:: melhorar o ecrã inicial (com conteúdo em trending e etc)
 
-//FIXME: linha 223 do connections.c, segmentation fault depois de strstr com episodekey X
-
 //BUG: alguns dos links não funcionam, mesmo funcionando no browser X
 //BUG: quando reproduzimos um vídeo, e voltamos à janela para escolher outro episódio, a janela anterior não fecha 
 //BUG: alguns resultados (até agora os de conteúdo único) não têm link associado
@@ -64,6 +62,7 @@ boolean settingstoggled = FALSE;
 extern const char* localfile;
 extern result results[];
 extern episode episodes[];
+extern stream streams[];
 extern trendinganimeinfo shows[];
 
 extern HWND hproviderlist;
@@ -380,11 +379,22 @@ LRESULT CALLBACK MainWindowProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM 
                     int i = (int)SendMessage(heplistbox, LB_GETITEMDATA, item, 0);
 
                     char * link = eplinkConnection(hwnd, episodes[i].id);
-                    printf("\n\n\ndevolveu este link zeca: %s", link);
 
-                    initializeLink(hwnd, link);
-                    _beginthread(videoWindowWrapper, 0, NULL);
-                    //printf("e saiu do videowindow");
+                    if (link == NULL) {
+                        MessageBox(NULL, "An error occured, please try again later.", "Error", MB_ICONERROR);
+                    } else { 
+                        printf("\n\n\ndevolveu este link zeca: %s", link);
+
+                        if (!strcmp(provider, PROVIDER1)) {
+                            getQualitiesJson(link, streams);
+                            link = streams[1].link;
+                        } 
+                        
+
+                        initializeLink(hwnd, link);
+                        _beginthread(videoWindowWrapper, 0, NULL);
+                    }
+
                     break;
                 }   
                     
@@ -392,7 +402,9 @@ LRESULT CALLBACK MainWindowProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM 
               
                 case IDW_SEARCH_LISTBOX_SHOW: {
                     switch (HIWORD(wparam)) {
+                        
                         case LBN_SELCHANGE: {
+                            //TODO: put this logic on the eventual 'select' button
                             memset(&episodes, 0, sizeof(episode));
                             int item = (int)SendMessage(hshowlistbox, LB_GETCURSEL, 0, 0);
                             int i = (int)SendMessage(hshowlistbox, LB_GETITEMDATA, item, 0);
@@ -400,14 +412,14 @@ LRESULT CALLBACK MainWindowProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM 
 
                             number = episodesConnection(hwnd, results[i].id, episodes);
 
-                            for (int i = 0; i < number; i++) {
+                            /*for (int i = 0; i < number; i++) {
                                 printf("\n%s", episodes[i].id);
-                            }
+                            }*/
                              
                             SendMessage(heplistbox, LB_RESETCONTENT, 0, 0);
                             for (int i = 0; i < number; i++) {
-                                printf("%s", episodes[i].title);
-                                printf("\n\n\nerro do capeta: %lu", GetLastError());
+                                printf("\nDeu: %s", episodes[i].number);
+                                //printf("\n\n\nerro do capeta: %lu", GetLastError());
                                 int position = (int)SendMessage(heplistbox, LB_INSERTSTRING, 0, (LPARAM)episodes[i].title);
                                 if (position == LB_ERR || position == LB_ERRSPACE) {
                                     printf("\n\n\nerro do capeta: %lu", GetLastError());

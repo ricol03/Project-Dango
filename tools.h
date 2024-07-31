@@ -34,4 +34,5 @@
 #include "json.h"
 #include "file.h"
 #include "lang_en.h"
+#include "provider.h"
 

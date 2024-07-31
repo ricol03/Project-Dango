@@ -3,6 +3,8 @@
 #ifndef MAIN_H_
 #define MAIN_H_
 
+
+
 LRESULT CALLBACK MainWindowProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam);
 LRESULT CALLBACK SearchWindowProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam);
 LRESULT CALLBACK SettingsWndProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam);

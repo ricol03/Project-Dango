@@ -10,7 +10,7 @@ libvlc_media_t* media;
 
 HDC hdc;
 
-char * videolink = NULL;
+char videolink[256];
 
 LRESULT videoWindowProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam);
 
@@ -102,8 +102,9 @@ LRESULT videoWindowProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam) {
 }
 
 int initializeLink(HWND hwnd, char * link) {
-    videolink = malloc(512);
-    videolink = link;
+    strcpy(videolink, link);
+
+    printf("\n\nvideolink: %s", videolink);
 
     return 1;
 }

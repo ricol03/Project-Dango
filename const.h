@@ -21,8 +21,6 @@
 #define SETTINGSFILENAME "settings.bin"
 #define TESTIMAGE "test.jpg"
 
-#define PROVIDER1 "Gogoanime"
-#define PROVIDER2 "Zoro"
 
 #define MAINWINDOWHEIGHT 500
 #define MAINWINDOWWIDTH 600

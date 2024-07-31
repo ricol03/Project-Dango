@@ -5,6 +5,9 @@
 #ifndef CONNECTIONS_H_
 #define CONNECTIONS_H_
 
+//number of different connections made
+#define MAXCONNECTIONS 5
+
 typedef union {
     char* value;
     int number;

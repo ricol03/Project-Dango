@@ -59,6 +59,7 @@ const char* localfile;
 
 result results[100];
 episode episodes[100];
+stream streams[8];
 trendinganimeinfo shows[12];
 
 extern char provider[32];

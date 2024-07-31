@@ -13,6 +13,7 @@ int getEpisodesNum(char* jsonstring, const char* key);
 int parseResultsJson(char* jsonstring, result results[]);
 int parseEpisodesJson(HWND hwnd, char * resultid, char* jsonstring, episode episodes[]);
 char * getLinkJson(HWND hwnd, char * jsonstring);
+int getQualitiesJson(char* jsonstring, stream streams[]);
 int getTrendingInfo(char * jsonstring, trendinganimeinfo results[]);
 
 #endif

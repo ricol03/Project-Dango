@@ -1,9 +1,9 @@
 #include "tools.h"
 #include "connections.h"
 
+extern char provider[32];
 extern char server[32];
-
-#define SERVERADDRESS server
+extern char port[6];
 
 //para este tipo de dados precisamos sempre de alocar memória
 LPSTR requestedquery = NULL;
@@ -109,6 +109,8 @@ char * winHttpGetResponse(HINTERNET hRequest, HINTERNET hConnect, HINTERNET hSes
             } while (dwSize > 0);
 
             bResults = TRUE;
+        } else {
+            MessageBox(NULL, "Unhandled HTTP code", "Error", MB_ICONERROR);
         }
     } else {
         printf("Error %u in WinHttpQueryHeaders.\n", GetLastError());
@@ -163,7 +165,9 @@ LPSTR serverAddressInitializer() {
 
 int searchConnection(HWND hwnd, char * query, result results[]) {
 
-    parseRequestText("/anime/zoro/", query);
+    selectStringMatrix();
+
+    parseRequestText(strmatrix[0], query);
 
     //Cria um handle de sessão de hinternet
     HINTERNET hsession = WinHttpOpen(L"Dango/1.0", WINHTTP_ACCESS_TYPE_DEFAULT_PROXY, WINHTTP_NO_PROXY_NAME, WINHTTP_NO_PROXY_BYPASS, 0);
@@ -179,10 +183,9 @@ int searchConnection(HWND hwnd, char * query, result results[]) {
     LPSTR servernew = serverAddressInitializer();
 
     //Estabelece contacto com o domínio especificado
-    HINTERNET hconnect = WinHttpConnect(hsession, servernew, INTERNET_DEFAULT_PORT, 0);
+    HINTERNET hconnect = WinHttpConnect(hsession, servernew, (WORD)atoi(port), 0);
     if (hconnect == NULL) {
         MessageBox(hwnd, "WinHttpConnect failed!", "Error", MB_ICONERROR);
-        MessageBox(hwnd, SERVERADDRESS, "Error", MB_ICONERROR);
         MessageBox(hwnd, servernew, "Error", MB_ICONERROR);
         MessageBox(hwnd, requestedquery, "INFO", MB_ICONINFORMATION);
         return 0;
@@ -211,7 +214,7 @@ int searchConnection(HWND hwnd, char * query, result results[]) {
 
 int episodesConnection(HWND hwnd, char * resultid, episode episodes[]) {
 
-    parseRequestText2("/anime/zoro/info?id=", resultid);
+    parseRequestText2(strmatrix[1], resultid);
 
     HINTERNET hsession2 = WinHttpOpen(L"Dango/1.0", WINHTTP_ACCESS_TYPE_DEFAULT_PROXY, WINHTTP_NO_PROXY_NAME, WINHTTP_NO_PROXY_BYPASS, 0);
     if (hsession2 == NULL) {
@@ -225,7 +228,7 @@ int episodesConnection(HWND hwnd, char * resultid, episode episodes[]) {
 
     LPSTR servernew = serverAddressInitializer();
     
-    HINTERNET hconnect2 = WinHttpConnect(hsession2, servernew, INTERNET_DEFAULT_PORT, 0);
+    HINTERNET hconnect2 = WinHttpConnect(hsession2, servernew, (WORD)atoi(port), 0);
     if (hconnect2 == NULL) {
         MessageBox(hwnd, "WinHttpConnect failed!", "Error", MB_ICONERROR);
         printf("\n %lu", GetLastError());
@@ -254,7 +257,7 @@ int episodesConnection(HWND hwnd, char * resultid, episode episodes[]) {
 
 int epnumConnection(HWND hwnd, char * resultid) {
 
-    parseRequestText("/anime/zoro/info?id=", resultid);
+    parseRequestText(strmatrix[1], resultid);
 
     HINTERNET hsession = WinHttpOpen(L"Dango/1.0", WINHTTP_ACCESS_TYPE_DEFAULT_PROXY, WINHTTP_NO_PROXY_NAME, WINHTTP_NO_PROXY_BYPASS, 0);
     if (hsession == NULL) {
@@ -268,7 +271,7 @@ int epnumConnection(HWND hwnd, char * resultid) {
     LPSTR servernew = serverAddressInitializer();
 
     //Estabelece contacto com o domínio especificado
-    HINTERNET hconnect = WinHttpConnect(hsession, servernew, INTERNET_DEFAULT_PORT, 0);
+    HINTERNET hconnect = WinHttpConnect(hsession, servernew, (WORD)atoi(port), 0);
     if (hconnect == NULL) {
         MessageBox(hwnd, "WinHttpConnect failed!", "Error", MB_ICONERROR);
         return 0;
@@ -297,7 +300,7 @@ int epnumConnection(HWND hwnd, char * resultid) {
 }
 
 char * eplinkConnection(HWND hwnd, char * epid) {
-    parseRequestText2("/anime/zoro/watch?episodeId=", epid);
+    parseRequestText2(strmatrix[2], epid);
 
     HINTERNET hsession2 = WinHttpOpen(L"Dango/1.0", WINHTTP_ACCESS_TYPE_DEFAULT_PROXY, WINHTTP_NO_PROXY_NAME, WINHTTP_NO_PROXY_BYPASS, 0);
     if (hsession2 == NULL) {
@@ -311,7 +314,7 @@ char * eplinkConnection(HWND hwnd, char * epid) {
     
     LPSTR servernew = serverAddressInitializer();
 
-    HINTERNET hconnect2 = WinHttpConnect(hsession2, servernew, INTERNET_DEFAULT_PORT, 0);
+    HINTERNET hconnect2 = WinHttpConnect(hsession2, servernew, (WORD)atoi(port), 0);
     if (hconnect2 == NULL) {
         MessageBox(hwnd, "WinHttpConnect failed!", "Error", MB_ICONERROR);
         printf("\n %lu", GetLastError());
@@ -351,7 +354,7 @@ int getinfoConnection(HWND hwnd, trendinganimeinfo shows[]) {
 
     LPSTR servernew = serverAddressInitializer();
     
-    HINTERNET hconnect2 = WinHttpConnect(hsession2, servernew, INTERNET_DEFAULT_PORT, 0);
+    HINTERNET hconnect2 = WinHttpConnect(hsession2, servernew, (WORD)atoi(port), 0);
     if (hconnect2 == NULL) {
         MessageBox(hwnd, "WinHttpConnect failed!", "Error", MB_ICONERROR);
         printf("\n %lu", GetLastError());

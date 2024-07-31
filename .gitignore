@@ -1,8 +1,15 @@
 file.exe
 json.exe
 main.exe
+connections.exe
+provider.exe
+video.exe
 settings.dat
 test.jpg
 ai.txt
 ai.txt
 wmcreate.exe
+libvlc/
+plugins/
+.vscode/
+
