@@ -1,4 +1,5 @@
 #include "tools.h"
+#include "libvlc/include/vlc/vlc.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
@@ -16,6 +17,7 @@
 const wchar_t MAIN_CLASS[]          = L"MainWndClass";
 const wchar_t SEARCH_CLASS[]        = L"SearchWndClass";
 const wchar_t SETTINGS_CLASS[]      = L"idkwhyicantputanormalname";
+const wchar_t VIDEO_CLASS[]         = L"VideoWndClass";
 
 const wchar_t NETWORKTAB_CLASS[]    = L"NetTabWndClass";
 const wchar_t PROVIDERTAB_CLASS[]   = L"ProviderTabWndClass";
@@ -78,6 +80,12 @@ typedef struct stbInfo {
 
 extern char provider[32];
 extern char lang[5];
+
+//video stuhf
+libvlc_instance_t* linst;
+libvlc_media_player_t* mplay;
+libvlc_media_t* media;
+extern char * videolink;
 
 int WINAPI WinMain(HINSTANCE hinstance, HINSTANCE hprevinstance, PSTR lpcmdline, int nshowcmd) {
 
@@ -192,6 +200,43 @@ int WINAPI WinMain(HINSTANCE hinstance, HINSTANCE hprevinstance, PSTR lpcmdline,
     #pragma endregion
 
     settingstoggled = createSettingsWindow(hinstance);
+
+    #pragma region videoWindow
+
+    WNDCLASS videowindowclass = { 0 };
+
+    videowindowclass.style            = CS_OWNDC;
+    videowindowclass.lpfnWndProc      = VideoWindowProc;
+    videowindowclass.hInstance        = hinstance;
+    videowindowclass.lpszClassName    = (LPCSTR)VIDEO_CLASS;
+
+    RegisterClass(&videowindowclass);
+
+    //createVideoWindow(hinstance);
+
+    //createVideoWindow(hinstance);
+
+    #pragma endregion
+
+    /*hvidwindow = CreateWindowEx(
+        0,
+        VIDEO_CLASS,
+        "Video",
+        //WS_OVERLAPPEDWINDOW,
+        WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_ICONIC | WS_ACTIVECAPTION | WS_VISIBLE,
+        CW_USEDEFAULT, CW_USEDEFAULT, 1280, 720,
+        NULL,
+        NULL,
+        hinstance,
+        NULL 
+    );
+
+    if (hvidwindow == NULL) {
+        MessageBox(NULL, "Não funcionou (language tab)", "Error", MB_ICONERROR);
+        printf("Erro: %lu", GetLastError());
+        //printf("%s", NETWORKTAB_CLASS);
+    }*/
+
 
     //initializeTheming();
 
@@ -312,6 +357,28 @@ int createLanguageTab() {
     }
 }
 
+int createVideoWindow(HINSTANCE hinstance) {
+    hvidwindow = CreateWindowEx(
+        0,
+        VIDEO_CLASS,
+        "Project Dango",
+        WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_ICONIC | WS_ACTIVECAPTION,
+        CW_USEDEFAULT, CW_USEDEFAULT, 1280, 720,
+        NULL,
+        NULL,
+        hinstance,
+        NULL
+    );
+
+    if (hvidwindow == NULL) {
+        MessageBoxW(NULL, L"Unable to create Windows", 
+                L"Error", MB_ICONERROR | MB_OK);
+        return 0;
+    }
+
+    
+}
+
 LRESULT CALLBACK MainWindowProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam) {
     
     switch (message) {
@@ -338,10 +405,18 @@ LRESULT CALLBACK MainWindowProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM 
 
                 case ID_TEST: {
                     MessageBox(hwnd, "CLicou", "Info", MB_ICONINFORMATION);
-                    getinfoConnection(hwnd, shows);
+                    //getinfoConnection(hwnd, shows);
+
+                    createVideoWindow(GetModuleHandle(NULL));
+
+                    ShowWindow(hvidwindow, SW_SHOW);
+                    UpdateWindow(hvidwindow);
+
+                    SetForegroundWindow(hvidwindow);
+
                 }
 
-
+                #pragma region won
                 case IDM_FILE_HOME:
                     homeWindow(hwnd);
                     break;
@@ -390,9 +465,12 @@ LRESULT CALLBACK MainWindowProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM 
                             link = streams[1].link;
                         } 
                         
+                        
 
-                        initializeLink(hwnd, link);
-                        _beginthread(videoWindowWrapper, 0, NULL);
+                        //initializeLink(hwnd, link);
+                        //_beginthread(videoWindowWrapper, 0, NULL);
+                        ShowWindow(hvidwindow, SW_SHOW);
+                        UpdateWindow(hvidwindow);
                     }
 
                     break;
@@ -507,9 +585,87 @@ LRESULT CALLBACK MainWindowProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM 
     return DefWindowProc(hwnd, message, wparam, lparam);
 }
 
-void videoWindowWrapper(void* data) {
-    videoWindowMain(hvidwindow, GetModuleHandle(NULL));
+#pragma endregion
+
+LRESULT CALLBACK VideoWindowProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam) {
+    
+    switch (message) {
+        case WM_CREATE: {
+    
+        }
+        return 0;
+
+        case WM_SHOWWINDOW: {
+            linst = libvlc_new(0, NULL);
+
+            if (linst != NULL) {
+                media = libvlc_media_new_location(linst, videolink);
+                printf("este é o link saboroso do coisinho: %s", videolink);
+
+                mplay = libvlc_media_player_new_from_media(media);
+                printf("Ele fez esta parte do new from media");
+
+                libvlc_media_release(media);
+                printf("Ele fez esta parte do media release");
+
+                libvlc_media_player_set_hwnd(mplay, hwnd);
+                printf("Ele fez esta parte do hwnd");
+
+                libvlc_media_player_play(mplay);
+                printf("Ele fez esta parte do play");
+
+                return 0;
+            } else {
+                MessageBox(hwnd, "No instance could be created", "Error", MB_ICONERROR);
+                return -1;
+            }
+            AppendMenu(GetSystemMenu(hwnd, FALSE), MF_SEPARATOR, 0, NULL);
+            //AppendMenu(GetSystemMenu(hwnd, FALSE), MF_STRING, IDW_VIDEO_SYS_TOGGLE, "Control menu");
+        }
+        return 0;
+
+        /*case WM_SYSCOMMAND: {
+            switch (wparam) {
+                case IDW_VIDEO_SYS_TOGGLE:
+                    MessageBox(hwnd, "Test", "Test", MB_ICONEXCLAMATION);
+                    break;
+                
+                default:
+                    break;
+            }
+            return 0;
+        }*/
+
+        case WM_PAINT: {
+            HDC hdc = BeginPaint(hwnd, &ps);
+
+            FillRect(hdc, &ps.rcPaint, (HBRUSH) (COLOR_3DFACE+1));
+
+            EndPaint(hwnd, &ps);
+        }
+        return 0;
+
+        case WM_CLOSE:
+            DestroyWindow(hwnd);
+            return 0;
+
+        case WM_DESTROY:
+            libvlc_media_player_stop(mplay);
+            printf("este man saiu me daqui");
+            libvlc_media_player_release(mplay);
+            libvlc_release(linst);
+            return 0;
+
+        default:
+            return DefWindowProc(hwnd, message, wparam, lparam);
+    }
+
+    
 }
+
+/*void videoWindowWrapper(void* data) {
+    videoWindowMain(hvidwindow, GetModuleHandle(NULL));
+}*/
 
 LRESULT CALLBACK SearchWindowProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam) {
     switch (message) {

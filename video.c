@@ -10,9 +10,9 @@ libvlc_media_t* media;
 
 HDC hdc;
 
-char videolink[256];
+char * videolink;
 
-LRESULT videoWindowProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam);
+/*LRESULT CALLBACK videoWindowProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam);
 
 HWND videoWindowMain(HWND hwnd, HINSTANCE hinstance) {
     const wchar_t VIDEO_CLASS[] = L"Video Window";
@@ -57,17 +57,57 @@ HWND videoWindowMain(HWND hwnd, HINSTANCE hinstance) {
     return hvidwindow;
 }
 
-LRESULT videoWindowProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam) {
+LRESULT CALLBACK videoWindowProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam) {
     
     switch (message) {
-        case WM_CREATE:
+        case WM_CREATE: {
             
 
-            printf("\n\n\n\n\n\n\nprint do videolink: %s", videolink);
-            videoWindow(hwnd, videolink);
+            //printf("\n\n\n\n\n\n\nprint do videolink: %s", videolink);
+            linst = libvlc_new(0, NULL);
+
+            if (linst != NULL) {
+                media = libvlc_media_new_location(linst, videolink);
+                printf("este é o link saboroso do coisinho: %s", videolink);
+
+                mplay = libvlc_media_player_new_from_media(media);
+                printf("Ele fez esta parte do new from media");
+
+                libvlc_media_release(media);
+                printf("Ele fez esta parte do media release");
+
+                libvlc_media_player_set_hwnd(mplay, hwnd);
+                printf("Ele fez esta parte do hwnd");
+
+                libvlc_media_player_play(mplay);
+                printf("Ele fez esta parte do play");
+
+                /*MSG msg;
+                while (GetMessage(&msg, NULL, 0, 0)) {
+                    TranslateMessage(&msg);
+                    DispatchMessage(&msg);
+                }*/
+
+                /*getchar();
+                printf("char");*/
+
+                /*libvlc_media_player_stop(mplay);
+                printf("Ele fez esta parte do stop");
+                libvlc_media_player_release(mplay);
+                printf("Ele fez esta parte do release 1");
+
+                libvlc_release(linst);
+                printf("Ele fez esta parte do release 2");
+
+                return 0;
+            } else {
+                MessageBox(hwnd, "No instance could be created", "Error", MB_ICONERROR);
+                return -1;
+            }
             AppendMenu(GetSystemMenu(hwnd, FALSE), MF_SEPARATOR, 0, NULL);
             AppendMenu(GetSystemMenu(hwnd, FALSE), MF_STRING, IDW_VIDEO_SYS_TOGGLE, "Control menu");
-            break;
+        }
+        break;
         
         case WM_SYSCOMMAND:
             switch (wparam) {
@@ -99,10 +139,10 @@ LRESULT videoWindowProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam) {
     }
 
     return DefWindowProc(hwnd, message, wparam, lparam);
-}
+}*/
 
 int initializeLink(HWND hwnd, char * link) {
-    strcpy(videolink, link);
+    //strcpy(videolink, link);
 
     printf("\n\nvideolink: %s", videolink);
 

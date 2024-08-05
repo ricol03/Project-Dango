@@ -21,8 +21,8 @@
                 //"-lmfplat",
                 //"-lmfuuid",
                 "-lcomctl32",
-                "-I\"${fileDirname}\\libvlc\\include\"",
-                "-L\"${fileDirname}\\libvlc\"",
+                "-Ilibvlc\\include",
+                "-Llibvlc",
                 "-lvlc",
                 //"-mwindows"
                 "--static"
