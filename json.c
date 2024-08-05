@@ -212,7 +212,7 @@ char * getLinkJson(HWND hwnd, char * jsonstring) {
     const char * linkkey = "\"url\":";
     const char * endquote = "\"";
 
-    char * value = malloc(512);
+    char * value = malloc(2048*sizeof(char));
     //malloc(value);
 
     char * start = strstr(jsonstring, linkkey);
@@ -268,7 +268,7 @@ int getQualitiesJson(char * jsonstring, stream streams[]) {
     return 1;
 }
 
-int getTrendingInfo(char * jsonstring, trendinganimeinfo results[]) {
+int getTrendingShows(char * jsonstring, trendinganimeinfo results[]) {
     const char * idkey = "{\"id\":\"";
     const char * titlekey = "\"title\":\"";
     const char * imagekey = "\"image\":\"";
@@ -291,7 +291,37 @@ int getTrendingInfo(char * jsonstring, trendinganimeinfo results[]) {
         if (jsonstring == NULL)
             return i;
     }
-
-
-
 }
+
+int getShowInfo(char * jsonstring, animeinfo show) {
+    const char * totalepkey = "\"totalEpisodes\":";
+    const char * imagekey = "\"image\":\"";
+    const char * datekey = "\"releaseDate\":\"";
+    const char * descriptionkey = "\"description\":\"";
+    const char * dubkey = "\"subOrDub\":\"";
+    const char * typekey = "\"type\":\"";
+    const char * statuskey = "\"status\":\"";
+    const char * endquote = "\"";
+
+    BOOL isdub;
+
+    getJsonId(jsonstring, totalepkey, show.episodes, 3);
+    MessageBox(NULL, show.episodes, "Info", MB_ICONINFORMATION);
+    printf("\n\nid do resultado: %s", show.episodes);
+    getJsonId(jsonstring, imagekey, show.imageurl, 3);
+    MessageBox(NULL, show.imageurl, "Info", MB_ICONINFORMATION);
+    getJsonId(jsonstring, datekey, show.date, 3);
+    MessageBox(NULL, show.date, "Info", MB_ICONINFORMATION);
+    getJsonId(jsonstring, descriptionkey, show.description, 3);
+    MessageBox(NULL, show.description, "Info", MB_ICONINFORMATION);
+    //getJsonId(jsonstring, dubkey, show.isdub, 3);
+    MessageBox(NULL, show.isdub, "Info", MB_ICONINFORMATION);
+    getJsonId(jsonstring, typekey, show.type, 3);
+    MessageBox(NULL, show.type, "Info", MB_ICONINFORMATION);
+    getJsonId(jsonstring, descriptionkey, show.description, 3);
+    MessageBox(NULL, show.description, "Info", MB_ICONINFORMATION);
+    getJsonId(jsonstring, statuskey, show.status, 3); 
+    MessageBox(NULL, show.status, "Info", MB_ICONINFORMATION);
+    
+}
+

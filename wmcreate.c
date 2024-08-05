@@ -8,7 +8,7 @@ char providers[6][16] = {
     PROVIDER1, PROVIDER2, "", "", "", ""
 };
 
-//janela principal
+//main window
 HWND hbutton;            
 HWND htext;              
 HBITMAP hbitmap;
@@ -19,15 +19,20 @@ HWND hsearchbutton, hcancelbutton;
 HWND settingsbutton;
 HWND htestbutton, hunavailabletext;
 
-//utilidades
+//utils
 HFONT htitlefont;
 HFONT hfont;
 HBRUSH hbrush;
 
-//pesquisa
+//search
+HWND hlisttitle;
 HWND hshowlistbox;
+HWND hselectbutton;
 HWND hwatchbutton;
 HWND heplistbox;
+
+//info
+HWND hdescriptiontext;
 
 //settings
 HWND hokbutton, hcancelbutton, happlybutton;
@@ -61,6 +66,7 @@ result results[100];
 episode episodes[100];
 stream streams[8];
 trendinganimeinfo shows[12];
+animeinfo show;
 
 extern char provider[32];
 extern char server[32];
@@ -131,7 +137,7 @@ int homeWindow(HWND hwnd) {
 
     if (!strcmp(provider, PROVIDER1)) {
         HWND htesttext = CreateWindow(
-            TEXT("STATIC"), 
+            WC_STATIC, 
             TEXT("Under construction"),
             WS_VISIBLE | WS_CHILD,
             250, 150, 450, 200,
@@ -288,7 +294,6 @@ int searchResults(HWND hwnd, char * query) {
 
     //faz a conexão à api para fazer a pesquisa, e devolve o número de resultados
     int resultsize = searchConnection(hwnd, query, results);
-    printf("\n\n\n\n\nNúmero size: %d", resultsize);
 
     if (resultsize != 0) {
         MessageBox(hwnd, "Working", "Info", MB_ICONEXCLAMATION);
@@ -296,22 +301,36 @@ int searchResults(HWND hwnd, char * query) {
         MessageBox(hwnd, "No results found or error connecting", "Error", MB_ICONERROR);
         return 0;
     }
+    
+    hlisttitle = CreateWindow(
+        WC_STATIC,
+        "Search Results",
+        WS_VISIBLE | WS_CHILD,
+        25, 25, 350, 50,
+        hwnd,
+        (HMENU)1010,
+        GetModuleHandle(NULL),
+        NULL
+    );
+
+    SendMessage(hlisttitle, WM_SETFONT, (WPARAM)htitlefont, (LPARAM)NULL);
         
     hshowlistbox = CreateWindow(
         TEXT("LISTBOX"),
         NULL,
-        WS_CHILD | WS_BORDER | LBS_STANDARD,
-        10, 50, 330, 140,
+        WS_CHILD | WS_BORDER | WS_VSCROLL | LBS_STANDARD,
+        25, 75, 545, 350,
         hwnd,
         (HMENU)IDW_SEARCH_LISTBOX_SHOW,
         GetModuleHandle(NULL),
         NULL
     );
 
+    //TODO: REALLOCATE THE WATCH BUTTON
     hwatchbutton = CreateWindow(
         TEXT("BUTTON"),
         TEXT("Watch"),
-        WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,
+        WS_TABSTOP | WS_CHILD | BS_DEFPUSHBUTTON,
         350, 50, 120, 30,
         hwnd,
         (HMENU)IDW_SEARCH_BUTTON_WATCH,
@@ -319,6 +338,18 @@ int searchResults(HWND hwnd, char * query) {
         NULL
     );
 
+    hselectbutton = CreateWindow(
+        TEXT("BUTTON"),
+        TEXT("Select"),
+        WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,
+        450, 25, 120, 30,
+        hwnd,
+        (HMENU)IDW_SEARCH_BUTTON_SELECT,
+        GetModuleHandle(NULL),
+        NULL
+    );
+
+    //TODO: REALLOCATE THE EP LIST
     heplistbox = CreateWindow(
         TEXT("LISTBOX"),
         NULL,
@@ -350,9 +381,43 @@ int searchResults(HWND hwnd, char * query) {
         printf("Error in listbox: %lu", GetLastError());
         return 1;
     }
+}
 
-    ShowWindow(heplistbox, SW_SHOWDEFAULT);
-    UpdateWindow(heplistbox);  
+int infoWindow(HWND hwnd) {
+    MessageBox(hwnd, show.title, "Info", MB_ICONINFORMATION);
+
+    HWND hinfotitletext = CreateWindow(
+        WC_STATIC, 
+        "devia dar",
+        WS_VISIBLE | WS_CHILD | WS_BORDER,
+        250, 150, 450, 200,
+        hwnd,
+        (HMENU)1098,
+        (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE),
+        NULL
+    );
+
+    hdescriptiontext = CreateWindow(
+        WC_STATIC, 
+        show.description,
+        WS_VISIBLE | WS_CHILD,
+        250, 150, 450, 200,
+        hwnd,
+        (HMENU)1099,
+        (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE),
+        NULL
+    );
+
+    HWND hokbuttons = CreateWindow(
+        WC_BUTTON,
+        TEXT("OK"),
+        WS_TABSTOP | WS_CHILD | BS_DEFPUSHBUTTON | WS_VISIBLE,
+        155, 192, 70, 25,
+        hwnd,
+        (HMENU)11111,
+        (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE),
+        NULL
+    );
 }
 
 BOOL showSettings() {

@@ -1,7 +1,6 @@
 #include "tools.h"
 #include "libvlc/include/vlc/vlc.h"
 
-HWND hvidwindow;
 extern PAINTSTRUCT ps;
 
 libvlc_instance_t* linst;
@@ -25,7 +24,7 @@ HWND videoWindowMain(HWND hwnd, HINSTANCE hinstance) {
 
     RegisterClass(&videowindowclass);
 
-    hvidwindow = CreateWindowEx(
+    hwndvideo = CreateWindowEx(
         0,
         VIDEO_CLASS,
         "Video",
@@ -37,24 +36,24 @@ HWND videoWindowMain(HWND hwnd, HINSTANCE hinstance) {
         NULL 
     );
 
-    ShowWindow(hvidwindow, SW_SHOW);
-    UpdateWindow(hvidwindow);
+    ShowWindow(hwndvideo, SW_SHOW);
+    UpdateWindow(hwndvideo);
 
     MSG msg = { 0 };
 
-    if (hvidwindow == NULL) {
+    if (hwndvideo == NULL) {
         MessageBox(hwnd, "Couldn't create video window", "Error", MB_ICONERROR);
         return 0;
     }
     
-    while (GetMessage(&msg, hvidwindow, 0, 0)) {
+    while (GetMessage(&msg, hwndvideo, 0, 0)) {
         TranslateMessage(&msg);
         DispatchMessage(&msg);
     }
 
     
 
-    return hvidwindow;
+    return hwndvideo;
 }
 
 LRESULT CALLBACK videoWindowProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam) {
@@ -203,7 +202,7 @@ int videoWindow(HWND hwnd, char * link) {
 #include <stdio.h>
 #include <stdlib.h>
 
-HWND hvidwindow;
+HWND hwndvideo;
 PAINTSTRUCT ps;
 
 libvlc_instance_t* linst;
@@ -263,7 +262,7 @@ HWND videoWindowMain(HWND hwnd, HINSTANCE hinstance) {
 
     RegisterClass(&wc);
 
-    hvidwindow = CreateWindowEx(
+    hwndvideo = CreateWindowEx(
         0,
         CLASS_NAME,
         L"Video",
@@ -275,13 +274,13 @@ HWND videoWindowMain(HWND hwnd, HINSTANCE hinstance) {
         NULL 
     );
 
-    if (hvidwindow == NULL) {
+    if (hwndvideo == NULL) {
         MessageBox(hwnd, "Couldn't create video window", "Error", MB_ICONERROR);
         return 0;
     }
 
-    ShowWindow(hvidwindow, SW_SHOW);
-    UpdateWindow(hvidwindow);
+    ShowWindow(hwndvideo, SW_SHOW);
+    UpdateWindow(hwndvideo);
 
     MSG msg = { 0 };
     while (GetMessage(&msg, NULL, 0, 0)) {
@@ -289,7 +288,7 @@ HWND videoWindowMain(HWND hwnd, HINSTANCE hinstance) {
         DispatchMessage(&msg);
     }
 
-    return hvidwindow;
+    return hwndvideo;
 }
 
 int initializeLink(HWND hwnd, char * link) {

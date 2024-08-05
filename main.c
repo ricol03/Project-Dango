@@ -12,12 +12,13 @@
 
 //BUG: alguns dos links não funcionam, mesmo funcionando no browser X
 //BUG: quando reproduzimos um vídeo, e voltamos à janela para escolher outro episódio, a janela anterior não fecha 
-//BUG: alguns resultados (até agora os de conteúdo único) não têm link associado
+//BUG: alguns resultados (até agora os de conteúdo único) não têm link associado X
 
 const wchar_t MAIN_CLASS[]          = L"MainWndClass";
 const wchar_t SEARCH_CLASS[]        = L"SearchWndClass";
 const wchar_t SETTINGS_CLASS[]      = L"idkwhyicantputanormalname";
 const wchar_t VIDEO_CLASS[]         = L"VideoWndClass";
+const wchar_t INFO_CLASS[]          = L"InfoWndClass";
 
 const wchar_t NETWORKTAB_CLASS[]    = L"NetTabWndClass";
 const wchar_t PROVIDERTAB_CLASS[]   = L"ProviderTabWndClass";
@@ -28,7 +29,9 @@ const wchar_t TEST_CLASS[]    = L"TCLASS";
 //janelas
 HWND hwndmain;
 HWND hwndsearch;
+HWND hwndinfo;
 HWND hwndsettings;
+HWND hwndvideo;
 
 //controlos do home
 extern HWND hbutton, hsearchbutton;            
@@ -51,11 +54,13 @@ extern HWND hshowlistbox, heplistbox;
 extern HWND hwatchbutton;
 
 //controlos da janela de vídeo
-extern HWND hvidwindow;
+
 
 //menu da janela
 extern HMENU hmenu;
 extern HMENU hsubmenusearch;  
+
+
 
 //bool para a pesquisa estar vísivel ou não
 boolean searchtoggled = FALSE;
@@ -66,6 +71,7 @@ extern result results[];
 extern episode episodes[];
 extern stream streams[];
 extern trendinganimeinfo shows[];
+extern animeinfo show;
 
 extern HWND hproviderlist;
 
@@ -201,7 +207,7 @@ int WINAPI WinMain(HINSTANCE hinstance, HINSTANCE hprevinstance, PSTR lpcmdline,
 
     settingstoggled = createSettingsWindow(hinstance);
 
-    #pragma region videoWindow
+    #pragma region VideoWindow
 
     WNDCLASS videowindowclass = { 0 };
 
@@ -218,27 +224,17 @@ int WINAPI WinMain(HINSTANCE hinstance, HINSTANCE hprevinstance, PSTR lpcmdline,
 
     #pragma endregion
 
-    /*hvidwindow = CreateWindowEx(
-        0,
-        VIDEO_CLASS,
-        "Video",
-        //WS_OVERLAPPEDWINDOW,
-        WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_ICONIC | WS_ACTIVECAPTION | WS_VISIBLE,
-        CW_USEDEFAULT, CW_USEDEFAULT, 1280, 720,
-        NULL,
-        NULL,
-        hinstance,
-        NULL 
-    );
+    #pragma region InfoWindow
+    WNDCLASS infowindowclass = { 0 };
 
-    if (hvidwindow == NULL) {
-        MessageBox(NULL, "Não funcionou (language tab)", "Error", MB_ICONERROR);
-        printf("Erro: %lu", GetLastError());
-        //printf("%s", NETWORKTAB_CLASS);
-    }*/
+    infowindowclass.lpfnWndProc     = InfoWindowProc; 
+    infowindowclass.hInstance       = hinstance;
+    infowindowclass.lpszClassName   = TEST_CLASS;
+    infowindowclass.hIcon           = NULL;
 
+    RegisterClass(&infowindowclass);
 
-    //initializeTheming();
+    #pragma endregion
 
     MSG msg = { 0 };
 
@@ -276,8 +272,7 @@ int createSettingsWindow(HINSTANCE hinstance) {
             createLanguageTab();
 
             return 1;
-        }
-            
+        }        
     }
 }
 
@@ -358,11 +353,15 @@ int createLanguageTab() {
 }
 
 int createVideoWindow(HINSTANCE hinstance) {
-    hvidwindow = CreateWindowEx(
+
+    //TODO: MAKE A PROPER WINDOW TITLE
+    char * windowtitle = strcat(windowtitle, "a");
+
+    hwndvideo = CreateWindowEx(
         0,
         VIDEO_CLASS,
-        "Project Dango",
-        WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_ICONIC | WS_ACTIVECAPTION,
+        windowtitle,
+        WS_OVERLAPPEDWINDOW | WS_VISIBLE,
         CW_USEDEFAULT, CW_USEDEFAULT, 1280, 720,
         NULL,
         NULL,
@@ -370,19 +369,37 @@ int createVideoWindow(HINSTANCE hinstance) {
         NULL
     );
 
-    if (hvidwindow == NULL) {
+    if (hwndvideo == NULL) {
         MessageBoxW(NULL, L"Unable to create Windows", 
                 L"Error", MB_ICONERROR | MB_OK);
         return 0;
-    }
+    } 
+}
 
-    
+int createInfoWindow(HINSTANCE hinstance) {
+    hwndinfo = CreateWindowEx(
+        0,
+        TEST_CLASS,
+        "Info",
+        WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_ICONIC | WS_ACTIVECAPTION,
+        CW_USEDEFAULT, CW_USEDEFAULT, 800, 600,
+        NULL,
+        NULL,
+        hinstance,
+        NULL
+    );
+
+    if (hwndinfo == NULL) {
+        MessageBoxW(NULL, L"Unable to create Windows", 
+                L"Error", MB_ICONERROR | MB_OK);
+        return 0;
+    } 
 }
 
 LRESULT CALLBACK MainWindowProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam) {
     
     switch (message) {
-        case WM_CREATE:
+        case WM_CREATE: {
             createUtils();
             readSettings();
             homeWindow(hwnd);
@@ -395,24 +412,21 @@ LRESULT CALLBACK MainWindowProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM 
             } else {
                 MessageBox(NULL, "Não funcionou", "Error", MB_ICONERROR);
             }*/
-            
-            
-
-            return 0;
+        }
+        return 0;
 
         case WM_COMMAND:
             switch (LOWORD(wparam)) {
 
                 case ID_TEST: {
                     MessageBox(hwnd, "CLicou", "Info", MB_ICONINFORMATION);
-                    //getinfoConnection(hwnd, shows);
 
                     createVideoWindow(GetModuleHandle(NULL));
 
-                    ShowWindow(hvidwindow, SW_SHOW);
-                    UpdateWindow(hvidwindow);
+                    ShowWindow(hwndvideo, SW_SHOW);
+                    UpdateWindow(hwndvideo);
 
-                    SetForegroundWindow(hvidwindow);
+                    SetForegroundWindow(hwndvideo);
 
                 }
 
@@ -448,8 +462,10 @@ LRESULT CALLBACK MainWindowProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM 
                     searchtoggled = showSearch();
                     break;
                 }
-                 
-                case IDW_SEARCH_BUTTON_WATCH: {
+
+                
+                //TODO: MOVE THIS TO THE OTHER WINDOW 
+                /*case IDW_SEARCH_BUTTON_WATCH: {
                     int item = (int)SendMessage(heplistbox, LB_GETCURSEL, 0, 0);
                     int i = (int)SendMessage(heplistbox, LB_GETITEMDATA, item, 0);
 
@@ -462,23 +478,62 @@ LRESULT CALLBACK MainWindowProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM 
 
                         if (!strcmp(provider, PROVIDER1)) {
                             getQualitiesJson(link, streams);
-                            link = streams[1].link;
+                            videolink = streams[1].link;
                         } 
-                        
-                        
 
-                        //initializeLink(hwnd, link);
-                        //_beginthread(videoWindowWrapper, 0, NULL);
-                        ShowWindow(hvidwindow, SW_SHOW);
-                        UpdateWindow(hvidwindow);
+                        createVideoWindow(GetModuleHandle(NULL));
+                        ShowWindow(hwndvideo, SW_SHOW);
+                        UpdateWindow(hwndvideo);
+
+                        SetForegroundWindow(hwndvideo);
                     }
 
                     break;
-                }   
+                }   */
+                    
+                case IDW_SEARCH_BUTTON_SELECT: {
+                    //TODO: put this logic on the eventual 'select' button
+                    memset(&episodes, 0, sizeof(episode));
+                    int item = (int)SendMessage(hshowlistbox, LB_GETCURSEL, 0, 0);
+                    int i = (int)SendMessage(hshowlistbox, LB_GETITEMDATA, item, 0);
+                    MessageBox(hwnd, results[i].id, "Info", MB_ICONINFORMATION);
+
+                    strcpy(show.title, results[i].title);
+                    number = episodesConnection(hwnd, results[i].id, episodes);
+
+                    /*for (int i = 0; i < number; i++) {
+                        printf("\n%s", episodes[i].id);
+                    }*/
+                        
+                    SendMessage(heplistbox, LB_RESETCONTENT, 0, 0);
+                    for (int i = 0; i < number; i++) {
+                        printf("\nDeu: %s", episodes[i].number);
+                        //printf("\n\n\nerro do capeta: %lu", GetLastError());
+                        int position = (int)SendMessage(heplistbox, LB_INSERTSTRING, 0, (LPARAM)episodes[i].title);
+                        if (position == LB_ERR || position == LB_ERRSPACE) {
+                            printf("\n\n\nerro do capeta: %lu", GetLastError());
+                            break;
+                        } else {
+                            printf("\n\nfez com sucesso");
+                        }
+                        SendMessage(heplistbox, LB_SETITEMDATA, position, (LPARAM)i);
+                        
+                    }
+
+                    getInfoConnection(hwnd, results[i].id, show);
+
+                    createInfoWindow(GetModuleHandle(NULL));
+
                     
 
+                    //show info window
+                    ShowWindow(hwndinfo, SW_SHOW);
+                    UpdateWindow(hwndinfo);
+                }
+                return 0;
+
               
-                case IDW_SEARCH_LISTBOX_SHOW: {
+                /*case IDW_SEARCH_LISTBOX_SHOW: {
                     switch (HIWORD(wparam)) {
                         
                         case LBN_SELCHANGE: {
@@ -492,7 +547,7 @@ LRESULT CALLBACK MainWindowProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM 
 
                             /*for (int i = 0; i < number; i++) {
                                 printf("\n%s", episodes[i].id);
-                            }*/
+                            }
                              
                             SendMessage(heplistbox, LB_RESETCONTENT, 0, 0);
                             for (int i = 0; i < number; i++) {
@@ -516,7 +571,7 @@ LRESULT CALLBACK MainWindowProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM 
                             break;
                     }
                     break;
-                }
+                }*/
 
                 case IDW_SEARCH_LISTBOX_EPISODELIST: {
                     switch (HIWORD(wparam)) {
@@ -584,8 +639,6 @@ LRESULT CALLBACK MainWindowProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM 
     }
     return DefWindowProc(hwnd, message, wparam, lparam);
 }
-
-#pragma endregion
 
 LRESULT CALLBACK VideoWindowProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam) {
     
@@ -662,10 +715,6 @@ LRESULT CALLBACK VideoWindowProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM 
 
     
 }
-
-/*void videoWindowWrapper(void* data) {
-    videoWindowMain(hvidwindow, GetModuleHandle(NULL));
-}*/
 
 LRESULT CALLBACK SearchWindowProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam) {
     switch (message) {
@@ -985,6 +1034,46 @@ LRESULT CALLBACK LangTabProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM lpa
             return DefWindowProc(hwnd, message, wparam, lparam);
     }
 }
+
+LRESULT CALLBACK InfoWindowProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam) {
+    switch (message) {
+        case WM_CREATE:
+            infoWindow(hwnd);
+            MessageBox(hwnd, "aparaeu", "info", MB_ICONINFORMATION);
+            return 0;
+
+        case WM_COMMAND: {
+            switch (LOWORD(wparam)) {
+                
+            
+                default:
+                    break;
+            }
+            return 0;
+        }  
+            
+        case WM_PAINT: {
+            HDC hdc = BeginPaint(hwnd, &ps);
+
+            FillRect(hdc, &ps.rcPaint, (HBRUSH) (COLOR_3DFACE+1));
+
+            EndPaint(hwnd, &ps);
+        
+            return 0;
+        }
+
+        case WM_CLOSE:
+            DestroyWindow(hwnd);
+            return 0;
+        case WM_DESTROY:
+            
+            return 0;
+
+        default:
+            return DefWindowProc(hwnd, message, wparam, lparam);
+    }
+}
+
 
 BOOL CALLBACK SetFontProc(HWND hwnd, LPARAM lparam) {
     SendMessage(hwnd, WM_SETFONT, 0, lparam);

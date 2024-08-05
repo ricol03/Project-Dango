@@ -59,7 +59,8 @@
 #define IDW_SEARCH_BUTTON_WATCH             201
 #define IDW_SEARCH_BUTTON_SEARCH            202
 #define IDW_SEARCH_BUTTON_CANCEL            203
-#define IDW_SETTINGS_BUTTON_APPLY           204
+#define IDW_SEARCH_BUTTON_SELECT            204
+#define IDW_SETTINGS_BUTTON_APPLY           205
 
 #define IDW_SETTINGS_BUTTON_OK              210
 #define IDW_SETTINGS_BUTTON_CANCEL          211

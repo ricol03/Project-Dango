@@ -25,6 +25,7 @@ char * TsearchConnection(HWND hwnd, char * query, result results[]);
 int episodesConnection(HWND hwnd, char * id, episode episodes[]);
 int epnumConnection(HWND hwnd, char * resultid);
 char * eplinkConnection(HWND hwnd, char * epid);
-int getinfoConnection(HWND hwnd, trendinganimeinfo shows[]);
+int getInfoConnection(HWND hwnd, char * epid, animeinfo info);
+int getTrendsConnection(HWND hwnd, trendinganimeinfo shows[]);
 
 #endif

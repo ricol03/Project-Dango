@@ -341,7 +341,10 @@ char * eplinkConnection(HWND hwnd, char * epid) {
         return 0;
 }
 
-int getinfoConnection(HWND hwnd, trendinganimeinfo shows[]) {
+int getInfoConnection(HWND hwnd, char * epid, animeinfo info) {
+
+    parseRequestText2(strmatrix[1], epid);
+
     HINTERNET hsession2 = WinHttpOpen(L"Dango/1.0", WINHTTP_ACCESS_TYPE_DEFAULT_PROXY, WINHTTP_NO_PROXY_NAME, WINHTTP_NO_PROXY_BYPASS, 0);
     if (hsession2 == NULL) {
         MessageBox(hwnd, "WinHttpOpen failed!", "Error", MB_ICONERROR);
@@ -361,7 +364,7 @@ int getinfoConnection(HWND hwnd, trendinganimeinfo shows[]) {
         return 0;
     }
 
-    HINTERNET hrequest2 = WinHttpOpenRequest(hconnect2, L"GET", L"/anime/gogoanime/popular", NULL, WINHTTP_NO_REFERER, WINHTTP_DEFAULT_ACCEPT_TYPES, 0);
+    HINTERNET hrequest2 = WinHttpOpenRequest(hconnect2, L"GET", requestedquery2, NULL, WINHTTP_NO_REFERER, WINHTTP_DEFAULT_ACCEPT_TYPES, 0);
     if (hrequest2 == NULL) {
         MessageBox(hwnd, "WinHttpOpenRequest failed!", "Error", MB_ICONERROR);
         wprintf(L"\n %s | %lu", requestedquery2, GetLastError());
@@ -375,7 +378,47 @@ int getinfoConnection(HWND hwnd, trendinganimeinfo shows[]) {
     if (WinHttpSendRequest(hrequest2, WINHTTP_NO_ADDITIONAL_HEADERS, 0, WINHTTP_NO_REQUEST_DATA, 0, 0, 0)) {
         if (WinHttpReceiveResponse(hrequest2, NULL)) {
             jsonstring = winHttpGetResponse(hrequest2, hconnect2, hsession2);
-            return getTrendingInfo(jsonstring, shows);
+            return getShowInfo(jsonstring, info);
+        }   
+    } else
+        return 0;
+}
+
+int getTrendsConnection(HWND hwnd, trendinganimeinfo shows[]) {
+    HINTERNET hsession2 = WinHttpOpen(L"Dango/1.0", WINHTTP_ACCESS_TYPE_DEFAULT_PROXY, WINHTTP_NO_PROXY_NAME, WINHTTP_NO_PROXY_BYPASS, 0);
+    if (hsession2 == NULL) {
+        MessageBox(hwnd, "WinHttpOpen failed!", "Error", MB_ICONERROR);
+        printf("\n %lu", GetLastError());
+        return 0;
+    }
+
+    DWORD dwprotocols = WINHTTP_FLAG_SECURE_PROTOCOL_TLS1_2;
+    WinHttpSetOption(hsession2, WINHTTP_OPTION_SECURE_PROTOCOLS, &dwprotocols, sizeof(dwprotocols));
+
+    LPSTR servernew = serverAddressInitializer();
+    
+    HINTERNET hconnect2 = WinHttpConnect(hsession2, servernew, (WORD)atoi(port), 0);
+    if (hconnect2 == NULL) {
+        MessageBox(hwnd, "WinHttpConnect failed!", "Error", MB_ICONERROR);
+        printf("\n %lu", GetLastError());
+        return 0;
+    }
+
+    HINTERNET hrequest2 = WinHttpOpenRequest(hconnect2, L"GET", strmatrix[2], NULL, WINHTTP_NO_REFERER, WINHTTP_DEFAULT_ACCEPT_TYPES, 0);
+    if (hrequest2 == NULL) {
+        MessageBox(hwnd, "WinHttpOpenRequest failed!", "Error", MB_ICONERROR);
+        wprintf(L"\n %s | %lu", requestedquery2, GetLastError());
+        WinHttpCloseHandle(hconnect2);
+        WinHttpCloseHandle(hsession2);
+        return 0;
+    }
+
+    char * jsonstring;
+
+    if (WinHttpSendRequest(hrequest2, WINHTTP_NO_ADDITIONAL_HEADERS, 0, WINHTTP_NO_REQUEST_DATA, 0, 0, 0)) {
+        if (WinHttpReceiveResponse(hrequest2, NULL)) {
+            jsonstring = winHttpGetResponse(hrequest2, hconnect2, hsession2);
+            return getTrendingShows(jsonstring, shows);
         }   
     } else
         return 0;
