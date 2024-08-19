@@ -24,14 +24,15 @@ typedef struct {
 
 typedef struct {
     TCHAR title[128];
-    TCHAR description[2048];
+    WCHAR description[2048];
     TCHAR imageurl[512];
     TCHAR date[10];
     TCHAR episodes[4];
-    TCHAR type[8];
+    TCHAR type[16];
     TCHAR status[16];
     //false: sub | true: dub
     BOOL isdub;
+    BOOL isempty;
 } animeinfo;
 
 //test struct
@@ -49,7 +50,7 @@ int searchWindow(HWND hwnd);
 int settingsWindow(HWND hwnd);
 BOOL hideSearch();
 BOOL showSearch();
-int searchResults(HWND hwnd, char * query);
+int searchResults(HWND hwnd, wchar_t * query);
 int infoWindow(HWND hwnd);
 BOOL showSettings();
 BOOL hideSettings();

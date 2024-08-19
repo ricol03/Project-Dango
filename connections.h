@@ -13,19 +13,19 @@ typedef union {
     int number;
 } connections;
 
-char* winHttpGetResponse(HINTERNET hRequest, HINTERNET hConnect, HINTERNET hSession);
+wchar_t * winHttpGetResponse(HINTERNET hRequest, HINTERNET hConnect, HINTERNET hSession);
 
-void parseRequestText(char * uri, char * query);
-LPCSTR TparseRequestText(char * uri, char * query);
+void parseRequestText(wchar_t * uri, wchar_t * query);
+LPCSTR TparseRequestText(wchar_t * uri, wchar_t * query);
 void parseRequestText2(char * uri, char * query);
-LPSTR serverAddressInitializer();
+LPWSTR serverAddressInitializer();
 
-int searchConnection(HWND hwnd, char * query, result results[]);
-char * TsearchConnection(HWND hwnd, char * query, result results[]);
-int episodesConnection(HWND hwnd, char * id, episode episodes[]);
-int epnumConnection(HWND hwnd, char * resultid);
-char * eplinkConnection(HWND hwnd, char * epid);
-int getInfoConnection(HWND hwnd, char * epid, animeinfo info);
+int searchConnection(HWND hwnd, wchar_t * query, result results[]);
+wchar_t * TsearchConnection(HWND hwnd, wchar_t * query, result results[]);
+int episodesConnection(HWND hwnd, wchar_t * id, episode episodes[]);
+int epnumConnection(HWND hwnd, wchar_t * resultid);
+wchar_t * eplinkConnection(HWND hwnd, wchar_t * epid);
+animeinfo getInfoConnection(HWND hwnd, wchar_t * epid, animeinfo info);
 int getTrendsConnection(HWND hwnd, trendinganimeinfo shows[]);
 
 #endif

@@ -8,12 +8,12 @@ extern HWND hwndnetworktab;
 extern HWND hproviderlist;
 extern HWND hserverbox, hportbox;
 
-char server[32];
-char provider[32];
-char protocol[6];
-char port[6];
+wchar_t server[32];
+wchar_t provider[32];
+wchar_t protocol[6];
+wchar_t port[6];
 
-char lang[5];
+wchar_t lang[5];
 
 void readyingFile() {
     fr = fopen(SETTINGSFILENAME, "r");
@@ -32,7 +32,7 @@ int readSettings() {
         
         //strcpy(provider, savedProvider);
     } else {
-        MessageBox(NULL, "Settings not found", "Error", MB_ICONERROR);
+        MessageBox(NULL, L"Settings not found", L"Error", MB_ICONERROR);
     } 
 
     fclose(fr);
@@ -43,15 +43,17 @@ int saveSettings() {
 
     GetWindowText(hserverbox, server, 64);
 
-    MessageBox(NULL, server, "Info", MB_ICONINFORMATION);
+    MessageBox(NULL, server, L"Info", MB_ICONINFORMATION);
 
     if (SendDlgItemMessage(hwndnetworktab, IDW_NETWORK_RADIO_HTTP, BM_GETCHECK, 0, 0) == BST_CHECKED) {
-        strcpy(protocol, "HTTP");
+        wcscpy(protocol, L"HTTP");
+        MessageBox(NULL, L"1", L"Warning", MB_ICONWARNING);
     } else if (SendDlgItemMessage(hwndnetworktab, IDW_NETWORK_RADIO_HTTPS, BM_GETCHECK, 0, 0) == BST_CHECKED) {
-        strcpy(protocol, "HTTPS");
+        wcscpy(protocol, L"HTTPS");
+        MessageBox(NULL, L"2", L"Warning", MB_ICONWARNING);
     } else {
-        MessageBox(NULL, "No protocol specified, default will be HTTP.", "Warning", MB_ICONWARNING);
-        strcpy(protocol, "HTTP");
+        MessageBox(NULL, L"No protocol specified, default will be HTTP.", L"Warning", MB_ICONWARNING);
+        wcscpy(protocol, L"HTTP");
     }
     
     fwrite(server, sizeof(server), 1, fw);
@@ -60,19 +62,24 @@ int saveSettings() {
         GetWindowText(hportbox, port, sizeof(port));
         printf("000000000");
     } else {
-        if (!strcmp(protocol, "HTTP")) {
+        if (wcscmp(protocol, L"HTTP")) {
             printf("aaaaa");
-            strcpy(port, "80");
-        } else if (!strcmp(protocol, "HTTPS")) {
+            wcscpy(port, L"80");
+        } else if (wcscmp(protocol, L"HTTPS")) {
             printf("bbbbbb");
-            strcpy(port, "443");
+            wcscpy(port, L"443");
         } else 
-            MessageBox(NULL, "error", "error", MB_ICONERROR); 
+            MessageBox(NULL, L"error", L"error", MB_ICONERROR); 
     }
     
     fwrite(port, sizeof(port), 1, fw);
     fwrite(provider, sizeof(provider), 1, fw);
     
+
+    printf("\n%ls", server);
+    printf("\n%ls", protocol);
+    printf("\n%ls", port);
+    printf("\n%ls", provider);
     
     //fwrite(lang, sizeof(lang), 1, fw);
 

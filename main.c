@@ -66,7 +66,7 @@ extern HMENU hsubmenusearch;
 boolean searchtoggled = FALSE;
 boolean settingstoggled = FALSE;
 
-extern const char* localfile;
+extern const wchar_t * localfile;
 extern result results[];
 extern episode episodes[];
 extern stream streams[];
@@ -84,16 +84,18 @@ typedef struct stbInfo {
     int width, height, planes;
 } stbInfo;
 
-extern char provider[32];
-extern char lang[5];
+extern wchar_t provider[32];
+extern wchar_t lang[5];
 
 //video stuhf
 libvlc_instance_t* linst;
 libvlc_media_player_t* mplay;
 libvlc_media_t* media;
-extern char * videolink;
+extern wchar_t * videolink;
 
-int WINAPI WinMain(HINSTANCE hinstance, HINSTANCE hprevinstance, PSTR lpcmdline, int nshowcmd) {
+int WINAPI wWinMain(HINSTANCE hinstance, HINSTANCE hprevinstance, PWSTR lpcmdline, int nshowcmd) {
+
+    setlocale(LC_ALL, "");
 
     #pragma region MainWindow
     WNDCLASS mainwindowclass = { 0 };
@@ -108,7 +110,7 @@ int WINAPI WinMain(HINSTANCE hinstance, HINSTANCE hprevinstance, PSTR lpcmdline,
     hwndmain = CreateWindowEx(
         0,
         MAIN_CLASS,
-        "Project Dango",
+        L"Project Dango",
         WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_ICONIC | WS_ACTIVECAPTION | WS_VISIBLE,
         CW_USEDEFAULT, CW_USEDEFAULT, MAINWINDOWWIDTH, MAINWINDOWHEIGHT,
         NULL,
@@ -139,7 +141,7 @@ int WINAPI WinMain(HINSTANCE hinstance, HINSTANCE hprevinstance, PSTR lpcmdline,
     hwndsearch = CreateWindowEx(
         0,
         SEARCH_CLASS,
-        "Search",
+        L"Search",
         WS_CAPTION | WS_SYSMENU,
         CW_USEDEFAULT, CW_USEDEFAULT, SEARCHWINDOWWIDTH, SEARCHWINDOWHEIGHT,
         NULL,
@@ -253,7 +255,7 @@ int createSettingsWindow(HINSTANCE hinstance) {
         hwndsettings = CreateWindowEx(
             0,
             SETTINGS_CLASS,
-            "Settings",
+            L"Settings",
             WS_CAPTION,
             CW_USEDEFAULT, CW_USEDEFAULT, SETTINGSWINDOWWIDTH, SETTINGSWINDOWHEIGHT,
             NULL,
@@ -355,7 +357,7 @@ int createLanguageTab() {
 int createVideoWindow(HINSTANCE hinstance) {
 
     //TODO: MAKE A PROPER WINDOW TITLE
-    char * windowtitle = strcat(windowtitle, "a");
+    TCHAR * windowtitle = strcat(windowtitle, "a");
 
     hwndvideo = CreateWindowEx(
         0,
@@ -380,7 +382,7 @@ int createInfoWindow(HINSTANCE hinstance) {
     hwndinfo = CreateWindowEx(
         0,
         TEST_CLASS,
-        "Info",
+        L"Info",
         WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_ICONIC | WS_ACTIVECAPTION,
         CW_USEDEFAULT, CW_USEDEFAULT, 800, 600,
         NULL,
@@ -419,15 +421,12 @@ LRESULT CALLBACK MainWindowProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM 
             switch (LOWORD(wparam)) {
 
                 case ID_TEST: {
-                    MessageBox(hwnd, "CLicou", "Info", MB_ICONINFORMATION);
-
                     createVideoWindow(GetModuleHandle(NULL));
 
                     ShowWindow(hwndvideo, SW_SHOW);
                     UpdateWindow(hwndvideo);
 
                     SetForegroundWindow(hwndvideo);
-
                 }
 
                 #pragma region won
@@ -494,11 +493,13 @@ LRESULT CALLBACK MainWindowProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM 
                 case IDW_SEARCH_BUTTON_SELECT: {
                     //TODO: put this logic on the eventual 'select' button
                     memset(&episodes, 0, sizeof(episode));
+                    memset(&show, 0, sizeof(animeinfo));
                     int item = (int)SendMessage(hshowlistbox, LB_GETCURSEL, 0, 0);
                     int i = (int)SendMessage(hshowlistbox, LB_GETITEMDATA, item, 0);
-                    MessageBox(hwnd, results[i].id, "Info", MB_ICONINFORMATION);
+                    MessageBox(hwnd, results[i].id, L"Info", MB_ICONINFORMATION);
 
                     strcpy(show.title, results[i].title);
+                    show.isempty = TRUE;
                     number = episodesConnection(hwnd, results[i].id, episodes);
 
                     /*for (int i = 0; i < number; i++) {
@@ -520,15 +521,21 @@ LRESULT CALLBACK MainWindowProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM 
                         
                     }
 
-                    getInfoConnection(hwnd, results[i].id, show);
-
-                    createInfoWindow(GetModuleHandle(NULL));
-
+                    
                     
 
-                    //show info window
-                    ShowWindow(hwndinfo, SW_SHOW);
-                    UpdateWindow(hwndinfo);
+                    show = getInfoConnection(hwnd, results[i].id, show);
+
+                    if (show.isempty == FALSE) {
+                        createInfoWindow(GetModuleHandle(NULL));
+
+                        //show info window
+                        ShowWindow(hwndinfo, SW_SHOW);
+                        UpdateWindow(hwndinfo);
+                    }
+                    
+
+                    
                 }
                 return 0;
 
@@ -579,7 +586,7 @@ LRESULT CALLBACK MainWindowProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM 
                             
                             int item = (int)SendMessage(heplistbox, LB_GETCURSEL, 0, 0);
                             int i = (int)SendMessage(heplistbox, LB_GETITEMDATA, item, 0);
-                            MessageBox(hwnd, episodes[i].id, "Info", MB_ICONINFORMATION);
+                            MessageBox(hwnd, episodes[i].id, L"Info", MB_ICONINFORMATION);
 
                             
 
@@ -669,7 +676,7 @@ LRESULT CALLBACK VideoWindowProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM 
 
                 return 0;
             } else {
-                MessageBox(hwnd, "No instance could be created", "Error", MB_ICONERROR);
+                MessageBox(hwnd, L"No instance could be created", L"Error", MB_ICONERROR);
                 return -1;
             }
             AppendMenu(GetSystemMenu(hwnd, FALSE), MF_SEPARATOR, 0, NULL);
@@ -704,7 +711,6 @@ LRESULT CALLBACK VideoWindowProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM 
 
         case WM_DESTROY:
             libvlc_media_player_stop(mplay);
-            printf("este man saiu me daqui");
             libvlc_media_player_release(mplay);
             libvlc_release(linst);
             return 0;
@@ -725,8 +731,11 @@ LRESULT CALLBACK SearchWindowProc (HWND hwnd, UINT message, WPARAM wparam, LPARA
         case WM_COMMAND: {
             switch (LOWORD(wparam)) {
                 case IDW_SEARCH_BUTTON_SEARCH: {
-                    char searchquery[256];
+                    wchar_t searchquery[256];
                     GetWindowText(hsearchbox, searchquery, sizeof(searchquery));
+
+                    MessageBox(NULL, searchquery, L"Info", MB_ICONINFORMATION);
+
                     if (searchquery != NULL) {
                         ShowWindow(hwnd, SW_HIDE);
                         searchtoggled = hideSearch();
@@ -761,7 +770,6 @@ LRESULT CALLBACK SearchWindowProc (HWND hwnd, UINT message, WPARAM wparam, LPARA
         case WM_CLOSE:
         case WM_DESTROY:
             searchtoggled = hideSearch();
-            MessageBox(hwnd, "veio aqui", "warn", MB_ICONWARNING);
             return 0;
 
         default:
@@ -1039,7 +1047,6 @@ LRESULT CALLBACK InfoWindowProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM 
     switch (message) {
         case WM_CREATE:
             infoWindow(hwnd);
-            MessageBox(hwnd, "aparaeu", "info", MB_ICONINFORMATION);
             return 0;
 
         case WM_COMMAND: {

@@ -1,9 +1,9 @@
 #include "tools.h"
 
-extern char provider[32];
+extern wchar_t provider[32];
 
-char auxmatrix1[MAXCONNECTIONS][64] = {"/anime/gogoanime/", "/anime/gogoanime/info/", "/anime/gogoanime/watch/", "d", "e"};
-char auxmatrix2[MAXCONNECTIONS][64] = {"/anime/zoro/", "/anime/zoro/info?id=", "/anime/zoro/watch?episodeId=", "d", "e"};
+wchar_t auxmatrix1[MAXCONNECTIONS][64] = {L"/anime/gogoanime/", L"/anime/gogoanime/info/", L"/anime/gogoanime/watch/", L"d", L"e"};
+wchar_t auxmatrix2[MAXCONNECTIONS][64] = {L"/anime/zoro/", L"/anime/zoro/info?id=", L"/anime/zoro/watch?episodeId=", L"d", L"e"};
 
 
 /*int checkNumProviders() {
@@ -13,20 +13,20 @@ char auxmatrix2[MAXCONNECTIONS][64] = {"/anime/zoro/", "/anime/zoro/info?id=", "
     }
 }*/
 
-//TODO: how do I know when I must change strings if the user swaps provider??
+//TODO: how do I know when I must change strings if the user swaps provider?? (solved)
 int selectStringMatrix() {
     //if (strmatrix[0] == NULL) {
-        if (!strcmp(provider, PROVIDER1)){
+        if (!wcscmp(provider, PROVIDER1)){
             for (int i = 0; i < MAXCONNECTIONS; i++) {
-                strcpy(strmatrix[i], auxmatrix1[i]);
-                printf("\n\ntest %d: %s", i, strmatrix[i]);
+                wcscpy(strmatrix[i], auxmatrix1[i]);
+                printf("\n\ntest %d: %ls", i, strmatrix[i]);
             }
-        } else if (!strcmp(provider, PROVIDER2)) {
+        } else if (!wcscmp(provider, PROVIDER2)) {
             //TODO: move this to provider.h
             
             for (int i = 0; i < MAXCONNECTIONS; i++) {
-                strcpy(strmatrix[i], auxmatrix2[i]);
-                printf("\n\ntest %d: %s", i, strmatrix[i]);
+                wcscpy(strmatrix[i], auxmatrix2[i]);
+                printf("\n\ntest %d: %ls", i, strmatrix[i]);
             }
         }   
     /*} else {

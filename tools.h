@@ -1,3 +1,5 @@
+
+
 #define NO_DSHOW_STRSAFE
 
 #ifdef _WIN32_WINNT_WIN2K
@@ -12,6 +14,7 @@
 #include <stdio.h>
 //#include <winsock2.h>
 #include <Windows.h>
+#include <locale.h>
 #include <wingdi.h>
 #include <string.h>
 //#include <dshow.h>

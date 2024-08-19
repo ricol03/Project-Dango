@@ -24,8 +24,10 @@
                 "-Ilibvlc\\include",
                 "-Llibvlc",
                 "-lvlc",
-                //"-mwindows"
-                "--static"
+                //"-mwindows",
+                "-municode",
+                "--static",
+                "-Og"
             ],
             "options": {
                 "cwd": "${fileDirname}"

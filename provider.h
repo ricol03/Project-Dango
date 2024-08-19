@@ -4,11 +4,11 @@
 #ifndef PROVIDER_H_
 #define PROVIDER_H_
 
-#define PROVIDER1 "Gogoanime"
-#define PROVIDER2 "Zoro"
+#define PROVIDER1 L"Gogoanime"
+#define PROVIDER2 L"Zoro"
 
 
-char strmatrix[5][64];
+wchar_t strmatrix[5][64];
 
 /*typedef struct { 
     char * key;

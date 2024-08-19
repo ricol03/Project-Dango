@@ -4,8 +4,8 @@ extern HWND hwndmain;
 extern HWND hwndsearch;
 extern HWND hwndsettings;
 
-char providers[6][16] = {
-    PROVIDER1, PROVIDER2, "", "", "", ""
+wchar_t providers[6][16] = {
+    PROVIDER1, PROVIDER2, L"", L"", L"", L""
 };
 
 //main window
@@ -60,7 +60,7 @@ HMENU hsubmenusearch;
 HMENU hsubmenusettings; 
 HMENU hsubmenuabout; 
 
-const char* localfile;
+const wchar_t * localfile;
 
 result results[100];
 episode episodes[100];
@@ -68,10 +68,10 @@ stream streams[8];
 trendinganimeinfo shows[12];
 animeinfo show;
 
-extern char provider[32];
-extern char server[32];
-extern char protocol[6];
-extern char port[6];
+extern wchar_t provider[32];
+extern wchar_t server[32];
+extern wchar_t protocol[6];
+extern wchar_t port[6];
 
 void createUtils() {
     htitlefont = CreateFont(
@@ -138,7 +138,7 @@ int homeWindow(HWND hwnd) {
     if (!strcmp(provider, PROVIDER1)) {
         HWND htesttext = CreateWindow(
             WC_STATIC, 
-            TEXT("Under construction"),
+            L"Under construction",
             WS_VISIBLE | WS_CHILD,
             250, 150, 450, 200,
             hwnd, 
@@ -169,10 +169,15 @@ int homeWindow(HWND hwnd) {
             NULL
         );
     }
+
+    const WCHAR * labelText = "é`Àçõaz it works";
         
     htext = CreateWindow(
         TEXT("STATIC"),
-        TEXT("Trending Content"),
+        
+        L"Trending Content",
+        //L"トレンドコンテンツ",
+        //labelText,
         WS_VISIBLE | WS_CHILD,
         25, 25, 450, 50,
         hwnd,
@@ -184,8 +189,8 @@ int homeWindow(HWND hwnd) {
     SendMessage(htext, WM_SETFONT, (WPARAM)htitlefont, (LPARAM)NULL);
 
     hbutton = CreateWindow(
-        TEXT("BUTTON"),
-        TEXT("Search anime"),
+        WC_BUTTON,
+        L"Search anime",
         WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,
         400, 25, 120, 30,
         hwnd,
@@ -202,18 +207,18 @@ int homeWindow(HWND hwnd) {
     hsubmenusettings    = CreatePopupMenu();
     hsubmenuabout       = CreatePopupMenu();
 
-    AppendMenu(hsubmenufile, MF_STRING, IDM_FILE_HOME, "Home");
+    AppendMenu(hsubmenufile, MF_STRING, IDM_FILE_HOME, L"Home");
     AppendMenu(hsubmenufile, MF_SEPARATOR, 0, NULL);
-    AppendMenu(hsubmenufile, MF_STRING, IDM_FILE_CLOSE, "Exit");
-    AppendMenu(hsubmenusearch, MF_STRING, IDM_SEARCH_SEARCHBOX, "Search box...");
-    AppendMenu(hsubmenusettings, MF_STRING, IDM_SETTINGS_SETTINGS, "Settings");
-    AppendMenu(hsubmenuabout, MF_STRING, IDM_ABOUT_HELP, "Ajuda");
+    AppendMenu(hsubmenufile, MF_STRING, IDM_FILE_CLOSE, L"Exit");
+    AppendMenu(hsubmenusearch, MF_STRING, IDM_SEARCH_SEARCHBOX, L"Search box...");
+    AppendMenu(hsubmenusettings, MF_STRING, IDM_SETTINGS_SETTINGS, L"Settings");
+    AppendMenu(hsubmenuabout, MF_STRING, IDM_ABOUT_HELP, L"Helo");
     AppendMenu(hsubmenuabout, MF_SEPARATOR, 0, NULL);
-    AppendMenu(hsubmenuabout, MF_STRING, IDM_ABOUT_ABOUT, "Acerca de");
-    AppendMenu(hmenu, MF_STRING | MF_POPUP, (UINT_PTR)hsubmenufile, "File");
-    AppendMenu(hmenu, MF_STRING | MF_POPUP, (UINT_PTR)hsubmenusearch, "Search");
-    AppendMenu(hmenu, MF_STRING | MF_POPUP, (UINT_PTR)hsubmenusettings, "Settings");
-    AppendMenu(hmenu, MF_STRING | MF_POPUP, (UINT_PTR)hsubmenuabout, "About");
+    AppendMenu(hsubmenuabout, MF_STRING, IDM_ABOUT_ABOUT, L"About");
+    AppendMenu(hmenu, MF_STRING | MF_POPUP, (UINT_PTR)hsubmenufile, L"File");
+    AppendMenu(hmenu, MF_STRING | MF_POPUP, (UINT_PTR)hsubmenusearch, L"Search");
+    AppendMenu(hmenu, MF_STRING | MF_POPUP, (UINT_PTR)hsubmenusettings, L"Settings");
+    AppendMenu(hmenu, MF_STRING | MF_POPUP, (UINT_PTR)hsubmenuabout, L"About");
 
     SetMenu(hwnd, hmenu);
 }
@@ -231,7 +236,6 @@ int searchWindow(HWND hwnd) {
     );
 
     if (hsearchlabel == NULL) {
-        MessageBox(hwnd, "Olha o erro", "Erro", MB_ICONERROR);
         printf("Erro do label: %lu", GetLastError());
     }
     
@@ -250,7 +254,7 @@ int searchWindow(HWND hwnd) {
 
     hsearchbutton = CreateWindow(
         TEXT("BUTTON"),
-        TEXT("Search"),
+        L"Search",
         WS_TABSTOP | WS_CHILD | BS_DEFPUSHBUTTON | WS_VISIBLE,
         200, 90, 70, 20,
         hwnd,
@@ -263,7 +267,7 @@ int searchWindow(HWND hwnd) {
 
     hcancelbutton = CreateWindow(
         TEXT("BUTTON"),
-        TEXT("Cancel"),
+        L"Cancel",
         WS_TABSTOP | WS_CHILD | BS_DEFPUSHBUTTON | WS_VISIBLE,
         120, 90, 70, 20,
         hwnd,
@@ -289,22 +293,22 @@ BOOL showSearch() {
     return TRUE;
 }
 
-int searchResults(HWND hwnd, char * query) {
+int searchResults(HWND hwnd, wchar_t * query) {
     destroyVisibleChildWindows(hwnd);
 
     //faz a conexão à api para fazer a pesquisa, e devolve o número de resultados
     int resultsize = searchConnection(hwnd, query, results);
 
     if (resultsize != 0) {
-        MessageBox(hwnd, "Working", "Info", MB_ICONEXCLAMATION);
+        MessageBox(hwnd, L"Working", L"Info", MB_ICONEXCLAMATION);
     } else {
-        MessageBox(hwnd, "No results found or error connecting", "Error", MB_ICONERROR);
+        MessageBox(hwnd, L"No results found or error connecting", L"Error", MB_ICONERROR);
         return 0;
     }
     
     hlisttitle = CreateWindow(
         WC_STATIC,
-        "Search Results",
+        L"Search Results",
         WS_VISIBLE | WS_CHILD,
         25, 25, 350, 50,
         hwnd,
@@ -384,35 +388,56 @@ int searchResults(HWND hwnd, char * query) {
 }
 
 int infoWindow(HWND hwnd) {
-    MessageBox(hwnd, show.title, "Info", MB_ICONINFORMATION);
+    MessageBox(hwnd, show.title, L"Info", MB_ICONINFORMATION);
 
-    HWND hinfotitletext = CreateWindow(
+    HWND hinfotitletext = CreateWindowW(
         WC_STATIC, 
-        "devia dar",
-        WS_VISIBLE | WS_CHILD | WS_BORDER,
-        250, 150, 450, 200,
+        show.title,
+        WS_VISIBLE | WS_CHILD,
+        25, 25, 750, 50,
         hwnd,
         (HMENU)1098,
         (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE),
         NULL
     );
 
+    SendMessage(hinfotitletext, WM_SETFONT, (WPARAM)htitlefont, (LPARAM)NULL);
+
     hdescriptiontext = CreateWindow(
         WC_STATIC, 
         show.description,
         WS_VISIBLE | WS_CHILD,
-        250, 150, 450, 200,
+        250, 100, 525, 550,
         hwnd,
         (HMENU)1099,
         (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE),
         NULL
     );
 
-    HWND hokbuttons = CreateWindow(
+    TCHAR totalepisodes[32];
+    strcpy(totalepisodes, IDT_TOTALEPISODES);
+    strcat(totalepisodes, show.episodes);
+
+    MessageBox(NULL, totalepisodes, "Info", MB_OK);
+
+    HWND htotalepisodes = CreateWindow(
+        WC_STATIC, 
+        totalepisodes,
+        WS_VISIBLE | WS_CHILD,
+        25, 500, 350, 50,
+        hwnd,
+        (HMENU)1098,
+        (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE),
+        NULL
+    );
+
+    //free(totalepisodes);
+
+    HWND hokbutton = CreateWindow(
         WC_BUTTON,
-        TEXT("OK"),
+        TEXT("Watch"),
         WS_TABSTOP | WS_CHILD | BS_DEFPUSHBUTTON | WS_VISIBLE,
-        155, 192, 70, 25,
+        700, 500, 70, 25,
         hwnd,
         (HMENU)11111,
         (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE),
@@ -438,7 +463,7 @@ int settingsWindow(HWND hwnd) {
     htabtest = CreateWindowEx(
         WS_EX_TRANSPARENT,
         WC_TABCONTROL,
-        "",
+        L"",
         WS_CHILDWINDOW | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_VISIBLE,
         5, 5, 380, 180,
         hwnd,
@@ -456,13 +481,13 @@ int settingsWindow(HWND hwnd) {
     TCITEM tcnetwork, tcprovider, tclang;
 
     tcnetwork.mask = TCIF_TEXT;
-    tcnetwork.pszText = "Network";
+    tcnetwork.pszText = L"Network";
 
     tcprovider.mask = TCIF_TEXT;
-    tcprovider.pszText = "Provider";
+    tcprovider.pszText = L"Provider";
 
     tclang.mask = TCIF_TEXT;
-    tclang.pszText = "Language";
+    tclang.pszText = L"Language";
 
     icex.dwICC = ICC_TAB_CLASSES;
     icex.dwSize = sizeof(INITCOMMONCONTROLSEX);
@@ -604,17 +629,17 @@ int networkTab(HWND hwnd) {
     printf("chegou aqui");
 
     //sets the enabled radio button
-    if (!strcmp(protocol, "HTTP")) {
+    if (!wcscmp(protocol, L"HTTP")) {
         SendDlgItemMessage(hwnd, IDW_NETWORK_RADIO_HTTP, BM_SETCHECK, 1, 0);
         SendDlgItemMessage(hwnd, IDW_NETWORK_RADIO_HTTPS, BM_SETCHECK, 0, 0);
         printf("e aqui");
-    } else if (!strcmp(protocol, "HTTPS")) {
+    } else if (!wcscmp(protocol, L"HTTPS")) {
         SendDlgItemMessage(hwnd, IDW_NETWORK_RADIO_HTTPS, BM_SETCHECK, 1, 0);
         SendDlgItemMessage(hwnd, IDW_NETWORK_RADIO_HTTP, BM_SETCHECK, 0, 0);
         printf("e aqui2");
     }
 
-    if ((!strcmp(port, "443") && !strcmp(protocol, "HTTPS")) || (!strcmp(port, "80") && !strcmp(protocol, "HTTP"))) {
+    if ((!wcscmp(port, L"443") && !wcscmp(protocol, L"HTTPS")) || (!wcscmp(port, L"80") && !wcscmp(protocol, L"HTTP"))) {
         SendDlgItemMessage(hwnd, IDW_NETWORK_CHECKBOX_PORT, BM_SETCHECK, 1, 0);
         SetWindowText(hportbox, port);
         EnableWindow(GetDlgItem(hwnd, IDW_NETWORK_EDIT_PORT), FALSE);

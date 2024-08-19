@@ -4,6 +4,7 @@ main.exe
 connections.exe
 provider.exe
 video.exe
+tools.exe
 settings.dat
 test.jpg
 ai.txt
@@ -13,3 +14,4 @@ libvlc/
 plugins/
 .vscode/
 
+connections.exe
