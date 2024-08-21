@@ -1,7 +1,6 @@
 file.exe
 json.exe
 main.exe
-connections.exe
 provider.exe
 video.exe
 tools.exe
@@ -13,5 +12,6 @@ wmcreate.exe
 libvlc/
 plugins/
 .vscode/
-
+a.jpg
+kanon-2006.jpg
 connections.exe

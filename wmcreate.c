@@ -73,7 +73,12 @@ extern wchar_t server[32];
 extern wchar_t protocol[6];
 extern wchar_t port[6];
 
+int x, y, c;
+unsigned char * imgdata;
+
 void createUtils() {
+    createDirectory();
+
     htitlefont = CreateFont(
         32,
         0,
@@ -371,10 +376,10 @@ int searchResults(HWND hwnd, wchar_t * query) {
         return 1;
     }
 
-    for (int i = 0; i < resultsize; i++) {
+    for (int i = 0; i <= resultsize; i++) {
         int position = (int)SendMessage(hshowlistbox, LB_INSERTSTRING, 0, (LPARAM)results[i].title);
         SendMessage(hshowlistbox, LB_SETITEMDATA, position, (LPARAM)i);
-        printf("\n%s", results[i].id);
+        printf("\n%ls", results[i].id);
     }
     
     ShowWindow(hshowlistbox, SW_SHOWDEFAULT);
@@ -388,6 +393,8 @@ int searchResults(HWND hwnd, wchar_t * query) {
 }
 
 int infoWindow(HWND hwnd) {
+    printf("\n\ntitle: %ls", show.title);
+
     MessageBox(hwnd, show.title, L"Info", MB_ICONINFORMATION);
 
     HWND hinfotitletext = CreateWindowW(
@@ -403,37 +410,56 @@ int infoWindow(HWND hwnd) {
 
     SendMessage(hinfotitletext, WM_SETFONT, (WPARAM)htitlefont, (LPARAM)NULL);
 
-    hdescriptiontext = CreateWindow(
+    hdescriptiontext = CreateWindowW(
         WC_STATIC, 
         show.description,
         WS_VISIBLE | WS_CHILD,
-        250, 100, 525, 550,
+        270, 75, 505, 550,
         hwnd,
         (HMENU)1099,
         (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE),
         NULL
     );
 
-    TCHAR totalepisodes[32];
-    strcpy(totalepisodes, IDT_TOTALEPISODES);
-    strcat(totalepisodes, show.episodes);
+    TCHAR infogroupone[64];
+    wcscpy(infogroupone, IDT_SHOWSTATUS);
+    wcscat(infogroupone, show.status);
+    wcscat(infogroupone, IDT_SHOWDATE);
+    wcscat(infogroupone, show.date);
 
-    MessageBox(NULL, totalepisodes, "Info", MB_OK);
+    TCHAR infogrouptwo[64];
+    wcscpy(infogrouptwo, IDT_SHOWTYPE);
+    wcscat(infogrouptwo, show.type);
+    wcscat(infogrouptwo, IDT_TOTALEPISODES);
+    wcscat(infogrouptwo, show.episodes);
 
-    HWND htotalepisodes = CreateWindow(
+    
+
+    HWND hinfogroupone = CreateWindowW(
         WC_STATIC, 
-        totalepisodes,
+        infogroupone,
         WS_VISIBLE | WS_CHILD,
-        25, 500, 350, 50,
+        25, 480, 350, 50,
         hwnd,
         (HMENU)1098,
         (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE),
         NULL
     );
 
+    HWND hinfogrouptwo = CreateWindowW(
+        WC_STATIC, 
+        infogrouptwo,
+        WS_VISIBLE | WS_CHILD,
+        25, 500, 350, 50,
+        hwnd,
+        (HMENU)1099,
+        (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE),
+        NULL
+    );
+
     //free(totalepisodes);
 
-    HWND hokbutton = CreateWindow(
+    HWND hokbutton = CreateWindowW(
         WC_BUTTON,
         TEXT("Watch"),
         WS_TABSTOP | WS_CHILD | BS_DEFPUSHBUTTON | WS_VISIBLE,
@@ -443,6 +469,23 @@ int infoWindow(HWND hwnd) {
         (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE),
         NULL
     );
+
+    imgdata = stbi_load("a.jpg", &x, &y, &c, 4);
+    //stbi__jpeg_load()
+    
+    /*printf("Dados: %s\n", imgdata);
+    printf("Altura: %d\n", y);
+    printf("Largura: %d\n", x);
+    printf("n sei: %d", c);*/
+
+    if (imgdata) {
+        MessageBox(NULL, L"Funcionou", L"Info", MB_ICONINFORMATION);
+    } else {
+        MessageBox(NULL, L"Não funcionou", L"Error", MB_ICONERROR);
+        printf("%s", stbi_failure_reason());
+    }
+
+
 }
 
 BOOL showSettings() {

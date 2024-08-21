@@ -8,12 +8,49 @@ extern HWND hwndnetworktab;
 extern HWND hproviderlist;
 extern HWND hserverbox, hportbox;
 
+extern DWORD wversion, wmajorversion, wminorversion, wbuild;
+
 wchar_t server[32];
 wchar_t provider[32];
 wchar_t protocol[6];
 wchar_t port[6];
 
 wchar_t lang[5];
+
+void createDirectory() {
+    TCHAR appdata[64];
+
+    if (wmajorversion == 5) {
+        HRESULT result = SHGetFolderPathW(NULL, CSIDL_APPDATA, NULL, 0, appdata);
+        wcscat(appdata, L"\\ProjectDango");
+
+        if (checkDirectory(appdata)) {
+            BOOL check = CreateDirectory(appdata, NULL);
+
+            if (check == 0) {
+                MessageBox(NULL, L"The folder could not be created", L"Error", MB_ICONERROR);
+                printf("\n\nGetLastError: %lu\n\n", GetLastError());
+            }
+        }
+    } else {
+        HRESULT result = SHGetFolderPathW(NULL, CSIDL_PROFILE, NULL, 0, appdata);
+        wcscat(appdata, L"\\AppData\\Local\\ProjectDango");
+
+        if (checkDirectory(appdata) == -1) {
+            BOOL check = CreateDirectory(appdata, NULL);
+
+            if (check == 0) {
+                MessageBox(NULL, L"The folder could not be created", L"Error", MB_ICONERROR);
+                printf("\n\nGetLastError: %lu\n\n", GetLastError());
+            }
+        }
+    } 
+}
+
+int checkDirectory(TCHAR * pathname) {
+    DWORD check = GetFileAttributes(pathname);
+    return (int)check;
+}
 
 void readyingFile() {
     fr = fopen(SETTINGSFILENAME, "r");

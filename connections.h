@@ -17,12 +17,12 @@ wchar_t * winHttpGetResponse(HINTERNET hRequest, HINTERNET hConnect, HINTERNET h
 
 void parseRequestText(wchar_t * uri, wchar_t * query);
 LPCSTR TparseRequestText(wchar_t * uri, wchar_t * query);
-void parseRequestText2(char * uri, char * query);
+void parseRequestText2(wchar_t * uri, wchar_t * query);
 LPWSTR serverAddressInitializer();
 
 int searchConnection(HWND hwnd, wchar_t * query, result results[]);
 wchar_t * TsearchConnection(HWND hwnd, wchar_t * query, result results[]);
-int episodesConnection(HWND hwnd, wchar_t * id, episode episodes[]);
+int episodesConnection(HWND hwnd, wchar_t * resultid, episode episodes[]);
 int epnumConnection(HWND hwnd, wchar_t * resultid);
 wchar_t * eplinkConnection(HWND hwnd, wchar_t * epid);
 animeinfo getInfoConnection(HWND hwnd, wchar_t * epid, animeinfo info);

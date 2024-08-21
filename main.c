@@ -93,9 +93,17 @@ libvlc_media_player_t* mplay;
 libvlc_media_t* media;
 extern wchar_t * videolink;
 
+extern int x, y, c;
+extern unsigned char * imgdata;
+
+DWORD wversion, wmajorversion, wminorversion, wbuild;
+
 int WINAPI wWinMain(HINSTANCE hinstance, HINSTANCE hprevinstance, PWSTR lpcmdline, int nshowcmd) {
 
     setlocale(LC_ALL, "");
+
+    if (checkVersion())
+        PostQuitMessage(-1);
 
     #pragma region MainWindow
     WNDCLASS mainwindowclass = { 0 };
@@ -246,6 +254,23 @@ int WINAPI wWinMain(HINSTANCE hinstance, HINSTANCE hprevinstance, PWSTR lpcmdlin
     } 
 
     return 0;
+}
+
+int checkVersion() {
+    wversion = GetVersion();
+
+    wmajorversion = (DWORD)(LOBYTE(LOWORD(wversion)));
+    wminorversion = (DWORD)(HIBYTE(LOWORD(wversion)));
+
+    if (wmajorversion >= 5 && wmajorversion < 11) {
+        return 0;
+    } else if (wmajorversion < 5) {
+        MessageBox(NULL, L"This program only runs on Windows 2000 and later.", L"Error", MB_ICONERROR);
+        return 1;
+    } else {
+        MessageBox(NULL, L"Unknown Windows version. Aborting.", L"Error", MB_ICONERROR);
+        return 1;
+    }
 }
 
 int createSettingsWindow(HINSTANCE hinstance) {
@@ -498,7 +523,7 @@ LRESULT CALLBACK MainWindowProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM 
                     int i = (int)SendMessage(hshowlistbox, LB_GETITEMDATA, item, 0);
                     MessageBox(hwnd, results[i].id, L"Info", MB_ICONINFORMATION);
 
-                    strcpy(show.title, results[i].title);
+                    wcscpy(show.title, results[i].title);
                     show.isempty = TRUE;
                     number = episodesConnection(hwnd, results[i].id, episodes);
 
@@ -1048,7 +1073,6 @@ LRESULT CALLBACK InfoWindowProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM 
         case WM_CREATE:
             infoWindow(hwnd);
             return 0;
-
         case WM_COMMAND: {
             switch (LOWORD(wparam)) {
                 
@@ -1064,8 +1088,133 @@ LRESULT CALLBACK InfoWindowProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM 
 
             FillRect(hdc, &ps.rcPaint, (HBRUSH) (COLOR_3DFACE+1));
 
+            BITMAPINFO bmap;
+            HBITMAP hbitmap;
+
+            void * dibdata;
+            //HDC newhdc = GetDC(NULL);
+
+            ZeroMemory(&bmap, sizeof(bmap));
+            bmap.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+            bmap.bmiHeader.biWidth = x;
+            bmap.bmiHeader.biHeight = -y;
+            //tem de ser sempre 1!!!
+            bmap.bmiHeader.biPlanes = 1;
+            bmap.bmiHeader.biBitCount = 32;
+            bmap.bmiHeader.biCompression = BI_RGB;
+
+            /*float aspectratio = (float)bmap.bmiHeader.biWidth / -(float)bmap.bmiHeader.biHeight;
+
+            printf("\n\n\naspect ratio: %f", aspectratio);
+
+            int scaledwidth = 225;
+            int scaledheight = (int)(225 / aspectratio);
+
+            if (scaledheight > 350) {
+                scaledheight = 350;
+                scaledwidth = (int)(350 * aspectratio);
+            }
+
+            printf("\nscaled height: %d", scaledheight);
+            printf("\nscaled width: %d", scaledwidth);
+
+            hbitmap = CreateDIBSection(hdc, &bmap, DIB_RGB_COLORS, &dibdata, NULL, 0);
+
+            //hbitmap = CreateBitmap(x, y, c, 3, a);
+
+            //ReleaseDC(NULL, newhdc);
+            
+            if (hbitmap) {
+
+                
+
+                
+                
+
+
+                RECT rc;
+                GetWindowRect(hwnd, &rc);
+
+                int windowwidth = rc.right - rc.left;
+                int windowheight = rc.bottom - rc.top;
+
+                HDC hdcmem = CreateCompatibleDC(hdc);
+                HBITMAP hbm = (HBITMAP)SelectObject(hdcmem, hbitmap);
+
+                BITMAP bm;
+                GetObject(hbitmap, sizeof(bm), &bm);
+
+                StretchDIBits(hdc, 0, 0, windowwidth, windowheight,
+                                   0, 0, bm.bmWidth, bm.bmHeight,
+                                   dibdata, &bmap, DIB_RGB_COLORS, SRCCOPY);
+                StretchBlt(hdc, 30, 75, scaledwidth, scaledheight, hdcmem, 0, 0, bmap.bmiHeader.biWidth, bmap.bmiHeader.biHeight, SRCCOPY);
+
+                SelectObject(hdcmem, hbm);
+                DeleteDC(hdcmem);
+            } else {
+                MessageBox(NULL, "morreu", "error", MB_ICONERROR);
+            }*/
+
+            float aspectratio = (float)x / (float)y;
+
+            int scaledwidth = 225; // Target width
+            int scaledheight = (int)(scaledwidth / aspectratio);
+
+            if (scaledheight > 350) {
+                scaledheight = 350;
+                scaledwidth = (int)(scaledheight * aspectratio);
+            }
+
+            SetStretchBltMode(hdc, HALFTONE);
+
+            hbitmap = CreateDIBSection(hdc, &bmap, DIB_RGB_COLORS, &dibdata, NULL, 0);
+
+            if (hbitmap) {
+                unsigned char * data = (unsigned char *)imgdata;
+                unsigned char * row1 = (unsigned char *)dibdata;
+
+                for (int i = 0; i < y; i++) {
+                    unsigned char * pixel = (unsigned char *)row1;
+                    unsigned char * pixel2 = (unsigned char *)data;
+                    for (int j = 0; j < x; j++) {
+                        unsigned char r = pixel2[0];
+                        unsigned char g = pixel2[1];
+                        unsigned char b = pixel2[2];
+                        unsigned char a = pixel2[3];
+
+                        pixel[0] = b;
+                        pixel[1] = g;
+                        pixel[2] = r;
+                        pixel[3] = a;
+
+                        pixel += 4;
+                        pixel2 += 4;
+                    } 
+
+                    row1 += x*4;
+                    data += x*4;
+                }
+
+                RECT rc;
+                GetClientRect(hwnd, &rc);
+
+                HDC hdcmem = CreateCompatibleDC(hdc);
+                HBITMAP hbmold = (HBITMAP)SelectObject(hdcmem, hbitmap);
+
+                StretchBlt(hdc, 30, 75, scaledwidth, scaledheight,
+                   hdcmem, 0, 0, x, y, SRCCOPY);
+
+                SelectObject(hdcmem, hbmold);
+                DeleteDC(hdcmem);
+                DeleteObject(hbitmap);
+                
+            } else {
+                MessageBox(hwnd, L"Failed to create DIB section", L"Error", MB_ICONERROR);
+            }
+
             EndPaint(hwnd, &ps);
-        
+            DeleteObject(hdc);
+
             return 0;
         }
 

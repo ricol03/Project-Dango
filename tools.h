@@ -24,6 +24,7 @@
 #include <tchar.h>
 #include <commctrl.h>
 #include <process.h>
+#include <shlobj.h>
 
 //external headers
 

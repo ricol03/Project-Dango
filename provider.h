@@ -7,9 +7,6 @@
 #define PROVIDER1 L"Gogoanime"
 #define PROVIDER2 L"Zoro"
 
-
-wchar_t strmatrix[5][64];
-
 /*typedef struct { 
     char * key;
     char * value;

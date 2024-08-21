@@ -14,8 +14,9 @@ LRESULT CALLBACK InfoWindowProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM 
 
 void videoWindowWrapper(void* data);
 DWORD WINAPI settingsWindowWrapper(void* arg);
-int WINAPI WinMain(HINSTANCE hinstance, HINSTANCE hprevinstance, PSTR lpcmdline, int nshowcmd);
+int WINAPI wWinMain(HINSTANCE hinstance, HINSTANCE hprevinstance, PWSTR lpcmdline, int nshowcmd);
 
+int checkVersion();
 int createSettingsWindow(HINSTANCE hinstance);
 int createNetworkTab();
 int createProviderTab();

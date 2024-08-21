@@ -16,7 +16,7 @@ wchar_t * getJsonId(wchar_t * jsonstring, const wchar_t * key, TCHAR * value, in
         return NULL;
     }
 
-    wprintf(L"String de entrada: \n\n%ls\n\n", jsonstring);
+    //wprintf(L"String de entrada: \n\n%ls\n\n", jsonstring);
 
     //printf("\n\n cheque %d", check);
 
@@ -50,14 +50,14 @@ wchar_t * getJsonId(wchar_t * jsonstring, const wchar_t * key, TCHAR * value, in
     //"verifica" se a string imagekey existe na jsonstring
 
     //ele queima-se todo aqui man, vê lá isso
-    wprintf(L"\n\nBefore check: \n%ls", jsonstring);
-    wprintf(L"\n\nKey: %ls\n\n", key);
+    //wprintf(L"\n\nBefore check: \n%ls", jsonstring);
+    //wprintf(L"\n\nKey: %ls\n\n", key);
     wchar_t * start = wcsstr(jsonstring, key);
-    wprintf(L"Start value: %ls\n", start);
-    wprintf(L"JSON value: %s\n", jsonstring);
+    //wprintf(L"Start value: %ls\n", start);
+    //wprintf(L"JSON value: %s\n", jsonstring);
 
-    printf("valor do start: %s", start);
-    printf("valor do json: %s", jsonstring);
+    //printf("valor do start: %s", start);
+    //printf("valor do json: %s", jsonstring);
     
     //se existir
     if (start != NULL) {
@@ -67,7 +67,7 @@ wchar_t * getJsonId(wchar_t * jsonstring, const wchar_t * key, TCHAR * value, in
         //printf("\n\npasso 2");
 
         wchar_t * end = wcsstr(start, endquote);
-        printf("\n\n\nEle dá print disto amigo (end): %s", end);
+        //printf("\n\n\nEle dá print disto amigo (end): %s", end);
 
         if (end != NULL) {
             //printf("\n\npasso 3");
@@ -80,7 +80,7 @@ wchar_t * getJsonId(wchar_t * jsonstring, const wchar_t * key, TCHAR * value, in
             
             if (check != 3) {
                 value[length] = '\0';
-                printf("\nvalor: %s", value);
+                //printf("\nvalor: %s", value);
 
                 /*test.value = start;
                 return test;    */
@@ -98,32 +98,32 @@ wchar_t * getJsonId(wchar_t * jsonstring, const wchar_t * key, TCHAR * value, in
 int getEpisodesNum(wchar_t * jsonstring, const wchar_t * key) {
 
     //printf("\n\n\nele chegou ao getepisodesnum");
-    //printf("\ncom isto: %s", jsonstring);
+    //printf("\ncom isto: %ls", jsonstring);
 
-    const wchar_t * start = strstr(jsonstring, key);
-    //printf("\n\n\nstart do episodes: %s", start);
-    //printf("\n\n\n\nposição do key %c", start[strlen(key)]);
+    wchar_t * start = wcsstr(jsonstring, key);
+    //printf("\n\n\nstart do episodes: %ls", start);
+    //printf("\n\n\n\nposição do key: %c", start[wcslen(key)]);
 
     if (start != NULL) {
         // Check if the key is standalone (not part of another key)
-        if (start[strlen(key) - 1] == ':' || start[strlen(key) - 1] == ' ') {
-            int value;
-            if (sscanf(start + strlen(key), "%d", &value) == 1) {
+        //if (start[wcslen(key) - 1] == ':' || start[wcslen(key) - 1] == ' ') {
+            int value = 0;
+            if (wscanf(start + wcslen(key), "%d", &value) == 1) {
                 //printf("\n\n\n\n\nencontrou o coiso bom: %d", value);
                 return value;
             } else {
                 //printf("\n\n\n\n\nnão encontrou nada doutor");
             }
                 
-            //printf("\n\n\n\n\n\nstarto: %s", start);
-            //printf("\n\nFound key: %s\n", key);
+            //printf("\n\n\n\n\n\nstarto: %ls", start);
+            //printf("\n\nFound key: %ls\n", key);
             
-        } else {
-            //printf("\n\n\n\n\nnão verificou direitinho");
-        }
+        /*} else {
+            printf("\n\n\n\n\nnão verificou direitinho");
+        }*/
         
     } else {
-        //printf("\n\n\n\n\nnem o start é nulo");
+        printf("\n\n\n\n\nnem o start é nulo");
     }
 }
 
@@ -143,11 +143,11 @@ int parseResultsJson(wchar_t * jsonstring, result results[]) {
     //TODO: change this to a do while or a while
     for (int i = 0; i < 8; i++) {
         getJsonId(jsonstring, idkey, results[i].id, 0);
-        MessageBox(NULL, L"antes do izaias", L"WARNING", MB_ICONWARNING);
-        MessageBox(NULL, results[i].id, L"Info", MB_ICONINFORMATION);
+        //MessageBox(NULL, L"antes do izaias", L"WARNING", MB_ICONWARNING);
+        //MessageBox(NULL, results[i].id, L"Info", MB_ICONINFORMATION);
         //printf("\n\nid do resultado: %s", results[i].id);
         getJsonId(jsonstring, titlekey, results[i].title, 0);
-        MessageBox(NULL, results[i].title, L"Info", MB_ICONINFORMATION);
+        //MessageBox(NULL, results[i].title, L"Info", MB_ICONINFORMATION);
         //printf("\n\ntítulo do resultado: %s", results[i].title);
         //getJsonId(jsonstring, ratingkey, results[i].rating, 0);
         //printf("\n\nrating do resultado: %s", results[i].rating);
@@ -175,19 +175,19 @@ int parseEpisodesJson(HWND hwnd, wchar_t * resultid, wchar_t * jsonstring, episo
 
     int number = epnumConnection(hwnd, resultid);
 
-    printf("que número é este meu senhor? %d", number);
-    const wchar_t * totalepisodeskey = "\"totalEpisodes\":";
-    const wchar_t * episodekey = "\"episodes\":";
+    //printf("que número é este meu senhor? %d", number);
+    const wchar_t * totalepisodeskey = L"\"totalEpisodes\":";
+    const wchar_t * episodekey = L"\"episodes\":";
 
-    printf("\n\n\n vê lá a string no peej: %s", jsonstring);
+    //printf("\n\n\n vê lá a string no peej: %s", jsonstring);
 
-    wchar_t * newstring = strstr(jsonstring, totalepisodeskey);
-    wchar_t * newstring2 = strstr(newstring, episodekey);
+    wchar_t * newstring = wcsstr(jsonstring, totalepisodeskey);
+    wchar_t * newstring2 = wcsstr(newstring, episodekey);
 
     //cria uma string do início da chave de cada atributo json
-    const wchar_t * idkey = "\"id\":\"";
-    const wchar_t * numberkey = "\"number\":";
-    const wchar_t * titlekey = "\"title\":\"";
+    const wchar_t * idkey = L"\"id\":\"";
+    const wchar_t * numberkey = L"\"number\":";
+    const wchar_t * titlekey = L"\"title\":\"";
 
     for (int i = 0; i < number; i++) {
         getJsonId(newstring2, idkey, episodes[i].id, 0);
@@ -214,8 +214,8 @@ wchar_t * getLinkJson(HWND hwnd, wchar_t * jsonstring) {
         return NULL;
     }
     
-    const wchar_t * linkkey = "\"url\":";
-    const wchar_t * endquote = "\"";
+    const wchar_t * linkkey = L"\"url\":";
+    const wchar_t * endquote = L"\"";
 
     wchar_t * value = malloc(2048*sizeof(wchar_t));
     //malloc(value);
@@ -259,8 +259,8 @@ wchar_t * getLinkJson(HWND hwnd, wchar_t * jsonstring) {
 }
 
 int getQualitiesJson(wchar_t * jsonstring, stream streams[]) {
-    const wchar_t * linkkey = "\"url\":\"";
-    const wchar_t * qualitykey = "\"quality\":\"";
+    const wchar_t * linkkey = L"\"url\":\"";
+    const wchar_t * qualitykey = L"\"quality\":\"";
 
     int i = 0;
     while (jsonstring != NULL) {
@@ -274,10 +274,10 @@ int getQualitiesJson(wchar_t * jsonstring, stream streams[]) {
 }
 
 int getTrendingShows(wchar_t * jsonstring, trendinganimeinfo results[]) {
-    const wchar_t * idkey = "{\"id\":\"";
-    const wchar_t * titlekey = "\"title\":\"";
-    const wchar_t * imagekey = "\"image\":\"";
-    const wchar_t * endquote = "\"";
+    const wchar_t * idkey = L"{\"id\":\"";
+    const wchar_t * titlekey = L"\"title\":\"";
+    const wchar_t * imagekey = L"\"image\":\"";
+    const wchar_t * endquote = L"\"";
 
     printf(" - - - - trendinginfo\n\n\n");
     printf("%s", jsonstring);
@@ -299,14 +299,16 @@ int getTrendingShows(wchar_t * jsonstring, trendinganimeinfo results[]) {
 }
 
 animeinfo getShowInfo(wchar_t * jsonstring, animeinfo show) {
-    const wchar_t * totalepkey = "\"totalEpisodes\":";
-    const wchar_t * imagekey = "\"image\":\"";
-    const wchar_t * datekey = "\"releaseDate\":\"";
-    const wchar_t * descriptionkey = "\"description\":\"";
-    const wchar_t * dubkey = "\"subOrDub\":\"";
-    const wchar_t * typekey = "\"type\":\"";
-    const wchar_t * statuskey = "\"status\":\"";
-    const wchar_t * endquote = "\"";
+    //MessageBox(NULL, L"Chegou aqui ao show", L"Info", MB_ICONINFORMATION);
+
+    const wchar_t * totalepkey = L"\"totalEpisodes\":";
+    const wchar_t * imagekey = L"\"image\":\"";
+    const wchar_t * datekey = L"\"releaseDate\":\"";
+    const wchar_t * descriptionkey = L"\"description\":\"";
+    const wchar_t * dubkey = L"\"subOrDub\":\"";
+    const wchar_t * typekey = L"\"type\":\"";
+    const wchar_t * statuskey = L"\"status\":\"";
+    const wchar_t * endquote = L"\"";
 
     BOOL isdub;
 
@@ -315,7 +317,7 @@ animeinfo getShowInfo(wchar_t * jsonstring, animeinfo show) {
     getJsonId(jsonstring, datekey, show.date, 3);
     getJsonId(jsonstring, descriptionkey, show.description, 3);
     //getJsonId(jsonstring, dubkey, show.isdub, 3);
-    MessageBox(NULL, show.isdub, "Info", MB_ICONINFORMATION);
+    //MessageBox(NULL, show.isdub, "Info", MB_ICONINFORMATION);
     getJsonId(jsonstring, typekey, show.type, 3);
     getJsonId(jsonstring, statuskey, show.status, 3); 
 

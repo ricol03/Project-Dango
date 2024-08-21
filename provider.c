@@ -2,6 +2,8 @@
 
 extern wchar_t provider[32];
 
+wchar_t strmatrix[MAXCONNECTIONS][64];
+
 wchar_t auxmatrix1[MAXCONNECTIONS][64] = {L"/anime/gogoanime/", L"/anime/gogoanime/info/", L"/anime/gogoanime/watch/", L"d", L"e"};
 wchar_t auxmatrix2[MAXCONNECTIONS][64] = {L"/anime/zoro/", L"/anime/zoro/info?id=", L"/anime/zoro/watch?episodeId=", L"d", L"e"};
 

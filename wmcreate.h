@@ -24,7 +24,7 @@ typedef struct {
 
 typedef struct {
     TCHAR title[128];
-    WCHAR description[2048];
+    TCHAR description[2048];
     TCHAR imageurl[512];
     TCHAR date[10];
     TCHAR episodes[4];

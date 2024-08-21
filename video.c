@@ -3,9 +3,9 @@
 
 extern PAINTSTRUCT ps;
 
-libvlc_instance_t* linst;
+/*libvlc_instance_t* linst;
 libvlc_media_player_t* mplay;
-libvlc_media_t* media;
+libvlc_media_t* media;*/
 
 HDC hdc;
 
@@ -140,15 +140,15 @@ LRESULT CALLBACK videoWindowProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM 
     return DefWindowProc(hwnd, message, wparam, lparam);
 }*/
 
-int initializeLink(HWND hwnd, char * link) {
+/*int initializeLink(HWND hwnd, char * link) {
     //strcpy(videolink, link);
 
     printf("\n\nvideolink: %s", videolink);
 
     return 1;
-}
+}*/
 
-int videoWindow(HWND hwnd, char * link) {
+/*int videoWindow(HWND hwnd, char * link) {
 
     printf("\n\n\n\n\neste é o link saboroso do coisinho: %s", link);
 
@@ -170,22 +170,22 @@ int videoWindow(HWND hwnd, char * link) {
         libvlc_media_player_play(mplay);
         printf("Ele fez esta parte do play");
 
-        /*MSG msg;
+        MSG msg;
         while (GetMessage(&msg, NULL, 0, 0)) {
             TranslateMessage(&msg);
             DispatchMessage(&msg);
-        }*/
+        }
 
-        /*getchar();
-        printf("char");*/
+        *getchar();
+        printf("char");
 
-        /*libvlc_media_player_stop(mplay);
+        libvlc_media_player_stop(mplay);
         printf("Ele fez esta parte do stop");
         libvlc_media_player_release(mplay);
         printf("Ele fez esta parte do release 1");
 
         libvlc_release(linst);
-        printf("Ele fez esta parte do release 2");*/
+        printf("Ele fez esta parte do release 2");
 
         return 0;
     }
@@ -195,7 +195,7 @@ int videoWindow(HWND hwnd, char * link) {
         return -1;
     }
 
-}
+}*/
 
 /*#include <windows.h>
 //#include <vlc/vlc.h>

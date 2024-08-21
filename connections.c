@@ -1,6 +1,8 @@
 #include "tools.h"
 #include "connections.h"
 
+extern wchar_t strmatrix[MAXCONNECTIONS][64];
+
 extern wchar_t provider[32];
 extern wchar_t server[32];
 extern wchar_t port[6];
@@ -191,7 +193,7 @@ void parseRequestText(wchar_t * uri, wchar_t * query) {
     wcscpy(buffer, uri);
     wcscat(buffer, query);
 
-    printf("%S", buffer);
+    printf("%ls", buffer);
 
     MessageBox(NULL, buffer, L"Info", MB_ICONINFORMATION);
     
@@ -210,9 +212,14 @@ void parseRequestText(wchar_t * uri, wchar_t * query) {
     //mbstowcs((wchar_t*) requestedquery, buffer, strlen(buffer) + 1);
 }
 
-void parseRequestText2(char * uri, char * query) {
-    char buffer[256]; 
-    sprintf(buffer, "%s%s", uri, query);
+void parseRequestText2(wchar_t * uri, wchar_t * query) {
+    wchar_t buffer[256]; 
+    wcscpy(buffer, uri);
+    wcscat(buffer, query);
+
+    printf("%ls", buffer);
+
+    MessageBox(NULL, buffer, L"Info", MB_ICONINFORMATION);
     
     if (requestedquery2 != NULL) {
         free(requestedquery2);
@@ -220,9 +227,13 @@ void parseRequestText2(char * uri, char * query) {
     }
     
     //alocamos memória para este long pointer constant wide string, fazendo o tamanho do buffer vezes o tamanho de um wide char
-    requestedquery2 = (LPCWSTR)malloc((strlen(buffer) + 1) * sizeof(wchar_t));
+    requestedquery2 = (LPSTR)malloc((wcslen(buffer) + 1) * sizeof(wchar_t));
     
-    mbstowcs((wchar_t*) requestedquery2, buffer, strlen(buffer) + 1);
+    wcscpy(requestedquery2, buffer);
+
+    MessageBox(NULL, requestedquery2, L"Warning", MB_ICONWARNING);
+
+    //mbstowcs((wchar_t*) requestedquery, buffer, strlen(buffer) + 1);
 }
 
 LPWSTR serverAddressInitializer() {
@@ -297,6 +308,8 @@ int searchConnection(HWND hwnd, wchar_t * query, result results[]) {
 
 int episodesConnection(HWND hwnd, wchar_t * resultid, episode episodes[]) {
 
+    MessageBox(NULL, L"episodesConnection", L"Info", MB_ICONINFORMATION);
+
     parseRequestText2(strmatrix[1], resultid);
 
     HINTERNET hsession2 = WinHttpOpen(L"Dango/1.0", WINHTTP_ACCESS_TYPE_DEFAULT_PROXY, WINHTTP_NO_PROXY_NAME, WINHTTP_NO_PROXY_BYPASS, 0);
@@ -309,7 +322,7 @@ int episodesConnection(HWND hwnd, wchar_t * resultid, episode episodes[]) {
     DWORD dwprotocols = WINHTTP_FLAG_SECURE_PROTOCOL_TLS1_2;
     WinHttpSetOption(hsession2, WINHTTP_OPTION_SECURE_PROTOCOLS, &dwprotocols, sizeof(dwprotocols));
 
-    LPSTR servernew = serverAddressInitializer();
+    LPWSTR servernew = serverAddressInitializer();
     
     HINTERNET hconnect2 = WinHttpConnect(hsession2, servernew, (WORD)atoi(port), 0);
     if (hconnect2 == NULL) {
@@ -340,6 +353,8 @@ int episodesConnection(HWND hwnd, wchar_t * resultid, episode episodes[]) {
 
 int epnumConnection(HWND hwnd, wchar_t * resultid) {
 
+    //MessageBox(NULL, L"epnumConnection", L"Info", MB_ICONINFORMATION);
+
     parseRequestText(strmatrix[1], resultid);
 
     HINTERNET hsession = WinHttpOpen(L"Dango/1.0", WINHTTP_ACCESS_TYPE_DEFAULT_PROXY, WINHTTP_NO_PROXY_NAME, WINHTTP_NO_PROXY_BYPASS, 0);
@@ -351,7 +366,7 @@ int epnumConnection(HWND hwnd, wchar_t * resultid) {
     DWORD dwprotocols = WINHTTP_FLAG_SECURE_PROTOCOL_TLS1_2;
     WinHttpSetOption(hsession, WINHTTP_OPTION_SECURE_PROTOCOLS, &dwprotocols, sizeof(dwprotocols));
 
-    LPSTR servernew = serverAddressInitializer();
+    LPWSTR servernew = serverAddressInitializer();
 
     //Estabelece contacto com o domínio especificado
     HINTERNET hconnect = WinHttpConnect(hsession, servernew, (WORD)atoi(port), 0);
@@ -426,6 +441,8 @@ wchar_t * eplinkConnection(HWND hwnd, wchar_t * epid) {
 
 animeinfo getInfoConnection(HWND hwnd, wchar_t * epid, animeinfo info) {
 
+    //MessageBox(NULL, L"getInfoConnectionn", L"Info", MB_ICONINFORMATION);
+
     parseRequestText2(strmatrix[1], epid);
     animeinfo nullstruct;
 
@@ -439,7 +456,7 @@ animeinfo getInfoConnection(HWND hwnd, wchar_t * epid, animeinfo info) {
     DWORD dwprotocols = WINHTTP_FLAG_SECURE_PROTOCOL_TLS1_2;
     WinHttpSetOption(hsession2, WINHTTP_OPTION_SECURE_PROTOCOLS, &dwprotocols, sizeof(dwprotocols));
 
-    LPSTR servernew = serverAddressInitializer();
+    LPWSTR servernew = serverAddressInitializer();
     
     HINTERNET hconnect2 = WinHttpConnect(hsession2, servernew, (WORD)atoi(port), 0);
     if (hconnect2 == NULL) {
