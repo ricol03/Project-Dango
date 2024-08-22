@@ -11,11 +11,13 @@ extern wchar_t port[6];
 LPSTR requestedquery = NULL;
 LPSTR requestedquery2 = NULL;
 
+size_t stringsize;
+
 extern connections test;
 extern trendinganimeinfo shows[12];
 
 //função para gerir redirects
-wchar_t* winHttpGetResponse(HINTERNET hRequest, HINTERNET hConnect, HINTERNET hSession) {
+wchar_t * winHttpGetResponse(HINTERNET hRequest, HINTERNET hConnect, HINTERNET hSession) {
 
     printf("\n%ls", server);
     printf("\n%ls", port);
@@ -36,7 +38,7 @@ wchar_t* winHttpGetResponse(HINTERNET hRequest, HINTERNET hConnect, HINTERNET hS
     // Verify the status code
     if (WinHttpQueryHeaders(hRequest, WINHTTP_QUERY_STATUS_CODE | WINHTTP_QUERY_FLAG_NUMBER, NULL, &dwStatusCode, &dwSizeStatusCode, NULL)) {
         
-        printf("\n\nerror code: %lu", dwStatusCode);
+        printf("\n\nstatus code: %lu", dwStatusCode);
         printf("\n\nserver: %ls", server);
         
         if (dwStatusCode == 308) {
@@ -167,23 +169,180 @@ wchar_t* winHttpGetResponse(HINTERNET hRequest, HINTERNET hConnect, HINTERNET hS
     }
 
 
-    printf("\nchar string: %s", responseStringAux);
+    //printf("\nchar string: %s", responseStringAux);
 
     //MessageBoxW(NULL, responseStringAux, L"Warning", MB_ICONWARNING);
 
-    printf("\n\n\nsize of responsestringaux: %d", strlen(responseStringAux));
+    //printf("\n\n\nsize of responsestringaux: %d", strlen(responseStringAux));
 
     int size = MultiByteToWideChar(CP_ACP, 0, responseStringAux, -1, NULL, 0);
 
-    responseString = (wchar_t *)malloc(size * sizeof(wchar_t));
+    stringsize = size * sizeof(wchar_t);
+    responseString = (wchar_t *)malloc(stringsize);
 
     //mbstowcs((wchar_t*) responseString, responseStringAux, strlen(responseStringAux) + 1);
 
     MultiByteToWideChar(CP_ACP, 0, responseStringAux, -1, responseString, size);
 
-    printf("\n\n\n responsestring: \n\n %ls", responseString);
+    //printf("\n\n\n responsestring: \n\n %ls", responseString);
 
     return responseString;
+}
+
+wchar_t * winHttpGetResponseBin(HINTERNET hRequest, HINTERNET hConnect, HINTERNET hSession, wchar_t * filepath) {
+
+    printf("\n%ls", server);
+    printf("\n%ls", port);
+    printf("\n%ls", provider);
+
+    DWORD dwSize = 0;
+    DWORD dwDownloaded = 0;
+    LPSTR pszOutBuffer = NULL;
+    BOOL bResults = FALSE;
+
+    char * responseStringAux = NULL;
+    wchar_t * responseString = NULL;
+    size_t totalSize = 0;
+
+    DWORD dwStatusCode = 0;
+    DWORD dwSizeStatusCode = sizeof(dwStatusCode);
+
+    // Verify the status code
+    if (WinHttpQueryHeaders(hRequest, WINHTTP_QUERY_STATUS_CODE | WINHTTP_QUERY_FLAG_NUMBER, NULL, &dwStatusCode, &dwSizeStatusCode, NULL)) {
+        
+        printf("\n\nstatus code: %lu", dwStatusCode);
+        printf("\n\nserver: %ls", server);
+        
+        if (dwStatusCode == 308) {
+            wchar_t szLocation[256];
+            DWORD dwSizeLocation = sizeof(szLocation) / sizeof(szLocation[0]);
+
+            // Obtain the 'Location' header
+            if (WinHttpQueryHeaders(hRequest, WINHTTP_QUERY_LOCATION, NULL, szLocation, &dwSizeLocation, NULL)) {
+                WinHttpCloseHandle(hRequest);
+
+                URL_COMPONENTS urlComp;
+                memset(&urlComp, 0, sizeof(urlComp));
+                urlComp.dwStructSize = sizeof(urlComp);
+
+                wchar_t szHostName[256];
+                wchar_t szUrlPath[256];
+                urlComp.lpszHostName = szHostName;
+                urlComp.dwHostNameLength = sizeof(szHostName) / sizeof(szHostName[0]);
+                urlComp.lpszUrlPath = szUrlPath;
+                urlComp.dwUrlPathLength = sizeof(szUrlPath) / sizeof(szUrlPath[0]);
+
+                // Crack the URL into components
+                WinHttpCrackUrl(szLocation, 0, 0, &urlComp);
+
+                hConnect = WinHttpConnect(hSession, urlComp.lpszHostName, urlComp.nPort, 0);
+                hRequest = WinHttpOpenRequest(hConnect, L"GET", urlComp.lpszUrlPath, NULL, WINHTTP_NO_REFERER, WINHTTP_DEFAULT_ACCEPT_TYPES, WINHTTP_FLAG_SECURE);
+
+                if (WinHttpSendRequest(hRequest, WINHTTP_NO_ADDITIONAL_HEADERS, 0, WINHTTP_NO_REQUEST_DATA, 0, 0, 0)) {
+                    if (WinHttpReceiveResponse(hRequest, NULL)) {
+                        return winHttpGetResponseBin(hRequest, hConnect, hSession, filepath);
+                    }
+                }
+
+                WinHttpCloseHandle(hRequest);
+                WinHttpCloseHandle(hConnect);
+
+                return NULL;
+            } else {
+                MessageBox(NULL, L"No location header was found", L"Error", MB_ICONERROR);
+            }
+        } else if (dwStatusCode == 200) {
+            // Read the data if the request is successful
+
+            HANDLE hf = CreateFile(filepath, GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+            if (hf == INVALID_HANDLE_VALUE) {
+                MessageBox(NULL, L"The file could not be created", L"Error", MB_ICONERROR);
+                //free(filepath);
+                return NULL;
+            }
+
+            do {
+                dwSize = 0;
+                if (!WinHttpQueryDataAvailable(hRequest, &dwSize)) {
+                    printf("Error %u in WinHttpQueryDataAvailable.\n", GetLastError());
+                    break;
+                }
+
+                if (dwSize > 0) {
+                    pszOutBuffer = (LPSTR)malloc(dwSize);
+                    if (!pszOutBuffer) {
+                        printf("Out of memory\n");
+                        break;
+                    }
+
+                    ZeroMemory(pszOutBuffer, dwSize);
+
+                    if (!WinHttpReadData(hRequest, (LPVOID)pszOutBuffer, dwSize, &dwDownloaded)) {
+                        printf("Error %u in WinHttpReadData.\n", GetLastError());
+                        free(pszOutBuffer);
+                        break;
+                    } else {
+                        
+
+                        // Escreve os dados da imagem no arquivo
+                        DWORD byteswritten = 0;
+                        BOOL result = WriteFile(hf, pszOutBuffer, dwSize, &byteswritten, NULL);
+                        /*if (!result || byteswritten != dwSize) {
+                            MessageBox(NULL, L"Failed to write the image data to the file", L"Error", MB_ICONERROR);
+                            CloseHandle(hf);
+                            //free(filepath);
+                            return NULL;
+                        }*/
+                    }
+
+                    //faz realloc da variável para acrescentar novos dados
+                    /*responseStringAux = (char*)realloc(responseStringAux, totalSize + dwDownloaded + 1);
+                    if (!responseStringAux) {
+                        printf("Out of memory\n");
+                        free(pszOutBuffer);
+                        break;
+                    }
+
+                    //
+                    memcpy(responseStringAux + totalSize, pszOutBuffer, dwDownloaded + 1);
+                    totalSize += dwDownloaded;*/
+
+                    free(pszOutBuffer);
+
+                }
+            } while (dwSize > 0);
+
+            bResults = TRUE;
+            CloseHandle(hf);
+        } else {
+            
+            printf("\n\nerror code: %lu", dwStatusCode);
+            printf("\n\nserver: %ls", server);
+            MessageBox(NULL, L"Unhandled HTTP code", L"Error", MB_ICONERROR);
+        }
+    } else {
+        printf("Error %u in WinHttpQueryHeaders.\n", GetLastError());
+    }
+
+
+    /*printf("\nchar string: %s", responseStringAux);
+
+    //MessageBoxW(NULL, responseStringAux, L"Warning", MB_ICONWARNING);
+
+    //printf("\n\n\nsize of responsestringaux: %d", strlen(responseStringAux));
+
+    int size = MultiByteToWideChar(CP_ACP, 0, responseStringAux, -1, NULL, 0);
+
+    stringsize = size * sizeof(wchar_t);
+    responseString = (wchar_t *)malloc(stringsize);
+
+    //mbstowcs((wchar_t*) responseString, responseStringAux, strlen(responseStringAux) + 1);
+
+    MultiByteToWideChar(CP_ACP, 0, responseStringAux, -1, responseString, size);
+
+    //printf("\n\n\n responsestring: \n\n %ls", responseString);*/
+
+    return filepath;
 }
 
 
@@ -236,7 +395,7 @@ void parseRequestText2(wchar_t * uri, wchar_t * query) {
     //mbstowcs((wchar_t*) requestedquery, buffer, strlen(buffer) + 1);
 }
 
-LPWSTR serverAddressInitializer() {
+LPWSTR serverAddressInitializer(wchar_t * server) {
     LPWSTR servernew = NULL;
 
     servernew = (LPWSTR)malloc((wcslen(server) + 1) * sizeof(wchar_t));
@@ -269,7 +428,7 @@ int searchConnection(HWND hwnd, wchar_t * query, result results[]) {
     DWORD dwprotocols = WINHTTP_FLAG_SECURE_PROTOCOL_TLS1_2;
     WinHttpSetOption(hsession, WINHTTP_OPTION_SECURE_PROTOCOLS, &dwprotocols, sizeof(dwprotocols));
 
-    LPWSTR servernew = serverAddressInitializer();
+    LPWSTR servernew = serverAddressInitializer(server);
 
     //Estabelece contacto com o domínio especificado
     HINTERNET hconnect = WinHttpConnect(hsession, servernew, (WORD)_wtoi(port), 0);
@@ -322,7 +481,7 @@ int episodesConnection(HWND hwnd, wchar_t * resultid, episode episodes[]) {
     DWORD dwprotocols = WINHTTP_FLAG_SECURE_PROTOCOL_TLS1_2;
     WinHttpSetOption(hsession2, WINHTTP_OPTION_SECURE_PROTOCOLS, &dwprotocols, sizeof(dwprotocols));
 
-    LPWSTR servernew = serverAddressInitializer();
+    LPWSTR servernew = serverAddressInitializer(server);
     
     HINTERNET hconnect2 = WinHttpConnect(hsession2, servernew, (WORD)atoi(port), 0);
     if (hconnect2 == NULL) {
@@ -366,7 +525,7 @@ int epnumConnection(HWND hwnd, wchar_t * resultid) {
     DWORD dwprotocols = WINHTTP_FLAG_SECURE_PROTOCOL_TLS1_2;
     WinHttpSetOption(hsession, WINHTTP_OPTION_SECURE_PROTOCOLS, &dwprotocols, sizeof(dwprotocols));
 
-    LPWSTR servernew = serverAddressInitializer();
+    LPWSTR servernew = serverAddressInitializer(server);
 
     //Estabelece contacto com o domínio especificado
     HINTERNET hconnect = WinHttpConnect(hsession, servernew, (WORD)atoi(port), 0);
@@ -410,7 +569,7 @@ wchar_t * eplinkConnection(HWND hwnd, wchar_t * epid) {
     DWORD dwprotocols = WINHTTP_FLAG_SECURE_PROTOCOL_TLS1_2;
     WinHttpSetOption(hsession2, WINHTTP_OPTION_SECURE_PROTOCOLS, &dwprotocols, sizeof(dwprotocols));
     
-    LPSTR servernew = serverAddressInitializer();
+    LPSTR servernew = serverAddressInitializer(server);
 
     HINTERNET hconnect2 = WinHttpConnect(hsession2, servernew, (WORD)atoi(port), 0);
     if (hconnect2 == NULL) {
@@ -456,7 +615,7 @@ animeinfo getInfoConnection(HWND hwnd, wchar_t * epid, animeinfo info) {
     DWORD dwprotocols = WINHTTP_FLAG_SECURE_PROTOCOL_TLS1_2;
     WinHttpSetOption(hsession2, WINHTTP_OPTION_SECURE_PROTOCOLS, &dwprotocols, sizeof(dwprotocols));
 
-    LPWSTR servernew = serverAddressInitializer();
+    LPWSTR servernew = serverAddressInitializer(server);
     
     HINTERNET hconnect2 = WinHttpConnect(hsession2, servernew, (WORD)atoi(port), 0);
     if (hconnect2 == NULL) {
@@ -496,7 +655,7 @@ int getTrendsConnection(HWND hwnd, trendinganimeinfo shows[]) {
     DWORD dwprotocols = WINHTTP_FLAG_SECURE_PROTOCOL_TLS1_2;
     WinHttpSetOption(hsession2, WINHTTP_OPTION_SECURE_PROTOCOLS, &dwprotocols, sizeof(dwprotocols));
 
-    LPSTR servernew = serverAddressInitializer();
+    LPWSTR servernew = serverAddressInitializer(server);
     
     HINTERNET hconnect2 = WinHttpConnect(hsession2, servernew, (WORD)atoi(port), 0);
     if (hconnect2 == NULL) {
@@ -523,4 +682,56 @@ int getTrendsConnection(HWND hwnd, trendinganimeinfo shows[]) {
         }   
     } else
         return 0;
+}
+
+wchar_t * imageConnection(HWND hwnd, wchar_t * imageurl, wchar_t * showid) {
+
+    wchar_t * imageserver = getLinkDomain(imageurl);
+    wchar_t * imagelocation = getLinkSubdomain(imageurl, imageserver);
+    wchar_t * imageextension = getFileExtension(imageurl);
+
+    printf("\n\n fez todos os images cosios");
+
+    if (imageextension == NULL) {
+        return NULL;
+    }
+    
+    HINTERNET hsession2 = WinHttpOpen(L"Dango/1.0", WINHTTP_ACCESS_TYPE_DEFAULT_PROXY, WINHTTP_NO_PROXY_NAME, WINHTTP_NO_PROXY_BYPASS, 0);
+    if (hsession2 == NULL) {
+        MessageBox(hwnd, "WinHttpOpen failed!", "Error", MB_ICONERROR);
+        printf("\n %lu", GetLastError());
+        return NULL;
+    }
+
+    DWORD dwprotocols = WINHTTP_FLAG_SECURE_PROTOCOL_TLS1_2;
+    WinHttpSetOption(hsession2, WINHTTP_OPTION_SECURE_PROTOCOLS, &dwprotocols, sizeof(dwprotocols));
+
+    LPWSTR servernew = serverAddressInitializer(imageserver);
+    
+    HINTERNET hconnect2 = WinHttpConnect(hsession2, servernew, (WORD)atoi(port), 0);
+    if (hconnect2 == NULL) {
+        MessageBox(hwnd, "WinHttpConnect failed!", "Error", MB_ICONERROR);
+        printf("\n %lu", GetLastError());
+        return NULL;
+    }
+
+    HINTERNET hrequest2 = WinHttpOpenRequest(hconnect2, L"GET", imagelocation, NULL, WINHTTP_NO_REFERER, WINHTTP_DEFAULT_ACCEPT_TYPES, 0);
+    if (hrequest2 == NULL) {
+        MessageBox(hwnd, "WinHttpOpenRequest failed!", "Error", MB_ICONERROR);
+        wprintf(L"\n %s | %lu", requestedquery2, GetLastError());
+        WinHttpCloseHandle(hconnect2);
+        WinHttpCloseHandle(hsession2);
+        return NULL;
+    }
+
+    wchar_t * jsonstring;
+
+    if (WinHttpSendRequest(hrequest2, WINHTTP_NO_ADDITIONAL_HEADERS, 0, WINHTTP_NO_REQUEST_DATA, 0, 0, 0)) {
+        if (WinHttpReceiveResponse(hrequest2, NULL)) {
+            return winHttpGetResponseBin(hrequest2, hconnect2, hsession2, createImagePath(showid, imageextension));
+        } else {
+            return NULL;
+        }
+    } else
+        return NULL;
 }

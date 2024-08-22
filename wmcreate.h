@@ -7,8 +7,8 @@ typedef struct {
     TCHAR id[128];
     TCHAR title[128];
     TCHAR rating[4];
-    TCHAR releasedate[4];
-    TCHAR type[5];
+    TCHAR releasedate[10];
+    TCHAR type[16];
 } result;
 
 typedef struct {
@@ -23,6 +23,7 @@ typedef struct {
 } stream;
 
 typedef struct {
+    TCHAR id[128];
     TCHAR title[128];
     TCHAR description[2048];
     TCHAR imageurl[512];

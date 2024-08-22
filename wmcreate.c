@@ -1,5 +1,7 @@
 #include "tools.h"
 
+
+
 extern HWND hwndmain;
 extern HWND hwndsearch;
 extern HWND hwndsettings;
@@ -393,7 +395,7 @@ int searchResults(HWND hwnd, wchar_t * query) {
 }
 
 int infoWindow(HWND hwnd) {
-    printf("\n\ntitle: %ls", show.title);
+    printf("\n\ntitle: %ls", show.imageurl);
 
     MessageBox(hwnd, show.title, L"Info", MB_ICONINFORMATION);
 
@@ -470,13 +472,19 @@ int infoWindow(HWND hwnd) {
         NULL
     );
 
-    imgdata = stbi_load("a.jpg", &x, &y, &c, 4);
-    //stbi__jpeg_load()
-    
-    /*printf("Dados: %s\n", imgdata);
-    printf("Altura: %d\n", y);
-    printf("Largura: %d\n", x);
-    printf("n sei: %d", c);*/
+    wchar_t * imagepath = checkImage(show.id);
+
+    printf("\n\e saiu do checkimage");
+
+    if (imagepath == NULL) {
+        printf("\n\nnão tem imagem");
+        imagepath = imageConnection(hwnd, show.imageurl, show.id);
+    }
+
+    char * newimagepath = (char *)malloc(128 * sizeof(char));
+    wcstombs(newimagepath, imagepath, wcslen(imagepath));
+        
+    imgdata = stbi_load(newimagepath, &x, &y, &c, 4);
 
     if (imgdata) {
         MessageBox(NULL, L"Funcionou", L"Info", MB_ICONINFORMATION);
@@ -484,8 +492,6 @@ int infoWindow(HWND hwnd) {
         MessageBox(NULL, L"Não funcionou", L"Error", MB_ICONERROR);
         printf("%s", stbi_failure_reason());
     }
-
-
 }
 
 BOOL showSettings() {

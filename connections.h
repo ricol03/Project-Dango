@@ -14,11 +14,12 @@ typedef union {
 } connections;
 
 wchar_t * winHttpGetResponse(HINTERNET hRequest, HINTERNET hConnect, HINTERNET hSession);
+wchar_t * winHttpGetResponseBin(HINTERNET hRequest, HINTERNET hConnect, HINTERNET hSession, wchar_t * filepath);
 
 void parseRequestText(wchar_t * uri, wchar_t * query);
 LPCSTR TparseRequestText(wchar_t * uri, wchar_t * query);
 void parseRequestText2(wchar_t * uri, wchar_t * query);
-LPWSTR serverAddressInitializer();
+LPWSTR serverAddressInitializer(wchar_t * server);
 
 int searchConnection(HWND hwnd, wchar_t * query, result results[]);
 wchar_t * TsearchConnection(HWND hwnd, wchar_t * query, result results[]);
@@ -27,5 +28,6 @@ int epnumConnection(HWND hwnd, wchar_t * resultid);
 wchar_t * eplinkConnection(HWND hwnd, wchar_t * epid);
 animeinfo getInfoConnection(HWND hwnd, wchar_t * epid, animeinfo info);
 int getTrendsConnection(HWND hwnd, trendinganimeinfo shows[]);
+wchar_t * imageConnection(HWND hwnd, wchar_t * imageurl, wchar_t * showid);
 
 #endif

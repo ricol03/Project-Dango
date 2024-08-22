@@ -33,7 +33,8 @@
     "_mingw_unicode.h": "c",
     "pshpack4.h": "c",
     "const.h": "c",
-    "main.h": "c"
+    "main.h": "c",
+    "stb_image.h": "c"
   },
   "C_Cpp.codeAnalysis.clangTidy.checks.disabled": [
     "clang-diagnostic-error"

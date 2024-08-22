@@ -10,6 +10,12 @@
 #include <winhttp.h>
 #endif
 
+
+#ifndef TOOLS_H_
+#define TOOLS_H_
+
+
+
 //system headers
 #include <stdio.h>
 //#include <winsock2.h>
@@ -40,3 +46,4 @@
 #include "lang_en.h"
 #include "provider.h"
 
+#endif

@@ -34,7 +34,7 @@ HWND hwndsettings;
 HWND hwndvideo;
 
 //controlos do home
-extern HWND hbutton, hsearchbutton;            
+extern HWND hbutton, hsearchbutton;
 extern HWND htext;
 extern HWND hsearchlabel;              
 extern HWND hsearchbox;  
@@ -523,6 +523,7 @@ LRESULT CALLBACK MainWindowProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM 
                     int i = (int)SendMessage(hshowlistbox, LB_GETITEMDATA, item, 0);
                     MessageBox(hwnd, results[i].id, L"Info", MB_ICONINFORMATION);
 
+                    wcscpy(show.id, results[i].id);
                     wcscpy(show.title, results[i].title);
                     show.isempty = TRUE;
                     number = episodesConnection(hwnd, results[i].id, episodes);

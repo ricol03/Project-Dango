@@ -12,19 +12,11 @@ wchar_t * getJsonId(wchar_t * jsonstring, const wchar_t * key, TCHAR * value, in
 
     if (jsonstring == NULL) {
         MessageBox(NULL, L"Error with JSON string", L"Error", MB_ICONERROR | MB_OK);
-        //return test;
         return NULL;
     }
 
-    //wprintf(L"String de entrada: \n\n%ls\n\n", jsonstring);
-
-    //printf("\n\n cheque %d", check);
-
-    //MessageBox(NULL, L"chega", L"aqui", MB_ICONASTERISK);
-
     if (check == 1) {
         wchar_t * check = wcsstr(jsonstring, resseparator);
-        //printf("OLHA AQUI: \n\n%s\n\n", check);
 
         //if there isn't a match with resseparator
         if (check == NULL) {
@@ -45,32 +37,15 @@ wchar_t * getJsonId(wchar_t * jsonstring, const wchar_t * key, TCHAR * value, in
         }
     }
 
-    //printf("\n\nantes do cheque: \n%s", jsonstring);z
-    //printf("\n\n cheque %d", check);
-    //"verifica" se a string imagekey existe na jsonstring
-
-    //ele queima-se todo aqui man, vê lá isso
-    //wprintf(L"\n\nBefore check: \n%ls", jsonstring);
-    //wprintf(L"\n\nKey: %ls\n\n", key);
     wchar_t * start = wcsstr(jsonstring, key);
-    //wprintf(L"Start value: %ls\n", start);
-    //wprintf(L"JSON value: %s\n", jsonstring);
-
-    //printf("valor do start: %s", start);
-    //printf("valor do json: %s", jsonstring);
     
     //se existir
     if (start != NULL) {
         //move o ponteiro para a posição após a string imagekey
         start += wcslen(key);
-
-        //printf("\n\npasso 2");
-
         wchar_t * end = wcsstr(start, endquote);
-        //printf("\n\n\nEle dá print disto amigo (end): %s", end);
 
         if (end != NULL) {
-            //printf("\n\npasso 3");
             //calcula o tamanho entre o início e o fim do link da imagem
             size_t length = end - start;
 
@@ -80,19 +55,102 @@ wchar_t * getJsonId(wchar_t * jsonstring, const wchar_t * key, TCHAR * value, in
             
             if (check != 3) {
                 value[length] = '\0';
-                //printf("\nvalor: %s", value);
-
-                /*test.value = start;
-                return test;    */
                 return value;
             }
         } else {
             return NULL;
         }
     } else {
-        MessageBox(NULL, (LPCWSTR)jsonstring, L"Error", MB_ICONERROR);
+        MessageBox(NULL, L"The program wasn't able to retrieve a value, functionality limited.", L"Error", MB_ICONERROR);
         return NULL;
     }
+}
+
+wchar_t * getLinkDomain(wchar_t * url) {
+    const wchar_t * protocol = L"https://";
+    const wchar_t * endslash = L"/";
+
+    wchar_t * value = (wchar_t *)malloc(128 * sizeof(wchar_t));
+    ZeroMemory(value, 128+1);
+
+    wchar_t * start = wcsstr(url, protocol);
+    
+    //se existir
+    if (start != NULL) {
+        //move o ponteiro para a posição após a string imagekey
+        start += wcslen(protocol);
+        wchar_t * end = wcsstr(start, endslash);
+
+        if (end != NULL) {
+            //calcula o tamanho entre o início e o fim do link da imagem
+            size_t length = end - start;
+
+            //coloca na struct a string da posição start até start + length
+            wcsncpy(value, start, length);
+            value[length] = '\0';
+            printf("\n\nvalue: %ls", value);
+            return value;
+        } else {
+            return NULL;
+        }
+    } else {
+        MessageBox(NULL, L"The program wasn't able to retrieve the link, functionality limited.", L"Error", MB_ICONERROR);
+        return NULL;
+    }
+
+}
+
+wchar_t * getLinkSubdomain(wchar_t * url, wchar_t * server) {
+
+    printf("\n\nseerver: %ls", server);
+
+    const wchar_t * endslash = L"/";
+    wchar_t * value = (wchar_t *)malloc(128 * sizeof(wchar_t));
+
+    wchar_t * start = wcsstr(url, server);
+
+    printf("\n\n\nstart: %ls", start);
+    
+    //se existir
+    if (start != NULL) {
+        //move o ponteiro para a posição após a string imagekey
+        start += wcslen(server);
+        wchar_t * end = wcsstr(start, endslash);
+
+        printf("\n\n\nend: %ls", end);
+
+        return end;
+
+        /*if (end != NULL) {
+            //calcula o tamanho entre o início e o fim do link da imagem
+            size_t length = end - start;
+
+            //coloca na struct a string da posição start até start + length
+            wcsncpy(value, end, length);
+            printf("\n\nvalue: %ls", value);
+            return value;
+        } else {
+            return NULL;
+        }*/
+    } else {
+        MessageBox(NULL, L"The program wasn't able to retrieve the subdomain, functionality limited.", L"Error", MB_ICONERROR);
+        return NULL;
+    }
+}
+
+wchar_t * getFileExtension(wchar_t * url) {
+    const wchar_t * jpgextension = L".jpg";
+    const wchar_t * pngextension = L".png";
+    const wchar_t * gifextension = L".gif";
+
+    if (wcsstr(url, jpgextension) != NULL)
+        return jpgextension;
+    else if (wcsstr(url, pngextension) != NULL)
+        return pngextension;
+    else if (wcsstr(url, gifextension) != NULL)
+        return gifextension;
+    else
+        return NULL;
 }
 
 int getEpisodesNum(wchar_t * jsonstring, const wchar_t * key) {
