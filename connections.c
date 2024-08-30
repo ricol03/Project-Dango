@@ -354,7 +354,7 @@ void parseRequestText(wchar_t * uri, wchar_t * query) {
 
     printf("%ls", buffer);
 
-    MessageBox(NULL, buffer, L"Info", MB_ICONINFORMATION);
+    //MessageBox(NULL, buffer, L"Info", MB_ICONINFORMATION);
     
     if (requestedquery != NULL) {
         free(requestedquery);
@@ -366,7 +366,7 @@ void parseRequestText(wchar_t * uri, wchar_t * query) {
     
     wcscpy(requestedquery, buffer);
 
-    MessageBox(NULL, requestedquery, L"Warning", MB_ICONWARNING);
+    //MessageBox(NULL, requestedquery, L"Warning", MB_ICONWARNING);
 
     //mbstowcs((wchar_t*) requestedquery, buffer, strlen(buffer) + 1);
 }
@@ -378,7 +378,7 @@ void parseRequestText2(wchar_t * uri, wchar_t * query) {
 
     printf("%ls", buffer);
 
-    MessageBox(NULL, buffer, L"Info", MB_ICONINFORMATION);
+    //MessageBox(NULL, buffer, L"Info", MB_ICONINFORMATION);
     
     if (requestedquery2 != NULL) {
         free(requestedquery2);
@@ -390,7 +390,7 @@ void parseRequestText2(wchar_t * uri, wchar_t * query) {
     
     wcscpy(requestedquery2, buffer);
 
-    MessageBox(NULL, requestedquery2, L"Warning", MB_ICONWARNING);
+    //MessageBox(NULL, requestedquery2, L"Warning", MB_ICONWARNING);
 
     //mbstowcs((wchar_t*) requestedquery, buffer, strlen(buffer) + 1);
 }
@@ -467,7 +467,7 @@ int searchConnection(HWND hwnd, wchar_t * query, result results[]) {
 
 int episodesConnection(HWND hwnd, wchar_t * resultid, episode episodes[]) {
 
-    MessageBox(NULL, L"episodesConnection", L"Info", MB_ICONINFORMATION);
+    //MessageBox(NULL, L"episodesConnection", L"Info", MB_ICONINFORMATION);
 
     parseRequestText2(strmatrix[1], resultid);
 
@@ -569,7 +569,7 @@ wchar_t * eplinkConnection(HWND hwnd, wchar_t * epid) {
     DWORD dwprotocols = WINHTTP_FLAG_SECURE_PROTOCOL_TLS1_2;
     WinHttpSetOption(hsession2, WINHTTP_OPTION_SECURE_PROTOCOLS, &dwprotocols, sizeof(dwprotocols));
     
-    LPSTR servernew = serverAddressInitializer(server);
+    LPWSTR servernew = serverAddressInitializer(server);
 
     HINTERNET hconnect2 = WinHttpConnect(hsession2, servernew, (WORD)atoi(port), 0);
     if (hconnect2 == NULL) {

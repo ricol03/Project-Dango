@@ -65,6 +65,11 @@
 #define IDW_SETTINGS_BUTTON_OK              210
 #define IDW_SETTINGS_BUTTON_CANCEL          211
 
+#define IDW_INFO_BUTTON_WATCH               220
+#define IDW_INFO_BUTTON_RETURN              221
+
+#define IDW_EPISODE_BUTTON_WATCH            230
+
 #define IDW_SEARCH_LISTBOX_SHOW             303
 #define IDW_SEARCH_LISTBOX_EPISODELIST      304
 

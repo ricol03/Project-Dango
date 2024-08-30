@@ -9,7 +9,7 @@ libvlc_media_t* media;*/
 
 HDC hdc;
 
-wchar_t * videolink;
+//wchar_t * videolink;
 
 /*LRESULT CALLBACK videoWindowProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam);
 

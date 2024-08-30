@@ -19,6 +19,7 @@ const wchar_t SEARCH_CLASS[]        = L"SearchWndClass";
 const wchar_t SETTINGS_CLASS[]      = L"idkwhyicantputanormalname";
 const wchar_t VIDEO_CLASS[]         = L"VideoWndClass";
 const wchar_t INFO_CLASS[]          = L"InfoWndClass";
+const wchar_t EPISODE_CLASS[]        = L"EpisodeWndClass";
 
 const wchar_t NETWORKTAB_CLASS[]    = L"NetTabWndClass";
 const wchar_t PROVIDERTAB_CLASS[]   = L"ProviderTabWndClass";
@@ -30,6 +31,7 @@ const wchar_t TEST_CLASS[]    = L"TCLASS";
 HWND hwndmain;
 HWND hwndsearch;
 HWND hwndinfo;
+HWND hwndepisode;
 HWND hwndsettings;
 HWND hwndvideo;
 
@@ -91,12 +93,14 @@ extern wchar_t lang[5];
 libvlc_instance_t* linst;
 libvlc_media_player_t* mplay;
 libvlc_media_t* media;
-extern wchar_t * videolink;
+char * videolink;
 
 extern int x, y, c;
 extern unsigned char * imgdata;
 
 DWORD wversion, wmajorversion, wminorversion, wbuild;
+
+#ifndef UNIT_TEST
 
 int WINAPI wWinMain(HINSTANCE hinstance, HINSTANCE hprevinstance, PWSTR lpcmdline, int nshowcmd) {
 
@@ -246,6 +250,18 @@ int WINAPI wWinMain(HINSTANCE hinstance, HINSTANCE hprevinstance, PWSTR lpcmdlin
 
     #pragma endregion
 
+    #pragma region EpisodeWindow
+    WNDCLASS episodewindowclass = { 0 };
+
+    episodewindowclass.lpfnWndProc     = EpisodeWindowProc; 
+    episodewindowclass.hInstance       = hinstance;
+    episodewindowclass.lpszClassName   = EPISODE_CLASS;
+    episodewindowclass.hIcon           = NULL;
+
+    RegisterClass(&episodewindowclass);
+
+    #pragma endregion
+
     MSG msg = { 0 };
 
     while (GetMessage(&msg, NULL, 0, 0)) {
@@ -255,6 +271,8 @@ int WINAPI wWinMain(HINSTANCE hinstance, HINSTANCE hprevinstance, PWSTR lpcmdlin
 
     return 0;
 }
+
+#endif
 
 int checkVersion() {
     wversion = GetVersion();
@@ -382,12 +400,12 @@ int createLanguageTab() {
 int createVideoWindow(HINSTANCE hinstance) {
 
     //TODO: MAKE A PROPER WINDOW TITLE
-    TCHAR * windowtitle = strcat(windowtitle, "a");
+    //TCHAR * windowtitle = strcat(windowtitle, "a");
 
     hwndvideo = CreateWindowEx(
         0,
         VIDEO_CLASS,
-        windowtitle,
+        L"Video",
         WS_OVERLAPPEDWINDOW | WS_VISIBLE,
         CW_USEDEFAULT, CW_USEDEFAULT, 1280, 720,
         NULL,
@@ -423,6 +441,27 @@ int createInfoWindow(HINSTANCE hinstance) {
     } 
 }
 
+int createEpisodeWindow(HINSTANCE hinstance) {
+    hwndepisode = CreateWindowEx(
+        0,
+        EPISODE_CLASS,
+        L"Episode selection",
+        WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_ICONIC | WS_ACTIVECAPTION | WS_VISIBLE,
+        CW_USEDEFAULT, CW_USEDEFAULT, 800, 600,
+        NULL,
+        NULL,
+        hinstance,
+        NULL
+    );
+
+    if (hwndepisode == NULL) {
+        MessageBoxW(NULL, L"Unable to create Windows", 
+                L"Error", MB_ICONERROR | MB_OK);
+        return 0;
+    }
+    
+}
+
 LRESULT CALLBACK MainWindowProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam) {
     
     switch (message) {
@@ -442,7 +481,7 @@ LRESULT CALLBACK MainWindowProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM 
         }
         return 0;
 
-        case WM_COMMAND:
+        case WM_COMMAND: {
             switch (LOWORD(wparam)) {
 
                 case ID_TEST: {
@@ -486,35 +525,7 @@ LRESULT CALLBACK MainWindowProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM 
                     searchtoggled = showSearch();
                     break;
                 }
-
-                
-                //TODO: MOVE THIS TO THE OTHER WINDOW 
-                /*case IDW_SEARCH_BUTTON_WATCH: {
-                    int item = (int)SendMessage(heplistbox, LB_GETCURSEL, 0, 0);
-                    int i = (int)SendMessage(heplistbox, LB_GETITEMDATA, item, 0);
-
-                    char * link = eplinkConnection(hwnd, episodes[i].id);
-
-                    if (link == NULL) {
-                        MessageBox(NULL, "An error occured, please try again later.", "Error", MB_ICONERROR);
-                    } else { 
-                        printf("\n\n\ndevolveu este link zeca: %s", link);
-
-                        if (!strcmp(provider, PROVIDER1)) {
-                            getQualitiesJson(link, streams);
-                            videolink = streams[1].link;
-                        } 
-
-                        createVideoWindow(GetModuleHandle(NULL));
-                        ShowWindow(hwndvideo, SW_SHOW);
-                        UpdateWindow(hwndvideo);
-
-                        SetForegroundWindow(hwndvideo);
-                    }
-
-                    break;
-                }   */
-                    
+         
                 case IDW_SEARCH_BUTTON_SELECT: {
                     //TODO: put this logic on the eventual 'select' button
                     memset(&episodes, 0, sizeof(episode));
@@ -526,29 +537,6 @@ LRESULT CALLBACK MainWindowProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM 
                     wcscpy(show.id, results[i].id);
                     wcscpy(show.title, results[i].title);
                     show.isempty = TRUE;
-                    number = episodesConnection(hwnd, results[i].id, episodes);
-
-                    /*for (int i = 0; i < number; i++) {
-                        printf("\n%s", episodes[i].id);
-                    }*/
-                        
-                    SendMessage(heplistbox, LB_RESETCONTENT, 0, 0);
-                    for (int i = 0; i < number; i++) {
-                        printf("\nDeu: %s", episodes[i].number);
-                        //printf("\n\n\nerro do capeta: %lu", GetLastError());
-                        int position = (int)SendMessage(heplistbox, LB_INSERTSTRING, 0, (LPARAM)episodes[i].title);
-                        if (position == LB_ERR || position == LB_ERRSPACE) {
-                            printf("\n\n\nerro do capeta: %lu", GetLastError());
-                            break;
-                        } else {
-                            printf("\n\nfez com sucesso");
-                        }
-                        SendMessage(heplistbox, LB_SETITEMDATA, position, (LPARAM)i);
-                        
-                    }
-
-                    
-                    
 
                     show = getInfoConnection(hwnd, results[i].id, show);
 
@@ -558,103 +546,17 @@ LRESULT CALLBACK MainWindowProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM 
                         //show info window
                         ShowWindow(hwndinfo, SW_SHOW);
                         UpdateWindow(hwndinfo);
-                    }
-                    
-
-                    
+                    } 
                 }
                 return 0;
-
-              
-                /*case IDW_SEARCH_LISTBOX_SHOW: {
-                    switch (HIWORD(wparam)) {
-                        
-                        case LBN_SELCHANGE: {
-                            //TODO: put this logic on the eventual 'select' button
-                            memset(&episodes, 0, sizeof(episode));
-                            int item = (int)SendMessage(hshowlistbox, LB_GETCURSEL, 0, 0);
-                            int i = (int)SendMessage(hshowlistbox, LB_GETITEMDATA, item, 0);
-                            MessageBox(hwnd, results[i].id, "Info", MB_ICONINFORMATION);
-
-                            number = episodesConnection(hwnd, results[i].id, episodes);
-
-                            /*for (int i = 0; i < number; i++) {
-                                printf("\n%s", episodes[i].id);
-                            }
-                             
-                            SendMessage(heplistbox, LB_RESETCONTENT, 0, 0);
-                            for (int i = 0; i < number; i++) {
-                                printf("\nDeu: %s", episodes[i].number);
-                                //printf("\n\n\nerro do capeta: %lu", GetLastError());
-                                int position = (int)SendMessage(heplistbox, LB_INSERTSTRING, 0, (LPARAM)episodes[i].title);
-                                if (position == LB_ERR || position == LB_ERRSPACE) {
-                                    printf("\n\n\nerro do capeta: %lu", GetLastError());
-                                    break;
-                                } else {
-                                    printf("\n\nfez com sucesso");
-                                }
-                                SendMessage(heplistbox, LB_SETITEMDATA, position, (LPARAM)i);
-                                
-                            }
-                        }
-                                           
-                            return 0;
-                        
-                        default:
-                            break;
-                    }
-                    break;
-                }*/
-
-                case IDW_SEARCH_LISTBOX_EPISODELIST: {
-                    switch (HIWORD(wparam)) {
-                        case LBN_SELCHANGE: {
-                            
-                            int item = (int)SendMessage(heplistbox, LB_GETCURSEL, 0, 0);
-                            int i = (int)SendMessage(heplistbox, LB_GETITEMDATA, item, 0);
-                            MessageBox(hwnd, episodes[i].id, L"Info", MB_ICONINFORMATION);
-
-                            
-
-                            //int number = episodesconnection(hwnd, episodes[i].id, episodes);
-
-                            /*for (int i = 0; i < number; i++) {
-                                printf("\n%s", episodes[i].title);
-                            }
-                             
-                            SendMessage(heplistbox, LB_RESETCONTENT, 0, 0);
-                            //SendMessage(heplistbox, LB_INITSTORAGE, (WPARAM)(int)number, (LPARAM)(sizeof(wchar_t)*sizeof(episodes->title)));
-                            printf("\n\n\n\n Isto deu meu amigo, olha: %s", episodes[0].title);
-                            for (int i = 0; i < number; i++) {
-                                printf("%s", episodes[i].title);
-                                printf("\n\n\nerro do capeta: %lu", GetLastError());
-                                int position = (int)SendMessage(heplistbox, LB_INSERTSTRING, 0, (LPARAM)episodes[i].title);
-                                if (position == LB_ERR || position == LB_ERRSPACE) {
-                                    printf("\n\n\nerro do capeta: %lu", GetLastError());
-                                    break;
-                                } else {
-                                    printf("\n\nfez com sucesso");
-                                }
-                                SendMessage(heplistbox, LB_SETITEMDATA, position, (LPARAM)i);
-                                
-                            }*/
-                        }
-                                           
-                            return 0;
-                        
-                        default:
-                        break;
-                    }
-                    break;
-                }
 
                 default:
                     break;
             }
             
             return 0;
-
         
+        }
 
         case WM_PAINT: {
             HDC hdc = BeginPaint(hwnd, &ps);
@@ -684,29 +586,51 @@ LRESULT CALLBACK VideoWindowProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM 
         case WM_SHOWWINDOW: {
             linst = libvlc_new(0, NULL);
 
-            if (linst != NULL) {
-                media = libvlc_media_new_location(linst, videolink);
-                printf("este é o link saboroso do coisinho: %s", videolink);
 
-                mplay = libvlc_media_player_new_from_media(media);
-                printf("Ele fez esta parte do new from media");
 
-                libvlc_media_release(media);
-                printf("Ele fez esta parte do media release");
+            //size_t a = wcstombs(NULL, videolink, 0);
 
-                libvlc_media_player_set_hwnd(mplay, hwnd);
-                printf("Ele fez esta parte do hwnd");
+            /*char * charlink = (char *)malloc(wcslen(videolink) * sizeof(char));
+            ZeroMemory(charlink, sizeof(charlink));*/
 
-                libvlc_media_player_play(mplay);
-                printf("Ele fez esta parte do play");
+            /*videolink[wcslen(videolink)] = L"\0";
 
-                return 0;
+            wcstombs(charlink, videolink, wcslen(videolink));  */
+
+            if (videolink != NULL) {
+                //WideCharToMultiByte(CP_UTF8, 0, videolink, -1, charlink, wcslen(videolink) * sizeof(char), 0, 0);
+
+                printf("\nlink: %ls", videolink);
+                //printf("\nlink novo: %s\n\n", charlink);
+
+                if (linst != NULL) {
+                    media = libvlc_media_new_location(linst, videolink);
+                    printf("este é o link saboroso do coisinho: %s", videolink);
+
+                    mplay = libvlc_media_player_new_from_media(media);
+                    printf("Ele fez esta parte do new from media");
+
+                    libvlc_media_release(media);
+                    printf("Ele fez esta parte do media release");
+
+                    libvlc_media_player_set_hwnd(mplay, hwnd);
+                    printf("Ele fez esta parte do hwnd");
+
+                    libvlc_media_player_play(mplay);
+                    printf("Ele fez esta parte do play");
+
+                    return 0;
+                } else {
+                    MessageBox(hwnd, L"No instance could be created", L"Error", MB_ICONERROR);
+                    return -1;
+                }
+                AppendMenu(GetSystemMenu(hwnd, FALSE), MF_SEPARATOR, 0, NULL);
+                //AppendMenu(GetSystemMenu(hwnd, FALSE), MF_STRING, IDW_VIDEO_SYS_TOGGLE, "Control menu");
             } else {
-                MessageBox(hwnd, L"No instance could be created", L"Error", MB_ICONERROR);
-                return -1;
+                MessageBox(NULL, L"An error occured and the video cannot be played.", L"Error", MB_ICONERROR);
             }
-            AppendMenu(GetSystemMenu(hwnd, FALSE), MF_SEPARATOR, 0, NULL);
-            //AppendMenu(GetSystemMenu(hwnd, FALSE), MF_STRING, IDW_VIDEO_SYS_TOGGLE, "Control menu");
+
+            
         }
         return 0;
 
@@ -1076,7 +1000,26 @@ LRESULT CALLBACK InfoWindowProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM 
             return 0;
         case WM_COMMAND: {
             switch (LOWORD(wparam)) {
-                
+                case IDW_INFO_BUTTON_RETURN:
+                    DestroyWindow(hwnd);
+                    break;
+
+                case IDW_INFO_BUTTON_WATCH:
+                    memset(&episodes, 0, sizeof(episode));
+                    /*int item = (int)SendMessage(hshowlistbox, LB_GETCURSEL, 0, 0);
+                    int i = (int)SendMessage(hshowlistbox, LB_GETITEMDATA, item, 0);
+                    MessageBox(hwnd, results[i].id, "Info", MB_ICONINFORMATION);*/
+
+
+                    printf("\n\nepisodescoiso\n");
+                    number = episodesConnection(hwnd, show.id, episodes);
+
+                    for (int i = 0; i < number; i++) {
+                        printf("\n%s", episodes[i].id);
+                    }
+
+                    createEpisodeWindow(GetModuleHandle(NULL));
+                    break;
             
                 default:
                     break;
@@ -1231,6 +1174,121 @@ LRESULT CALLBACK InfoWindowProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM 
     }
 }
 
+LRESULT CALLBACK EpisodeWindowProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam) {
+    switch (message) {
+        case WM_CREATE:
+            episodeWindow(hwnd);
+            return 0;
+        case WM_COMMAND: {
+            switch (LOWORD(wparam)) {
+                case IDW_EPISODE_BUTTON_WATCH: {
+                    int item = (int)SendMessage(heplistbox, LB_GETCURSEL, 0, 0);
+                    int i = (int)SendMessage(heplistbox, LB_GETITEMDATA, item, 0);
+
+                    MessageBox(NULL, episodes[i].id, L"Info", MB_ICONASTERISK);
+
+                    wchar_t * link = eplinkConnection(hwnd, episodes[i].id);
+
+                    printf("\n\nlink do command: %ls\\", link);
+                    //getchar();
+
+                    if (link == NULL) {
+                        MessageBox(NULL, L"An error occured, please try again later.", L"Error", MB_ICONERROR);
+                    } else { 
+                        printf("\n\n\ndevolveu este link zeca: %ls", link);
+
+                        /*if (!wcscmp(provider, PROVIDER1)) {z
+                            getQualitiesJson(link, streams);
+                            wcscpy(videolink, streams[1].link);
+                        } */
+
+                        
+
+                        videolink = (char *)malloc(wcslen(link) * sizeof(char));
+                        printf("\n\nsizeof: %d", (wcslen(link) * sizeof(char)));
+                        //wcscpy(videolink, link);
+
+                        if (convertWideToMulti(link, videolink)) {
+                            MessageBox(NULL, L"Deu com firmeza", L"Info", MB_ICONINFORMATION);
+                        }
+
+
+                        //videolink = link;
+
+                        createVideoWindow(GetModuleHandle(NULL));
+                        ShowWindow(hwndvideo, SW_SHOW);
+                        UpdateWindow(hwndvideo);
+
+                        SetForegroundWindow(hwndvideo);
+                    }
+                }
+                return 0;
+
+                case IDW_SEARCH_LISTBOX_EPISODELIST: {
+                    switch (HIWORD(wparam)) {
+                        case LBN_SELCHANGE: {
+                            
+                            int item = (int)SendMessage(heplistbox, LB_GETCURSEL, 0, 0);
+                            int i = (int)SendMessage(heplistbox, LB_GETITEMDATA, item, 0);
+                            MessageBox(hwnd, episodes[i].id, L"Info", MB_ICONINFORMATION);
+
+                            
+
+                            //int number = episodesconnection(hwnd, episodes[i].id, episodes);
+
+                            /*for (int i = 0; i < number; i++) {
+                                printf("\n%s", episodes[i].title);
+                            }
+                             
+                            SendMessage(heplistbox, LB_RESETCONTENT, 0, 0);
+                            //SendMessage(heplistbox, LB_INITSTORAGE, (WPARAM)(int)number, (LPARAM)(sizeof(wchar_t)*sizeof(episodes->title)));
+                            printf("\n\n\n\n Isto deu meu amigo, olha: %s", episodes[0].title);
+                            for (int i = 0; i < number; i++) {
+                                printf("%s", episodes[i].title);
+                                printf("\n\n\nerro do capeta: %lu", GetLastError());
+                                int position = (int)SendMessage(heplistbox, LB_INSERTSTRING, 0, (LPARAM)episodes[i].title);
+                                if (position == LB_ERR || position == LB_ERRSPACE) {
+                                    printf("\n\n\nerro do capeta: %lu", GetLastError());
+                                    break;
+                                } else {
+                                    printf("\n\nfez com sucesso");
+                                }
+                                SendMessage(heplistbox, LB_SETITEMDATA, position, (LPARAM)i);
+                                
+                            }*/
+                        }          
+                        return 0;
+                        
+                    
+                    }
+                    break;
+                }
+                
+            
+                default:
+                    break;
+            }
+            return 0;
+        }  
+            
+        case WM_PAINT: {
+            HDC hdc = BeginPaint(hwnd, &ps);
+            FillRect(hdc, &ps.rcPaint, (HBRUSH) (COLOR_3DFACE+1));
+            EndPaint(hwnd, &ps);
+            return 0;
+        }
+
+        case WM_CLOSE:
+            DestroyWindow(hwnd);
+            return 0;
+        case WM_DESTROY:
+            
+            return 0;
+
+        default:
+            return DefWindowProc(hwnd, message, wparam, lparam);
+    }
+}
 
 BOOL CALLBACK SetFontProc(HWND hwnd, LPARAM lparam) {
     SendMessage(hwnd, WM_SETFONT, 0, lparam);

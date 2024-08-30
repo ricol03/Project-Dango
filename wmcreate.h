@@ -31,6 +31,7 @@ typedef struct {
     TCHAR episodes[4];
     TCHAR type[16];
     TCHAR status[16];
+    TCHAR genres[5][32];
     //false: sub | true: dub
     BOOL isdub;
     BOOL isempty;
@@ -53,6 +54,7 @@ BOOL hideSearch();
 BOOL showSearch();
 int searchResults(HWND hwnd, wchar_t * query);
 int infoWindow(HWND hwnd);
+int episodeWindow(HWND hwnd);
 BOOL showSettings();
 BOOL hideSettings();
 

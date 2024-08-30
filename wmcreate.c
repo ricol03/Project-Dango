@@ -65,7 +65,7 @@ HMENU hsubmenuabout;
 const wchar_t * localfile;
 
 result results[100];
-episode episodes[100];
+episode episodes[100] = { 0 };
 stream streams[8];
 trendinganimeinfo shows[12];
 animeinfo show;
@@ -74,6 +74,8 @@ extern wchar_t provider[32];
 extern wchar_t server[32];
 extern wchar_t protocol[6];
 extern wchar_t port[6];
+
+extern int number;
 
 int x, y, c;
 unsigned char * imgdata;
@@ -337,17 +339,7 @@ int searchResults(HWND hwnd, wchar_t * query) {
         NULL
     );
 
-    //TODO: REALLOCATE THE WATCH BUTTON
-    hwatchbutton = CreateWindow(
-        TEXT("BUTTON"),
-        TEXT("Watch"),
-        WS_TABSTOP | WS_CHILD | BS_DEFPUSHBUTTON,
-        350, 50, 120, 30,
-        hwnd,
-        (HMENU)IDW_SEARCH_BUTTON_WATCH,
-        GetModuleHandle(NULL),
-        NULL
-    );
+    
 
     hselectbutton = CreateWindow(
         TEXT("BUTTON"),
@@ -360,20 +352,10 @@ int searchResults(HWND hwnd, wchar_t * query) {
         NULL
     );
 
-    //TODO: REALLOCATE THE EP LIST
-    heplistbox = CreateWindow(
-        TEXT("LISTBOX"),
-        NULL,
-        WS_CHILD | WS_BORDER | WS_VSCROLL | LBS_STANDARD,
-        10, 250, 330, 140,
-        hwnd,
-        (HMENU)IDW_SEARCH_LISTBOX_EPISODELIST,
-        GetModuleHandle(NULL),
-        NULL
-    );
+    
 
     if (hshowlistbox == NULL) {
-        MessageBox(NULL, "List box creation failed!", "Error", MB_ICONERROR);
+        MessageBox(NULL, L"List box creation failed!", L"Error", MB_ICONERROR);
         printf("Error in listbox: %lu", GetLastError());
         return 1;
     }
@@ -386,12 +368,7 @@ int searchResults(HWND hwnd, wchar_t * query) {
     
     ShowWindow(hshowlistbox, SW_SHOWDEFAULT);
     UpdateWindow(hshowlistbox);
-
-    if (heplistbox == NULL) {
-        MessageBox(NULL, "List box creation failed!", "Error", MB_ICONERROR);
-        printf("Error in listbox: %lu", GetLastError());
-        return 1;
-    }
+    
 }
 
 int infoWindow(HWND hwnd) {
@@ -435,7 +412,13 @@ int infoWindow(HWND hwnd) {
     wcscat(infogrouptwo, IDT_TOTALEPISODES);
     wcscat(infogrouptwo, show.episodes);
 
-    
+    TCHAR genres[64];
+    wcscpy(genres, IDT_SHOWGENRES);
+    for (int i = 0; i < 4; i++) {
+        wcscat(genres, show.genres[i]);
+        if (i != 3)
+            wcscat(genres, L", ");
+    }
 
     HWND hinfogroupone = CreateWindowW(
         WC_STATIC, 
@@ -459,15 +442,37 @@ int infoWindow(HWND hwnd) {
         NULL
     );
 
+    HWND hgenres = CreateWindowW(
+        WC_STATIC, 
+        genres,
+        WS_VISIBLE | WS_CHILD,
+        25, 520, 350, 50,
+        hwnd,
+        (HMENU)1100,
+        (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE),
+        NULL
+    );
+
     //free(totalepisodes);
 
-    HWND hokbutton = CreateWindowW(
+    HWND hwatchbutton = CreateWindowW(
         WC_BUTTON,
         TEXT("Watch"),
         WS_TABSTOP | WS_CHILD | BS_DEFPUSHBUTTON | WS_VISIBLE,
-        700, 500, 70, 25,
+        650, 525, 120, 30,
         hwnd,
-        (HMENU)11111,
+        (HMENU)IDW_INFO_BUTTON_WATCH,
+        (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE),
+        NULL
+    );
+
+    HWND hreturnbutton = CreateWindowW(
+        WC_BUTTON,
+        TEXT("< Return"),
+        WS_TABSTOP | WS_CHILD | BS_DEFPUSHBUTTON | WS_VISIBLE,
+        520, 525, 120, 30,
+        hwnd,
+        (HMENU)IDW_INFO_BUTTON_RETURN,
         (HINSTANCE)GetWindowLong(hwnd, GWL_HINSTANCE),
         NULL
     );
@@ -492,6 +497,82 @@ int infoWindow(HWND hwnd) {
         MessageBox(NULL, L"Não funcionou", L"Error", MB_ICONERROR);
         printf("%s", stbi_failure_reason());
     }
+}
+
+int episodeWindow(HWND hwnd) {
+
+    HWND htitletext = CreateWindow(
+        WC_STATIC,
+        L"Please select an episode",
+        WS_CHILD | WS_VISIBLE, 
+        25, 25, 100, 50,
+        hwnd,
+        2222,
+        GetModuleHandle(NULL),
+        NULL
+    );
+
+    SendMessage(htitletext, WM_SETFONT, (WPARAM)htitlefont, (LPARAM)NULL);
+
+    //TODO: REALLOCATE THE WATCH BUTTON
+    hwatchbutton = CreateWindow(
+        TEXT("BUTTON"),
+        TEXT("Watch"),
+        WS_TABSTOP | WS_CHILD | BS_DEFPUSHBUTTON | WS_VISIBLE,
+        670, 40, 120, 30,
+        hwnd,
+        (HMENU)IDW_EPISODE_BUTTON_WATCH,
+        GetModuleHandle(NULL),
+        NULL
+    );
+
+    //TODO: REALLOCATE THE EP LIST
+    heplistbox = CreateWindow(
+        TEXT("LISTBOX"),
+        NULL,
+        WS_CHILD | WS_BORDER | WS_VSCROLL | LBS_STANDARD | WS_VISIBLE,
+        25, 75, 750, 400,
+        hwnd,
+        (HMENU)IDW_SEARCH_LISTBOX_EPISODELIST,
+        GetModuleHandle(NULL),
+        NULL
+    );
+
+    printf("\ntitle: %ls", episodes[0].title);
+    printf("\nid: %ls", episodes[0].id);
+    printf("\ntitle: %ls", episodes[0].number);
+
+    //because there's no global variable to get the number of episodes of the selected show, 
+    //the program will have to determine that value everytime
+
+    /*int count = -1;
+
+    do {
+        count++;
+        printf("\ncount: %d", count);
+    } while (count < 100 || episodes[count].number != NULL);
+
+    printf("\n\nnnumber: %ls", episodes[count].number);
+
+    MessageBox(NULL, L"Parou", L"Parou", MB_ICONWARNING);*/
+
+    
+
+    SendMessage(heplistbox, LB_RESETCONTENT, 0, 0);
+    for (int i = 0; i < number; i++) {
+        printf("episode: %ls", episodes[i].title);
+        printf("\n\n\nerro do capeta: %lu", GetLastError());
+        int position = (int)SendMessage(heplistbox, LB_INSERTSTRING, 0, (LPARAM)episodes[i].id);
+        if (position == LB_ERR || position == LB_ERRSPACE) {
+            printf("\n\n\nerro do capeta: %lu", GetLastError());
+            break;
+        } else {
+            printf("\n\nfez com sucesso");
+        }
+        SendMessage(heplistbox, LB_SETITEMDATA, position, (LPARAM)i);
+        
+    }
+
 }
 
 BOOL showSettings() {

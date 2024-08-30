@@ -15,6 +15,8 @@ wchar_t * getJsonId(wchar_t * jsonstring, const wchar_t * key, TCHAR * value, in
         return NULL;
     }
 
+    printf("\n\n%ls\n", jsonstring);
+
     if (check == 1) {
         wchar_t * check = wcsstr(jsonstring, resseparator);
 
@@ -64,6 +66,170 @@ wchar_t * getJsonId(wchar_t * jsonstring, const wchar_t * key, TCHAR * value, in
         MessageBox(NULL, L"The program wasn't able to retrieve a value, functionality limited.", L"Error", MB_ICONERROR);
         return NULL;
     }
+}
+
+wchar_t * getGenres(wchar_t * jsonstring, const wchar_t * key, TCHAR value[][32]) {
+    /*const wchar_t * endquote = L"\"";
+    const wchar_t * middlecomma = L"\",\"";
+    const wchar_t * endbracket = L"\"]";
+
+    int commacounter = 0;
+
+    if (jsonstring == NULL) {
+        MessageBox(NULL, L"Error with JSON string", L"Error", MB_ICONERROR | MB_OK);
+        return NULL;
+    }
+
+    wchar_t * start;
+    BOOL check = TRUE;
+
+    //while (check != FALSE) {
+        start = wcsstr(jsonstring, key);
+
+        int i = 0;
+
+        for (i; 1; i++) {
+            commacounter += (start[i] == ',');
+            if (start[i] == ']') 
+                break; 
+        }
+
+        printf("\n\ncomma counter: %d", commacounter);
+        
+    //}
+    
+    
+    for (int j = 0; j < i; j++) {
+        
+        if (j == 0)
+           start = wcsstr(jsonstring, key);
+
+        printf("\nstart: %ls\n", start);
+        
+        //se existir
+        if (start != NULL) {
+            //move o ponteiro para a posição após a string imagekey
+            if (j == 0)
+                start += wcslen(key);
+            else {
+                //int j = i;
+                //start += wcslen(value[--j]);
+                start += wcslen(middlecomma);
+            }
+                
+            wchar_t * end;
+    
+            
+
+            if (end != NULL && j <= i - 1) {
+                end = wcsstr(start, middlecomma);
+           
+                printf("\nend: %ls\n", end);
+                //calcula o tamanho entre o início e o fim do link da imagem
+                size_t length = end - start;
+
+                printf("\nlength: %d\n", length);
+
+                //coloca na struct a string da posição start até start + length
+                wcsncpy(value[j], start, length);
+
+                printf("\nvalue: %ls\n", value[j]);
+
+                //wcscpy(jsonstring, end);
+
+                start = wcsstr(end, middlecomma);
+
+                if (start != NULL)
+                    continue;
+                else 
+                    break;
+            
+            } else {
+
+                printf("\n\n\nveio aqui");
+                end = wcsstr(start, endbracket);
+
+                //if (end != NULL) {
+                    //calcula o tamanho entre o início e o fim do link da imagem
+                    size_t length = end - start;
+
+                    printf("\nlength: %d\n", length);
+
+                    //coloca na struct a string da posição start até start + length
+                    wcsncpy(value[j], start, length);
+
+                    printf("\nvalue: %ls\n", value[j]);
+                //} 
+
+                //break;
+                //return NULL;
+            }
+        } else {
+            MessageBox(NULL, L"The program wasn't able to retrieve a value, functionality limited.", L"Error", MB_ICONERROR);
+            return NULL;
+        }
+    } 
+
+    for (int i = 0; i < 5; i++) {
+        printf("\nvalue %d: %s", i, value[i]);
+    }*/
+    
+    const wchar_t * middlecomma = L"\",\"";
+    const wchar_t * endbracket = L"\"]";
+    int genreCount = 0;
+
+    if (jsonstring == NULL) {
+        MessageBox(NULL, L"Error with JSON string", L"Error", MB_ICONERROR | MB_OK);
+        return NULL;
+    }
+
+    int i = 0, commacounter = 0;
+
+    wchar_t * start = wcsstr(jsonstring, key);
+    if (start == NULL) {
+        MessageBox(NULL, L"Key not found in JSON string", L"Error", MB_ICONERROR);
+        return NULL;
+    }
+
+    for (i; 1; i++) {
+        commacounter += (start[i] == ',');
+        if (start[i] == ']') 
+            break; 
+    }
+
+    // Move the start pointer to the first genre after the key
+    start += wcslen(key);
+
+    // Extract genres
+    for (int i = 0; i <= commacounter; i++) { 
+        wchar_t * end = wcsstr(start, middlecomma);
+        if (i == commacounter) {
+            // If no more commas, look for the closing bracket
+            end = wcsstr(start, endbracket);
+        }
+
+        if (end != NULL) {
+            size_t length = end - start;
+
+            // Copy the genre into the value array
+            wcsncpy(value[i], start, length);
+
+            genreCount++;
+
+            // Move start to after the comma for the next genre
+            start = end + wcslen(middlecomma);
+        } else {
+            break;
+        }
+    }
+
+    // Print the genres for debugging
+    for (int i = 0; i < genreCount; i++) {
+        wprintf(L"Genre %d: %ls\n", i + 1, value[i]);
+    }
+
+    return jsonstring;
+
 }
 
 wchar_t * getLinkDomain(wchar_t * url) {
@@ -155,23 +321,58 @@ wchar_t * getFileExtension(wchar_t * url) {
 
 int getEpisodesNum(wchar_t * jsonstring, const wchar_t * key) {
 
+    const wchar_t * endcomma = L",";
+
     //printf("\n\n\nele chegou ao getepisodesnum");
     //printf("\ncom isto: %ls", jsonstring);
 
     wchar_t * start = wcsstr(jsonstring, key);
-    //printf("\n\n\nstart do episodes: %ls", start);
-    //printf("\n\n\n\nposição do key: %c", start[wcslen(key)]);
+    printf("\n\n\nstart do episodes: %ls", start);
+    printf("\n\n\n\nposição do key: %c", start[wcslen(key)]);
 
     if (start != NULL) {
         // Check if the key is standalone (not part of another key)
         //if (start[wcslen(key) - 1] == ':' || start[wcslen(key) - 1] == ' ') {
+
+            start += wcslen(key);
+
             int value = 0;
-            if (wscanf(start + wcslen(key), "%d", &value) == 1) {
+
+            wchar_t * end = wcsstr(start, endcomma);
+       
+            if (end != NULL) {
+                size_t length = end - start;
+
+                wchar_t * a = (wchar_t*)malloc(4 * sizeof(wchar_t));
+
+                wcsncpy(a, start, length);
+
+                printf("\n\nvalue char: %ls", a);
+
+                value = _wtoi(a);
+
+                printf("\n\nvalue int: %d", value);
+
+                return value;
+
+            }
+
+
+
+
+            /*if (wscanf(start + wcslen(key), "%d", &value) == 1) {
                 //printf("\n\n\n\n\nencontrou o coiso bom: %d", value);
+
+
+                MessageBox(NULL, L"Encontrou o valor de episoódios", L"Info", MB_ICONINFORMATION);
                 return value;
             } else {
+                MessageBox(NULL, L"N deu", L"Info", MB_ICONINFORMATION);
+
                 //printf("\n\n\n\n\nnão encontrou nada doutor");
-            }
+            }*/
+
+
                 
             //printf("\n\n\n\n\n\nstarto: %ls", start);
             //printf("\n\nFound key: %ls\n", key);
@@ -181,6 +382,7 @@ int getEpisodesNum(wchar_t * jsonstring, const wchar_t * key) {
         }*/
         
     } else {
+        MessageBox(NULL, L"N deu 2", L"Info", MB_ICONINFORMATION);
         printf("\n\n\n\n\nnem o start é nulo");
     }
 }
@@ -249,10 +451,13 @@ int parseEpisodesJson(HWND hwnd, wchar_t * resultid, wchar_t * jsonstring, episo
 
     for (int i = 0; i < number; i++) {
         getJsonId(newstring2, idkey, episodes[i].id, 0);
+        //MessageBox(NULL, episodes[i].id, L"Info", MB_ICONEXCLAMATION);
         getJsonId(newstring2, numberkey, episodes[i].number, 0);
+        //MessageBox(NULL, episodes[i].number, L"Info", MB_ICONEXCLAMATION);
         
         //anteriormente test (union)
         getJsonId(newstring2, titlekey, episodes[i].title, 0);
+        //MessageBox(NULL, episodes[i].title, L"Info", MB_ICONEXCLAMATION);
         //newstring2 = test.value;
 
         newstring2 = getJsonId(newstring2, NULL, NULL, 1);
@@ -272,22 +477,50 @@ wchar_t * getLinkJson(HWND hwnd, wchar_t * jsonstring) {
         return NULL;
     }
     
-    const wchar_t * linkkey = L"\"url\":";
+    const wchar_t * linkkey = L"\"url\":\"";
     const wchar_t * endquote = L"\"";
+    const wchar_t * separator = L"\",\"";
 
-    wchar_t * value = malloc(2048*sizeof(wchar_t));
+    wchar_t * value;
     //malloc(value);
 
-    wchar_t * start = strstr(jsonstring, linkkey);
-    printf("\n\n\nEle dá print disto amigo (start): %s", start);
+    wchar_t * start = wcsstr(jsonstring, linkkey);
+    printf("\n\n\nEle dá print disto amigo (start): %ls", start);
+
+
+    start += wcslen(linkkey);
 
     if (start != NULL) {
         // Check if the key is standalone (not part of another key)
 
-        printf("\n\n\n\n\n\n\nchar do síituio: %c", start[strlen(linkkey) - 1]);
-        if (start[strlen(linkkey) - 1] == ':' || start[strlen(linkkey) - 1] == ' ') {
+        wchar_t * end = wcsstr(start, separator);
+
+        
+
+        if (end != NULL) {
+            size_t length = end - start;
+
+            printf("\n\nlength: %d", length);
+
+            printf("\n\nend: %ls", end);
+
+            value = malloc(length * sizeof(wchar_t));
+
+            // Copy the genre into the value array
+            wcsncpy(value, start, length);
+            wcscat(value, L"\0");
+
+            printf("\n\nvalue: %ls", value);
+
+            return value;
+        }
+        
+
+
+        /*printf("\n\n\n\n\n\n\nchar do síituio: %c", start[wcslen(linkkey) - 1]);
+        if (start[wcslen(linkkey) - 1] == ':' || start[wcslen(linkkey) - 1] == ' ') {
             
-            if (sscanf(start + strlen(linkkey), "\"%2048s\"", value) == 1) {
+            if (wscanf(start + wcslen(linkkey), "\"%2048s\"", value) == 1) {
                 printf("\n\n\n\n\nencontrou o coiso bom: %s", value);
                 return value;
             } else {
@@ -297,14 +530,14 @@ wchar_t * getLinkJson(HWND hwnd, wchar_t * jsonstring) {
                 return NULL;
             }
                 
-            printf("\n\n\n\n\n\nstarto: %s", start);
-            printf("\n\nFound key: %s\n", linkkey);
+            printf("\n\n\n\n\n\nstarto: %ls", start);
+            printf("\n\nFound key: %ls\n", linkkey);
             
         } else {
             printf("\n\n\n\n\nnão verificou direitinho");
             free(value);
             return NULL;
-        }
+        }*/
         
 
         
@@ -359,6 +592,7 @@ int getTrendingShows(wchar_t * jsonstring, trendinganimeinfo results[]) {
 animeinfo getShowInfo(wchar_t * jsonstring, animeinfo show) {
     //MessageBox(NULL, L"Chegou aqui ao show", L"Info", MB_ICONINFORMATION);
 
+    const wchar_t * genreskey = L"\"genres\":[\"";
     const wchar_t * totalepkey = L"\"totalEpisodes\":";
     const wchar_t * imagekey = L"\"image\":\"";
     const wchar_t * datekey = L"\"releaseDate\":\"";
@@ -370,6 +604,7 @@ animeinfo getShowInfo(wchar_t * jsonstring, animeinfo show) {
 
     BOOL isdub;
 
+    getGenres(jsonstring, genreskey, show.genres);
     getJsonId(jsonstring, totalepkey, show.episodes, 3);
     getJsonId(jsonstring, imagekey, show.imageurl, 3);
     getJsonId(jsonstring, datekey, show.date, 3);
@@ -378,6 +613,7 @@ animeinfo getShowInfo(wchar_t * jsonstring, animeinfo show) {
     //MessageBox(NULL, show.isdub, "Info", MB_ICONINFORMATION);
     getJsonId(jsonstring, typekey, show.type, 3);
     getJsonId(jsonstring, statuskey, show.status, 3); 
+    
 
     show.isempty = FALSE;
 
@@ -385,3 +621,32 @@ animeinfo getShowInfo(wchar_t * jsonstring, animeinfo show) {
     
 }
 
+int convertWideToMulti(wchar_t * widestring, char * multistring) {
+
+    ZeroMemory(multistring, strlen(multistring));
+
+    printf("\n\nstrlen multistring: %d", strlen(multistring));
+    printf("\n\nwcslen widestring: %d", wcslen(widestring));
+
+    if (widestring != NULL) {
+        //wcstombs(multistring, widestring, sizeof(widestring));
+        WideCharToMultiByte(CP_UTF8, 0, widestring, -1, multistring, wcslen(widestring), NULL, NULL);
+
+        printf("\n\nold string: %ls\\", widestring);
+        printf("\n\nnew string: %s\\", multistring);
+
+        return 1;
+    } else {
+        printf("\nCould not convert!");
+        return 0;
+    }
+
+    /*int bytesRequired = WideCharToMultiByte(CP_UTF8, 0, widestring, -1, NULL, 0, NULL, NULL);
+    
+    if (bytesRequired > 0 && bytesRequired <= sizeof(widestring)) {
+        WideCharToMultiByte(CP_UTF8, 0, widestring, -1, multistring, sizeof(widestring), NULL, NULL);
+    } else {
+        printf("Error: Buffer size is too small or conversion failed.\n");
+    }*/
+    
+}
