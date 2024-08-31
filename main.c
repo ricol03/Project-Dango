@@ -135,9 +135,11 @@ int WINAPI wWinMain(HINSTANCE hinstance, HINSTANCE hprevinstance, PWSTR lpcmdlin
         MessageBoxW(NULL, L"Unable to create Windows", 
                 L"Error", MB_ICONERROR | MB_OK);
         return 0;
-    } else
+    } else {
         ShowWindow(hwndmain, SW_SHOW);
-
+        UpdateWindow(hwndmain);
+    }
+        
     #pragma endregion
 
     #pragma region SearchWindow
@@ -426,7 +428,7 @@ int createInfoWindow(HINSTANCE hinstance) {
         0,
         TEST_CLASS,
         L"Info",
-        WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_ICONIC | WS_ACTIVECAPTION,
+        WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_ICONIC | WS_ACTIVECAPTION | WS_VISIBLE,
         CW_USEDEFAULT, CW_USEDEFAULT, 800, 600,
         NULL,
         NULL,
@@ -994,6 +996,12 @@ LRESULT CALLBACK LangTabProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM lpa
 }
 
 LRESULT CALLBACK InfoWindowProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam) {
+
+    BITMAPINFO bmap;
+    HBITMAP hbitmap;
+
+    void * dibdata;
+
     switch (message) {
         case WM_CREATE:
             infoWindow(hwnd);
@@ -1032,10 +1040,7 @@ LRESULT CALLBACK InfoWindowProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM 
 
             FillRect(hdc, &ps.rcPaint, (HBRUSH) (COLOR_3DFACE+1));
 
-            BITMAPINFO bmap;
-            HBITMAP hbitmap;
-
-            void * dibdata;
+            
             //HDC newhdc = GetDC(NULL);
 
             ZeroMemory(&bmap, sizeof(bmap));
@@ -1166,7 +1171,9 @@ LRESULT CALLBACK InfoWindowProc (HWND hwnd, UINT message, WPARAM wparam, LPARAM 
             DestroyWindow(hwnd);
             return 0;
         case WM_DESTROY:
-            
+            DeleteObject(hbitmap);
+            free(dibdata);
+            //free(bmap);
             return 0;
 
         default:
@@ -1187,22 +1194,22 @@ LRESULT CALLBACK EpisodeWindowProc (HWND hwnd, UINT message, WPARAM wparam, LPAR
 
                     MessageBox(NULL, episodes[i].id, L"Info", MB_ICONASTERISK);
 
-                    wchar_t * link = eplinkConnection(hwnd, episodes[i].id);
+                    videolink = eplinkConnection(hwnd, episodes[i].id);
 
-                    printf("\n\nlink do command: %ls\\", link);
+                    printf("\n\nlink do command: %s\\", videolink);
                     //getchar();
 
-                    if (link == NULL) {
+                    if (videolink == NULL) {
                         MessageBox(NULL, L"An error occured, please try again later.", L"Error", MB_ICONERROR);
                     } else { 
-                        printf("\n\n\ndevolveu este link zeca: %ls", link);
+                        /*printf("\n\n\ndevolveu este link zeca: %ls", link);
 
-                        /*if (!wcscmp(provider, PROVIDER1)) {z
+                        /*if (!wcscmp(provider, PROVIDER1)) {
                             getQualitiesJson(link, streams);
                             wcscpy(videolink, streams[1].link);
-                        } */
+                        }
 
-                        
+                        printf("\n\n\nlink zeca: %d", wcslen(link));
 
                         videolink = (char *)malloc(wcslen(link) * sizeof(char));
                         printf("\n\nsizeof: %d", (wcslen(link) * sizeof(char)));
@@ -1210,7 +1217,7 @@ LRESULT CALLBACK EpisodeWindowProc (HWND hwnd, UINT message, WPARAM wparam, LPAR
 
                         if (convertWideToMulti(link, videolink)) {
                             MessageBox(NULL, L"Deu com firmeza", L"Info", MB_ICONINFORMATION);
-                        }
+                        }*/
 
 
                         //videolink = link;

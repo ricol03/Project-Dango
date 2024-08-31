@@ -471,46 +471,56 @@ int parseEpisodesJson(HWND hwnd, wchar_t * resultid, wchar_t * jsonstring, episo
     return number;
 }
 
-wchar_t * getLinkJson(HWND hwnd, wchar_t * jsonstring) {
+char * getLinkJson(HWND hwnd, char * jsonstring) {
 
     if (jsonstring == NULL) {
         return NULL;
     }
     
-    const wchar_t * linkkey = L"\"url\":\"";
-    const wchar_t * endquote = L"\"";
-    const wchar_t * separator = L"\",\"";
+    const char * linkkey = "\"url\":\"";
+    const char * endquote = "\"";
+    const char * separator = "\",\"";
 
-    wchar_t * value;
+    char * value;
     //malloc(value);
 
-    wchar_t * start = wcsstr(jsonstring, linkkey);
-    printf("\n\n\nEle dá print disto amigo (start): %ls", start);
+    char * start = strstr(jsonstring, linkkey);
+    printf("\n\n\nEle dá print disto amigo (start): %s", start);
 
 
-    start += wcslen(linkkey);
+    start += strlen(linkkey);
 
     if (start != NULL) {
         // Check if the key is standalone (not part of another key)
 
-        wchar_t * end = wcsstr(start, separator);
-
-        
+        char * end = strstr(start, separator);
 
         if (end != NULL) {
             size_t length = end - start;
 
             printf("\n\nlength: %d", length);
 
-            printf("\n\nend: %ls", end);
+            printf("\n\nend: %s", end);
 
-            value = malloc(length * sizeof(wchar_t));
+            value = (char *)malloc(length * sizeof(char));
 
             // Copy the genre into the value array
-            wcsncpy(value, start, length);
-            wcscat(value, L"\0");
+            strncpy(value, start, length);
+            value[length] = '\0';
 
-            printf("\n\nvalue: %ls", value);
+            printf("\n\nvalue: %s", value);
+
+            if (strlen(value) > length) {
+                int i = strlen(value);
+                char c;
+
+                for (i; i > length; i--) {
+                    value[i] == '\0';
+                }
+
+                printf("value: novo %s", value);
+            }
+            
 
             return value;
         }
@@ -628,9 +638,17 @@ int convertWideToMulti(wchar_t * widestring, char * multistring) {
     printf("\n\nstrlen multistring: %d", strlen(multistring));
     printf("\n\nwcslen widestring: %d", wcslen(widestring));
 
+    /*wchar_t a = L"a";
+    int i;
+
+    for (i = 0; 0 == wcscmp(a, L"\0"); i++) {
+        a = widestring[i];
+    }*/
+    
+
     if (widestring != NULL) {
-        //wcstombs(multistring, widestring, sizeof(widestring));
-        WideCharToMultiByte(CP_UTF8, 0, widestring, -1, multistring, wcslen(widestring), NULL, NULL);
+        wcstombs(multistring, widestring, wcslen(widestring));
+        //WideCharToMultiByte(CP_UTF8, 0, widestring, -1, multistring, i, NULL, NULL);
 
         printf("\n\nold string: %ls\\", widestring);
         printf("\n\nnew string: %s\\", multistring);

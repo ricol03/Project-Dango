@@ -17,7 +17,7 @@ extern connections test;
 extern trendinganimeinfo shows[12];
 
 //função para gerir redirects
-wchar_t * winHttpGetResponse(HINTERNET hRequest, HINTERNET hConnect, HINTERNET hSession) {
+char * winHttpGetResponse(HINTERNET hRequest, HINTERNET hConnect, HINTERNET hSession, char * responseStringAux) {
 
     printf("\n%ls", server);
     printf("\n%ls", port);
@@ -28,8 +28,6 @@ wchar_t * winHttpGetResponse(HINTERNET hRequest, HINTERNET hConnect, HINTERNET h
     LPSTR pszOutBuffer = NULL;
     BOOL bResults = FALSE;
 
-    char * responseStringAux = NULL;
-    wchar_t * responseString = NULL;
     size_t totalSize = 0;
 
     DWORD dwStatusCode = 0;
@@ -68,7 +66,7 @@ wchar_t * winHttpGetResponse(HINTERNET hRequest, HINTERNET hConnect, HINTERNET h
 
                 if (WinHttpSendRequest(hRequest, WINHTTP_NO_ADDITIONAL_HEADERS, 0, WINHTTP_NO_REQUEST_DATA, 0, 0, 0)) {
                     if (WinHttpReceiveResponse(hRequest, NULL)) {
-                        return winHttpGetResponse(hRequest, hConnect, hSession);
+                        return winHttpGetResponse(hRequest, hConnect, hSession, responseStringAux);
                     }
                 }
 
@@ -168,25 +166,7 @@ wchar_t * winHttpGetResponse(HINTERNET hRequest, HINTERNET hConnect, HINTERNET h
         printf("Error %u in WinHttpQueryHeaders.\n", GetLastError());
     }
 
-
-    //printf("\nchar string: %s", responseStringAux);
-
-    //MessageBoxW(NULL, responseStringAux, L"Warning", MB_ICONWARNING);
-
-    //printf("\n\n\nsize of responsestringaux: %d", strlen(responseStringAux));
-
-    int size = MultiByteToWideChar(CP_ACP, 0, responseStringAux, -1, NULL, 0);
-
-    stringsize = size * sizeof(wchar_t);
-    responseString = (wchar_t *)malloc(stringsize);
-
-    //mbstowcs((wchar_t*) responseString, responseStringAux, strlen(responseStringAux) + 1);
-
-    MultiByteToWideChar(CP_ACP, 0, responseStringAux, -1, responseString, size);
-
-    //printf("\n\n\n responsestring: \n\n %ls", responseString);
-
-    return responseString;
+    return responseStringAux;
 }
 
 wchar_t * winHttpGetResponseBin(HINTERNET hRequest, HINTERNET hConnect, HINTERNET hSession, wchar_t * filepath) {
@@ -345,6 +325,29 @@ wchar_t * winHttpGetResponseBin(HINTERNET hRequest, HINTERNET hConnect, HINTERNE
     return filepath;
 }
 
+char * getCharResponseRaw(HINTERNET hrequest, HINTERNET hconnect, HINTERNET hsession) {
+    char * responseStringAux = NULL;
+    return winHttpGetResponse(hrequest, hconnect, hsession, responseStringAux);
+}
+
+wchar_t * getWideResponseRaw(HINTERNET hrequest, HINTERNET hconnect, HINTERNET hsession) {
+
+    char * responseStringAux = NULL;
+    wchar_t * responseString = NULL;
+
+    responseStringAux = winHttpGetResponse(hrequest, hconnect, hsession, responseStringAux);
+
+    int size = MultiByteToWideChar(CP_ACP, 0, responseStringAux, -1, NULL, 0);
+
+    stringsize = size * sizeof(wchar_t);
+    responseString = (wchar_t *)malloc(stringsize);
+
+    //mbstowcs((wchar_t*) responseString, responseStringAux, strlen(responseStringAux) + 1);
+
+    MultiByteToWideChar(CP_ACP, 0, responseStringAux, -1, responseString, size);
+
+    return responseString;
+}
 
 //joins two strings into one (char only)
 void parseRequestText(wchar_t * uri, wchar_t * query) {
@@ -453,7 +456,7 @@ int searchConnection(HWND hwnd, wchar_t * query, result results[]) {
 
     if (WinHttpSendRequest(hrequest, WINHTTP_NO_ADDITIONAL_HEADERS, 0, WINHTTP_NO_REQUEST_DATA, 0, 0, 0)) {
         if (WinHttpReceiveResponse(hrequest, NULL)) {
-            jsonstring = winHttpGetResponse(hrequest, hconnect, hsession);
+            jsonstring = getWideResponseRaw(hrequest, hconnect, hsession);
             return parseResultsJson(jsonstring, results);
         } else {
             MessageBox(hwnd, L"errorinner", L"Error", MB_ICONERROR);
@@ -503,7 +506,7 @@ int episodesConnection(HWND hwnd, wchar_t * resultid, episode episodes[]) {
     
     if (WinHttpSendRequest(hrequest2, WINHTTP_NO_ADDITIONAL_HEADERS, 0, WINHTTP_NO_REQUEST_DATA, 0, 0, 0)) {
         if (WinHttpReceiveResponse(hrequest2, NULL)) {
-            jsonstring = winHttpGetResponse(hrequest2, hconnect2, hsession2);
+            jsonstring = getWideResponseRaw(hrequest2, hconnect2, hsession2);
             return parseEpisodesJson(hwnd, resultid, jsonstring, episodes);
         }
     } else
@@ -549,14 +552,14 @@ int epnumConnection(HWND hwnd, wchar_t * resultid) {
 
     if (WinHttpSendRequest(hrequest, WINHTTP_NO_ADDITIONAL_HEADERS, 0, WINHTTP_NO_REQUEST_DATA, 0, 0, 0)) {
         if (WinHttpReceiveResponse(hrequest, NULL)) {
-            jsonstring = winHttpGetResponse(hrequest, hconnect, hsession);
+            jsonstring = getWideResponseRaw(hrequest, hconnect, hsession);
             return getEpisodesNum(jsonstring, epnumkey);
         }
     } else
         return 0;
 }
 
-wchar_t * eplinkConnection(HWND hwnd, wchar_t * epid) {
+char * eplinkConnection(HWND hwnd, wchar_t * epid) {
     parseRequestText2(strmatrix[2], epid);
 
     HINTERNET hsession2 = WinHttpOpen(L"Dango/1.0", WINHTTP_ACCESS_TYPE_DEFAULT_PROXY, WINHTTP_NO_PROXY_NAME, WINHTTP_NO_PROXY_BYPASS, 0);
@@ -587,11 +590,11 @@ wchar_t * eplinkConnection(HWND hwnd, wchar_t * epid) {
         return 0;
     }
 
-    wchar_t * jsonstring;
+    char * jsonstring;
 
     if (WinHttpSendRequest(hrequest2, WINHTTP_NO_ADDITIONAL_HEADERS, 0, WINHTTP_NO_REQUEST_DATA, 0, 0, 0)) {
         if (WinHttpReceiveResponse(hrequest2, NULL)) {
-            jsonstring = winHttpGetResponse(hrequest2, hconnect2, hsession2);
+            jsonstring = getCharResponseRaw(hrequest2, hconnect2, hsession2);
             return getLinkJson(hwnd, jsonstring);
         }   
     } else
@@ -637,7 +640,7 @@ animeinfo getInfoConnection(HWND hwnd, wchar_t * epid, animeinfo info) {
 
     if (WinHttpSendRequest(hrequest2, WINHTTP_NO_ADDITIONAL_HEADERS, 0, WINHTTP_NO_REQUEST_DATA, 0, 0, 0)) {
         if (WinHttpReceiveResponse(hrequest2, NULL)) {
-            jsonstring = winHttpGetResponse(hrequest2, hconnect2, hsession2);
+            jsonstring = getWideResponseRaw(hrequest2, hconnect2, hsession2);
             return getShowInfo(jsonstring, info);
         }   
     } else
@@ -677,7 +680,7 @@ int getTrendsConnection(HWND hwnd, trendinganimeinfo shows[]) {
 
     if (WinHttpSendRequest(hrequest2, WINHTTP_NO_ADDITIONAL_HEADERS, 0, WINHTTP_NO_REQUEST_DATA, 0, 0, 0)) {
         if (WinHttpReceiveResponse(hrequest2, NULL)) {
-            jsonstring = winHttpGetResponse(hrequest2, hconnect2, hsession2);
+            jsonstring = getWideResponseRaw(hrequest2, hconnect2, hsession2);
             return getTrendingShows(jsonstring, shows);
         }   
     } else

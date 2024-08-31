@@ -16,10 +16,7 @@ a.jpg
 kanon-2006.jpg
 connections.exe
 tests.exe
-dango.exe
-
 debug_dango.exe
-dango.exe
 connections.o
 file.o
 json.o
@@ -27,3 +24,4 @@ main.o
 provider.o
 video.o
 wmcreate.o
+dango.exe

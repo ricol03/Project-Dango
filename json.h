@@ -16,7 +16,7 @@ wchar_t * getFileExtension(wchar_t * url);
 int getEpisodesNum(wchar_t * jsonstring, const wchar_t * key);
 int parseResultsJson(wchar_t * jsonstring, result results[]);
 int parseEpisodesJson(HWND hwnd, wchar_t * resultid, wchar_t * jsonstring, episode episodes[]);
-wchar_t * getLinkJson(HWND hwnd, wchar_t * jsonstring);
+char * getLinkJson(HWND hwnd, char * jsonstring);
 int getQualitiesJson(wchar_t * jsonstring, stream streams[]);
 animeinfo getShowInfo(wchar_t * jsonstring, animeinfo show);
 int getTrendingShows(wchar_t * jsonstring, trendinganimeinfo results[]);
