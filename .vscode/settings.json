@@ -68,5 +68,13 @@
     "**/.*/**",
     "**/.vscode",
     "**/.vscode/**"
+  ],
+  "makefile.makePath": "C:\\Program Files\\GnuWin32\\bin\\make.exe",
+  "makefile.launchConfigurations": [
+    {
+      "cwd": "c:\\Users\\ricol03\\Documents\\Project Miru-win32",
+      "binaryPath": "c:\\Users\\ricol03\\Documents\\Project Miru-win32\\dango.exe",
+      "binaryArgs": []
+    }
   ]
 }

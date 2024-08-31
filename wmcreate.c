@@ -505,9 +505,9 @@ int episodeWindow(HWND hwnd) {
         WC_STATIC,
         L"Please select an episode",
         WS_CHILD | WS_VISIBLE, 
-        25, 25, 100, 50,
+        25, 25, 450, 50,
         hwnd,
-        2222,
+        (HMENU)2222,
         GetModuleHandle(NULL),
         NULL
     );
@@ -519,7 +519,7 @@ int episodeWindow(HWND hwnd) {
         TEXT("BUTTON"),
         TEXT("Watch"),
         WS_TABSTOP | WS_CHILD | BS_DEFPUSHBUTTON | WS_VISIBLE,
-        670, 40, 120, 30,
+        660, 825, 120, 30,
         hwnd,
         (HMENU)IDW_EPISODE_BUTTON_WATCH,
         GetModuleHandle(NULL),
